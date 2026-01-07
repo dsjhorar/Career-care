@@ -24,7 +24,12 @@
   </style>
 </head>
 <body>
-
+<script>
+  if (!sessionStorage.getItem("visited")) {
+    sessionStorage.setItem("visited", "true");
+    window.location.href = "splash.html";
+  }
+</script>
   <h1>Career Care</h1>
   <p>Right Practice for Success</p>
 
