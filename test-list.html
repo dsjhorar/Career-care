@@ -9,15 +9,20 @@
 <h2 id="examTitle"></h2>
 
 <ul>
-  <li>Topic Wise Test</li>
-  <li>Full Syllabus Test</li>
-  <li>Mock Test</li>
+  <li onclick="startTest('topic')">Topic Wise Test</li>
+  <li onclick="startTest('full')">Full Syllabus Test</li>
+  <li onclick="startTest('mock')">Mock Test</li>
 </ul>
 
 <script>
 let exam = localStorage.getItem("selectedExam");
 document.getElementById("examTitle").innerText =
   exam.toUpperCase() + " TESTS";
+
+function startTest(type){
+  localStorage.setItem("testType", type);
+  window.location.href = "test.html";
+}
 </script>
 
 </body>
