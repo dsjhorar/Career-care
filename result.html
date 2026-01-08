@@ -1,18 +1,30 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Result</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Result</title>
+<style>
+body{font-family:Arial;background:#f4f6f8;text-align:center}
+.card{background:#fff;margin:50px;padding:30px;border-radius:8px}
+button{padding:10px 15px;border:none;background:#1e88e5;color:#fff;border-radius:5px}
+</style>
 </head>
+
 <body>
 
-<h2>Test Result</h2>
+<div class="card">
+ <h2>Test Result</h2>
+ <h1 id="score"></h1>
+ <button onclick="goHome()">Go Home</button>
+</div>
 
 <script>
-let score = localStorage.getItem("score");
-document.write("<h3>Your Score: "+score+"</h3>");
+document.getElementById("score").innerText =
+ "Score: "+localStorage.getItem("score");
+function goHome(){
+ window.location.href="index.html";
+}
 </script>
-
-<a href="index.html">Back to Home</a>
 
 </body>
 </html>
