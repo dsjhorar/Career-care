@@ -28,19 +28,26 @@ firebase.initializeApp(firebaseConfig);
 
 <script src="firebase.js"></script>
 <script>
-
 function login(){
-  let name = document.getElementById("name").value;
-  let mobile = document.getElementById("mobile").value;
+  let name = document.getElementById("name").value.trim();
+  let mobile = document.getElementById("mobile").value.trim();
 
-  firebase.database().ref("students/"+mobile).set({
+  if(name === "" || mobile === ""){
+    alert("Fill Name and Mobile Number");
+    return;
+  }
+
+  firebase.database().ref("students/" + mobile).set({
     name: name,
     mobile: mobile,
-    joined: new Date().toString()
+    time: new Date().toString()
+  }).then(function(){
+    localStorage.setItem("user", mobile);
+    alert("Login Successful");
+    window.location.href = "index.html";
+  }).catch(function(error){
+    alert("Error: " + error.message);
   });
-
-  localStorage.setItem("user", mobile);
-  window.location.href = "index.html";
 }
 </script>
 
