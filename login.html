@@ -19,8 +19,6 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
 <script>
-alert("JS Loaded");   // 👈 ye alert aana hi chahiye
-
 var firebaseConfig = {
   apiKey: "AIzaSyBCuefZt2WuNsNiFme8M-HUHm_BZYKJAi4",
   authDomain: "career-care-afb64.firebaseapp.com",
@@ -30,14 +28,27 @@ var firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 
-alert("Firebase Initialized");
-
 function login(){
-  alert("Button Clicked");
 
-  firebase.database().ref("test").set("ok")
-  .then(()=>alert("DB Write OK"))
-  .catch(e=>alert(e.message));
+  let name = document.getElementById("name").value.trim();
+  let mobile = document.getElementById("mobile").value.trim();
+
+  if(name === "" || mobile === ""){
+    alert("Name aur Mobile dono bharo");
+    return;
+  }
+
+  firebase.database().ref("students/" + mobile).set({
+    name: name,
+    mobile: mobile,
+    loginTime: new Date().toString()
+  }).then(function(){
+    localStorage.setItem("userMobile", mobile);
+    window.location.href = "index.html";
+  }).catch(function(error){
+    alert(error.message);
+  });
+
 }
 </script>
 
