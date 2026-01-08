@@ -73,9 +73,12 @@ function nextQuestion(){
 function submitTest(){
   let user = localStorage.getItem("user");
   firebase.database().ref("results/"+user).push({
+    exam: localStorage.getItem("selectedExam"),
     score: score,
+    total: questions.length,
     time: new Date().toString()
   });
+
   localStorage.setItem("score", score);
   window.location.href = "result.html";
 }
@@ -93,6 +96,6 @@ setInterval(()=>{
 
 loadQuestion();
 </script>
-
+<script src="firebase.js"></script>
 </body>
 </html>
