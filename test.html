@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -20,14 +20,18 @@ body{font-family:Arial;margin:0;background:#f4f6f8}
 
 <body>
 
+<!-- 🔐 Login Protection -->
 <script>
 if(!localStorage.getItem("userMobile")){
   window.location.href="login.html";
 }
 </script>
 
-<div class="header">RAS Test – Demo</div>
-<div class="timer">⏱ Time Left: <span id="time">10:00</span></div>
+<div class="header">Test</div>
+
+<div class="timer">
+  ⏱ Time Left: <span id="time">01:00</span>
+</div>
 
 <div class="card">
   <div id="question"></div>
@@ -40,73 +44,84 @@ if(!localStorage.getItem("userMobile")){
   <button class="btn submit" onclick="submitTest()">Submit Test</button>
 </div>
 
+<!-- 🔽 JAVASCRIPT STARTS HERE -->
 <script>
+
+/* 🔹 QUESTIONS DATA */
 let questions = [
  {
-  q:"भारत का राष्ट्रीय पशु कौन है?",
-  o:["शेर","बाघ","हाथी","घोड़ा"],
+  q:"भारत का संविधान कब लागू हुआ?",
+  o:["1947","1950","1952","1949"],
   a:1
  },
  {
   q:"राजस्थान की राजधानी क्या है?",
-  o:["जोधपुर","उदयपुर","जयपुर","कोटा"],
-  a:2
- },
- {
-  q:"संविधान दिवस कब मनाया जाता है?",
-  o:["26 जनवरी","15 अगस्त","26 नवम्बर","2 अक्टूबर"],
+  o:["जोधपुर","कोटा","जयपुर","बीकानेर"],
   a:2
  }
 ];
 
-let index=0;
-let answers={};
+/* 🔹 VARIABLES */
+let index = 0;
+let answers = {};
 
+/* 🔹 LOAD QUESTION */
 function loadQ(){
  document.getElementById("question").innerHTML =
    "<b>Q"+(index+1)+".</b> "+questions[index].q;
 
- let optHTML="";
+ let html="";
  questions[index].o.forEach((opt,i)=>{
-   optHTML+=`
+  html += `
    <div class="option">
-    <input type="radio" name="opt" 
+    <input type="radio" name="opt"
     ${answers[index]==i?"checked":""}
     onclick="answers[${index}]=${i}">
     ${opt}
    </div>`;
  });
- document.getElementById("options").innerHTML=optHTML;
+ document.getElementById("options").innerHTML = html;
 }
 loadQ();
 
+/* 🔹 NAVIGATION */
 function nextQ(){
- if(index<questions.length-1){index++;loadQ();}
+ if(index < questions.length-1){
+   index++;
+   loadQ();
+ }
 }
+
 function prevQ(){
- if(index>0){index--;loadQ();}
+ if(index > 0){
+   index--;
+   loadQ();
+ }
 }
 
+/* 🔹 SUBMIT */
 function submitTest(){
- let score=0;
+ let score = 0;
  questions.forEach((q,i)=>{
-  if(answers[i]==q.a) score++;
+  if(answers[i] == q.a) score++;
  });
- localStorage.setItem("score",score);
- window.location.href="result.html";
+ localStorage.setItem("score", score);
+ window.location.href = "result.html";
 }
 
-/* TIMER */
-let t=600;
+/* 🔹 TIMER */
+let t = 60;
 setInterval(()=>{
- let m=Math.floor(t/60);
- let s=t%60;
- document.getElementById("time").innerText=
-  `${m}:${s<10?"0"+s:s}`;
- if(t==0) submitTest();
+ let m = Math.floor(t/60);
+ let s = t % 60;
+ document.getElementById("time").innerText =
+  `0${m}:${s<10?"0"+s:s}`;
+ if(t == 0) submitTest();
  t--;
 },1000);
+
 </script>
+<!-- 🔼 JAVASCRIPT ENDS HERE -->
 
 </body>
 </html>
