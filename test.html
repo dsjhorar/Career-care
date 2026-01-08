@@ -3,21 +3,91 @@
 <head>
   <title>Career Care Test</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { font-family: Arial; padding: 15px; }
+    #timer { font-weight: bold; color: red; }
+    .option {
+      display: block;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    button {
+      padding: 10px 20px;
+      background: #0D47A1;
+      color: white;
+      border: none;
+      border-radius: 5px;
+    }
+  </style>
 </head>
 <body>
 
-<h2>Test in Progress</h2>
-<h3 id="timer">20:00</h3>
+<h3>Time Left: <span id="timer">10:00</span></h3>
 
-<p>Sample Question:</p>
-<p>Who was the first Governor General of India?</p>
+<h3 id="question"></h3>
 
-<button onclick="selectAnswer('A')">Warren Hastings</button><br><br>
-<button onclick="selectAnswer('B')">Lord Curzon</button>
+<div id="options"></div>
 
-<br><br>
-<button onclick="submitTest()">Submit Test</button>
+<button onclick="nextQuestion()">Next</button>
+<button onclick="submitTest()">Submit</button>
 
-<script src="test-engine.js"></script>
+<script>
+let questions = [
+  {
+    q: "Rajasthan ka rajya pakshi kaunsa hai?",
+    options: ["Godawan", "Mor", "Kabutar", "Koyal"],
+    answer: 0
+  },
+  {
+    q: "Bharat ka rashtrapati kaun hota hai?",
+    options: ["PM", "Governor", "President", "CM"],
+    answer: 2
+  }
+];
+
+let current = 0;
+let score = 0;
+let selected = null;
+
+function loadQuestion(){
+  let q = questions[current];
+  document.getElementById("question").innerText = q.q;
+  let optHtml = "";
+  q.options.forEach((o,i)=>{
+    optHtml += `<div class="option" onclick="select(${i})">${o}</div>`;
+  });
+  document.getElementById("options").innerHTML = optHtml;
+}
+function select(i){ selected = i; }
+
+function nextQuestion(){
+  if(selected === questions[current].answer) score++;
+  selected = null;
+  current++;
+  if(current < questions.length) loadQuestion();
+  else submitTest();
+}
+
+function submitTest(){
+  localStorage.setItem("score", score);
+  window.location.href = "result.html";
+}
+
+/* TIMER */
+let time = 10*60;
+setInterval(()=>{
+  time--;
+  let m = Math.floor(time/60);
+  let s = time%60;
+  document.getElementById("timer").innerText =
+    m + ":" + (s<10?"0":"") + s;
+  if(time<=0) submitTest();
+},1000);
+
+loadQuestion();
+</script>
+
 </body>
 </html>
