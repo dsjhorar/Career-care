@@ -26,13 +26,16 @@ var firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 
+<script src="firebase.js"></script>
+
 function login(){
   let name = document.getElementById("name").value;
   let mobile = document.getElementById("mobile").value;
 
   firebase.database().ref("students/"+mobile).set({
     name: name,
-    mobile: mobile
+    mobile: mobile,
+    joined: new Date().toString()
   });
 
   localStorage.setItem("user", mobile);
