@@ -71,6 +71,11 @@ function nextQuestion(){
 }
 
 function submitTest(){
+  let user = localStorage.getItem("user");
+  firebase.database().ref("results/"+user).push({
+    score: score,
+    time: new Date().toString()
+  });
   localStorage.setItem("score", score);
   window.location.href = "result.html";
 }
