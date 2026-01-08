@@ -1,101 +1,112 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Career Care Test</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <style>
-    body { font-family: Arial; padding: 15px; }
-    #timer { font-weight: bold; color: red; }
-    .option {
-      display: block;
-      padding: 10px;
-      margin: 10px 0;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-    }
-    button {
-      padding: 10px 20px;
-      background: #0D47A1;
-      color: white;
-      border: none;
-      border-radius: 5px;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MCQ Test</title>
+
+<style>
+body{font-family:Arial;margin:0;background:#f4f6f8}
+.header{background:#1e88e5;color:#fff;padding:15px;text-align:center}
+.timer{background:#fff;padding:10px;text-align:center;font-weight:bold}
+.card{background:#fff;margin:10px;padding:15px;border-radius:6px}
+.option{margin:8px 0}
+.btn{padding:10px;border:none;border-radius:5px}
+.next{background:#1e88e5;color:#fff}
+.prev{background:#777;color:#fff}
+.submit{background:#43a047;color:#fff;width:100%;margin-top:10px}
+</style>
 </head>
+
 <body>
 
-<h3>Time Left: <span id="timer">10:00</span></h3>
+<script>
+if(!localStorage.getItem("userMobile")){
+  window.location.href="login.html";
+}
+</script>
 
-<h3 id="question"></h3>
+<div class="header">RAS Test – Demo</div>
+<div class="timer">⏱ Time Left: <span id="time">10:00</span></div>
 
-<div id="options"></div>
+<div class="card">
+  <div id="question"></div>
+  <div id="options"></div>
+</div>
 
-<button onclick="nextQuestion()">Next</button>
-<button onclick="submitTest()">Submit</button>
+<div class="card">
+  <button class="btn prev" onclick="prevQ()">Previous</button>
+  <button class="btn next" onclick="nextQ()">Next</button>
+  <button class="btn submit" onclick="submitTest()">Submit Test</button>
+</div>
 
 <script>
 let questions = [
-  {
-    q: "Rajasthan ka rajya pakshi kaunsa hai?",
-    options: ["Godawan", "Mor", "Kabutar", "Koyal"],
-    answer: 0
-  },
-  {
-    q: "Bharat ka rashtrapati kaun hota hai?",
-    options: ["PM", "Governor", "President", "CM"],
-    answer: 2
-  }
+ {
+  q:"भारत का राष्ट्रीय पशु कौन है?",
+  o:["शेर","बाघ","हाथी","घोड़ा"],
+  a:1
+ },
+ {
+  q:"राजस्थान की राजधानी क्या है?",
+  o:["जोधपुर","उदयपुर","जयपुर","कोटा"],
+  a:2
+ },
+ {
+  q:"संविधान दिवस कब मनाया जाता है?",
+  o:["26 जनवरी","15 अगस्त","26 नवम्बर","2 अक्टूबर"],
+  a:2
+ }
 ];
 
-let current = 0;
-let score = 0;
-let selected = null;
+let index=0;
+let answers={};
 
-function loadQuestion(){
-  let q = questions[current];
-  document.getElementById("question").innerText = q.q;
-  let optHtml = "";
-  q.options.forEach((o,i)=>{
-    optHtml += `<div class="option" onclick="select(${i})">${o}</div>`;
-  });
-  document.getElementById("options").innerHTML = optHtml;
+function loadQ(){
+ document.getElementById("question").innerHTML =
+   "<b>Q"+(index+1)+".</b> "+questions[index].q;
+
+ let optHTML="";
+ questions[index].o.forEach((opt,i)=>{
+   optHTML+=`
+   <div class="option">
+    <input type="radio" name="opt" 
+    ${answers[index]==i?"checked":""}
+    onclick="answers[${index}]=${i}">
+    ${opt}
+   </div>`;
+ });
+ document.getElementById("options").innerHTML=optHTML;
 }
-function select(i){ selected = i; }
+loadQ();
 
-function nextQuestion(){
-  if(selected === questions[current].answer) score++;
-  selected = null;
-  current++;
-  if(current < questions.length) loadQuestion();
-  else submitTest();
+function nextQ(){
+ if(index<questions.length-1){index++;loadQ();}
+}
+function prevQ(){
+ if(index>0){index--;loadQ();}
 }
 
 function submitTest(){
-  let user = localStorage.getItem("user");
-  firebase.database().ref("results/"+user).push({
-    exam: localStorage.getItem("selectedExam"),
-    score: score,
-    total: questions.length,
-    time: new Date().toString()
-  });
-
-  localStorage.setItem("score", score);
-  window.location.href = "result.html";
+ let score=0;
+ questions.forEach((q,i)=>{
+  if(answers[i]==q.a) score++;
+ });
+ localStorage.setItem("score",score);
+ window.location.href="result.html";
 }
 
 /* TIMER */
-let time = 10*60;
+let t=600;
 setInterval(()=>{
-  time--;
-  let m = Math.floor(time/60);
-  let s = time%60;
-  document.getElementById("timer").innerText =
-    m + ":" + (s<10?"0":"") + s;
-  if(time<=0) submitTest();
+ let m=Math.floor(t/60);
+ let s=t%60;
+ document.getElementById("time").innerText=
+  `${m}:${s<10?"0"+s:s}`;
+ if(t==0) submitTest();
+ t--;
 },1000);
-
-loadQuestion();
 </script>
-<script src="firebase.js"></script>
+
 </body>
 </html>
