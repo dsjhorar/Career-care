@@ -29,26 +29,24 @@ var firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 
 function login(){
-
   let name = document.getElementById("name").value.trim();
   let mobile = document.getElementById("mobile").value.trim();
 
   if(name === "" || mobile === ""){
-    alert("Name aur Mobile dono bharo");
+    alert("Fill Name and Mobile Number");
     return;
   }
 
   firebase.database().ref("students/" + mobile).set({
     name: name,
     mobile: mobile,
-    loginTime: new Date().toString()
-  }).then(function(){
+    createdAt: new Date().toString()
+  }).then(()=>{
     localStorage.setItem("userMobile", mobile);
     window.location.href = "index.html";
-  }).catch(function(error){
-    alert(error.message);
+  }).catch(err=>{
+    alert(err.message);
   });
-
 }
 </script>
 
