@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test List</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+
+<h2 id="examTitle"></h2>
+
+<ul>
+  <li>Topic Wise Test</li>
+  <li>Full Syllabus Test</li>
+  <li>Mock Test</li>
+</ul>
+
+<script>
+let exam = localStorage.getItem("selectedExam");
+document.getElementById("examTitle").innerText =
+  exam.toUpperCase() + " TESTS";
+</script>
+
+</body>
+</html>
