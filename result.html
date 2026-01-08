@@ -8,13 +8,11 @@
 <h2>Test Result</h2>
 
 <script>
-let ans = localStorage.getItem("answer");
-if (ans === "A") {
-  document.write("Score: 1/1 ✅");
-} else {
-  document.write("Score: 0/1 ❌");
-}
+let score = localStorage.getItem("score");
+document.write("<h3>Your Score: "+score+"</h3>");
 </script>
+
+<a href="index.html">Back to Home</a>
 
 </body>
 </html>
