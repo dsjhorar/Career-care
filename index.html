@@ -3,84 +3,177 @@ if(!localStorage.getItem("userMobile")){
   window.location.href = "login.html";
 }
 </script><!DOCTYPE html>
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <title>Career Care</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial;
-      background: #f5f5f5;
-    }
-    header {
-      background: #0D47A1;
-      color: white;
-      padding: 15px;
-      text-align: center;
-      font-size: 20px;
-    }
-    .container {
-      padding: 15px;
-    }
-    .card {
-      background: white;
-      padding: 20px;
-      margin-bottom: 15px;
-      border-radius: 8px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
-    .exam-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
-    }
-    .exam {
-      background: #1976D2;
-      color: white;
-      padding: 15px;
-      text-align: center;
-      border-radius: 6px;
-      font-weight: bold;
-    }
-    .premium {
-      background: gold;
-      text-align: center;
-      font-weight: bold;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Career Care</title>
+
+<style>
+body{
+  margin:0;
+  font-family: Arial, sans-serif;
+  background:#f4f6f8;
+}
+
+/* Header */
+.header{
+  background:#1e88e5;
+  color:white;
+  padding:15px;
+  text-align:center;
+  font-size:20px;
+  font-weight:bold;
+}
+
+/* User bar */
+.user-bar{
+  background:#ffffff;
+  padding:10px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  border-bottom:1px solid #ddd;
+}
+
+.logout{
+  background:#e53935;
+  color:white;
+  border:none;
+  padding:6px 10px;
+  border-radius:4px;
+}
+
+/* Sections */
+.section{
+  padding:15px;
+}
+
+.section h3{
+  margin-bottom:10px;
+}
+
+/* Cards */
+.card{
+  background:white;
+  padding:15px;
+  margin-bottom:10px;
+  border-radius:8px;
+  box-shadow:0 2px 4px rgba(0,0,0,0.1);
+}
+
+.card button{
+  background:#1e88e5;
+  color:white;
+  border:none;
+  padding:8px 12px;
+  border-radius:5px;
+  margin-top:8px;
+}
+
+/* Bottom nav */
+.nav{
+  position:fixed;
+  bottom:0;
+  width:100%;
+  background:white;
+  border-top:1px solid #ddd;
+  display:flex;
+}
+
+.nav div{
+  flex:1;
+  text-align:center;
+  padding:10px;
+  font-size:14px;
+}
+</style>
 </head>
+
 <body>
 
-<header>Career Care</header>
-
-<div class="container">
-
-  <div class="card">
-    <h3>Select Exam</h3>
-    <div class="exam-grid">
-      <div class="exam" onclick="openExam('ras')">RAS</div>
-      <div class="exam" onclick="openExam('reet')">REET</div>
-<div class="exam" onclick="openExam('first')">1st Grade</div>
-<div class="exam" onclick="openExam('second')">2nd Grade</div>
-    </div>
-  </div>
-
-  <div class="card">
-    <h3>Daily Current Affairs</h3>
-    <p>Attempt today's quiz</p>
-  </div>
-
-  <div class="card premium">
-    ⭐ Premium Test Series
-  </div>
-
-</div>
+<!-- 🔐 Login Check -->
 <script>
-function openExam(exam) {
-  localStorage.setItem("selectedExam", exam);
-  window.location.href = "test-list.html";
+if(!localStorage.getItem("userMobile")){
+  window.location.href="login.html";
 }
 </script>
+
+<div class="header">
+  Career Care
+</div>
+
+<div class="user-bar">
+  <div id="userMobile">Welcome</div>
+  <button class="logout" onclick="logout()">Logout</button>
+</div>
+
+<!-- Exams Section -->
+<div class="section">
+  <h3>📘 Exams</h3>
+
+  <div class="card">
+    <b>RAS</b><br>
+    Topic-wise & Full Tests
+    <br>
+    <button onclick="openExam('RAS')">Open</button>
+  </div>
+
+  <div class="card">
+    <b>1st Grade</b><br>
+    Subject-wise Tests
+    <br>
+    <button onclick="openExam('1st Grade')">Open</button>
+  </div>
+
+  <div class="card">
+    <b>2nd Grade</b><br>
+    Chapter-wise Tests
+    <br>
+    <button onclick="openExam('2nd Grade')">Open</button>
+  </div>
+
+  <div class="card">
+    <b>REET</b><br>
+    Practice + Mock Tests
+    <br>
+    <button onclick="openExam('REET')">Open</button>
+  </div>
+</div>
+
+<!-- Current Affairs -->
+<div class="section">
+  <h3>📰 Daily Current Affairs</h3>
+
+  <div class="card">
+    Daily Quiz (Hindi / English)
+    <br>
+    <button onclick="alert('Current Affairs coming soon')">Start Quiz</button>
+  </div>
+</div>
+
+<!-- Bottom Navigation -->
+<div class="nav">
+  <div>🏠 Home</div>
+  <div>📝 Tests</div>
+  <div>📊 Results</div>
+  <div>💳 Paid</div>
+</div>
+
+<script>
+document.getElementById("userMobile").innerText =
+  "Mobile: " + localStorage.getItem("userMobile");
+
+function logout(){
+  localStorage.removeItem("userMobile");
+  window.location.href="login.html";
+}
+
+function openExam(exam){
+  alert(exam + " section open hoga");
+}
+</script>
+
 </body>
 </html>
