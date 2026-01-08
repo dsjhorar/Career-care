@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Login</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+
+<h2>Student Login</h2>
+
+<input id="name" placeholder="Name"><br><br>
+<input id="mobile" placeholder="Mobile"><br><br>
+
+<button onclick="login()">Continue</button>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+<script>
+/* 🔴 PASTE YOUR FIREBASE CONFIG HERE */
+var firebaseConfig = {
+  apiKey: "XXXX",
+  authDomain: "XXXX",
+  databaseURL: "XXXX",
+  projectId: "XXXX",
+};
+firebase.initializeApp(firebaseConfig);
+
+function login(){
+  let name = document.getElementById("name").value;
+  let mobile = document.getElementById("mobile").value;
+
+  firebase.database().ref("students/"+mobile).set({
+    name: name,
+    mobile: mobile
+  });
+
+  localStorage.setItem("user", mobile);
+  window.location.href = "index.html";
+}
+</script>
+
+</body>
+</html>
