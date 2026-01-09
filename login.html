@@ -1,51 +1,68 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Login</title>
+<meta charset="UTF-8">
+<title>Career Care Login</title>
+<script src="firebase.js"></script>
+<style>
+body{font-family:Arial;background:#f4f6f8;padding:12px}
+input{padding:10px;margin:6px 0;border-radius:6px;width:200px}
+button{padding:10px 14px;margin:5px;border:none;border-radius:6px;cursor:pointer}
+</style>
 </head>
-
 <body>
 
-<h2>Student Login</h2>
+<h2>Login with OTP</h2>
 
-<input id="name" placeholder="Name"><br><br>
-<input id="mobile" placeholder="Mobile"><br><br>
+<div id="loginDiv">
+  <input type="text" id="mobile" placeholder="Enter Mobile +91" maxlength="10"><br>
+  <div id="recaptcha-container"></div>
+  <button onclick="sendOTP()">Send OTP</button>
+</div>
 
-<button onclick="login()">Continue</button>
-
-<!-- 🔴 Firebase scripts END me -->
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+<div id="otpDiv" style="display:none">
+  <input type="text" id="otp" placeholder="Enter OTP" maxlength="6"><br>
+  <button onclick="verifyOTP()">Verify OTP</button>
+</div>
 
 <script>
-var firebaseConfig = {
-  apiKey: "AIzaSyBCuefZt2WuNsNiFme8M-HUHm_BZYKJAi4",
-  authDomain: "career-care-afb64.firebaseapp.com",
-  databaseURL: "https://career-care-afb64-default-rtdb.firebaseio.com",
-  projectId: "career-care-afb64"
-};
+let confirmationResult;
 
-firebase.initializeApp(firebaseConfig);
+function sendOTP(){
+  let mobile = document.getElementById("mobile").value;
+  if(mobile.length != 10){ alert("Enter valid mobile"); return; }
 
-function login(){
-  let name = document.getElementById("name").value.trim();
-  let mobile = document.getElementById("mobile").value.trim();
+  window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container',{
+    size: 'invisible'
+  });
 
-  if(name === "" || mobile === ""){
-    alert("Fill Name and Mobile Number");
-    return;
-  }
+  firebase.auth().signInWithPhoneNumber("+91"+mobile, window.recaptchaVerifier)
+  .then(function(result){
+    confirmationResult = result;
+    alert("OTP sent!");
+    document.getElementById("loginDiv").style.display="none";
+    document.getElementById("otpDiv").style.display="block";
+  }).catch(function(error){
+    alert(error.message);
+  });
+}
 
-  firebase.database().ref("students/" + mobile).set({
-    name: name,
-    mobile: mobile,
-    createdAt: new Date().toString()
-  }).then(()=>{
-    localStorage.setItem("userMobile", mobile);
-    window.location.href = "index.html";
-  }).catch(err=>{
-    alert(err.message);
+function verifyOTP(){
+  let code = document.getElementById("otp").value;
+  confirmationResult.confirm(code).then(function(result){
+    let user = result.user;
+    alert("Login Successful");
+    
+    // Save user mobile & UID to Firebase
+    firebase.database().ref("students/"+user.phoneNumber.replace("+91","")).set({
+      uid: user.uid,
+      mobile: user.phoneNumber
+    });
+
+    // Redirect to home or test page
+    window.location = "index.html?mobile="+user.phoneNumber.replace("+91","");
+  }).catch(function(error){
+    alert("Invalid OTP: "+error.message);
   });
 }
 </script>
