@@ -1,1 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>My Profile</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+body{font-family:Arial;background:#f4f6f8;margin:0}
+header{background:#1e88e5;color:#fff;padding:12px;text-align:center}
+.box{
+  background:white;
+  margin:15px;
+  padding:15px;
+  border-radius:6px;
+}
+</style>
+</head>
+<body>
 
+<header>My Profile</header>
+
+<div class="box">
+  <p><b>Mobile:</b> <span id="mobile"></span></p>
+  <p><b>Status:</b> Free User</p>
+</div>
+
+<script>
+document.getElementById("mobile").innerText =
+  localStorage.getItem("userMobile") || "N/A";
+</script>
+
+</body>
+</html>
