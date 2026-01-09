@@ -61,13 +61,36 @@
 
   // 🔹 Fetch Questions
   function fetchQuestions() {
-    firebase.database().ref(examPath).once("value").then(snapshot=>{
-      snapshot.forEach(child=>{
+  firebase.database().ref(examPath).once("value")
+    .then(snapshot => {
+
+      if (!snapshot.exists()) {
+        alert("❌ No questions found in Firebase!");
+        return;
+      }
+
+      questions = [];
+      userAnswers = [];
+
+      snapshot.forEach(child => {
         questions.push(child.val());
-        userAnswers.push({selected:null, correct:null, skipped:false});
+        userAnswers.push({
+          selected: null,
+          correct: null,
+          skipped: false
+        });
       });
+
+      if (questions.length === 0) {
+        alert("❌ Questions empty!");
+        return;
+      }
+
       displayQuestion();
       startTimer();
+    })
+    .catch(error => {
+      alert("Firebase Error: " + error.message);
     });
   }
 
