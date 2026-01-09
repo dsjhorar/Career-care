@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Career Care Admin</title>
+<script src="firebase.js"></script>
+<style>
+body{font-family:Arial;padding:20px;background:#f4f6f8;}
+h2{color:#0a7cff;}
+input,select,textarea{padding:8px;margin:5px;width:200px;}
+textarea{width:400px;height:60px;}
+button{padding:8px 12px;margin:5px;border:none;border-radius:6px;background:#0a7cff;color:#fff;cursor:pointer;}
+</style>
+</head>
+<body>
+<h2>Admin Panel - Career Care</h2>
+
+<div>
+  <h3>Add / Edit Question</h3>
+  <label>Exam Name:</label>
+  <input type="text" id="exam" placeholder="e.g. first_grade"><br>
+
+  <label>Topic Name:</label>
+  <input type="text" id="topic" placeholder="e.g. topic_intro"><br>
+
+  <label>Question:</label><br>
+  <textarea id="q"></textarea><br>
+
+  <label>Option 0:</label><input type="text" id="opt0"><br>
+  <label>Option 1:</label><input type="text" id="opt1"><br>
+  <label>Option 2:</label><input type="text" id="opt2"><br>
+  <label>Option 3:</label><input type="text" id="opt3"><br>
+
+  <label>Correct Option (0-3):</label>
+  <input type="number" id="answer" min="0" max="3"><br>
+
+  <label>Explanation:</label><br>
+  <textarea id="explanation"></textarea><br>
+
+  <label>Premium Test?</label>
+  <select id="premiumFlag">
+    <option value="false">No</option>
+    <option value="true">Yes</option>
+  </select><br>
+
+  <button onclick="addQuestion()">Add Question</button>
+</div>
+
+<hr>
+<h3>View / Delete Questions</h3>
+<label>Exam:</label><input type="text" id="viewExam" placeholder="first_grade">
+<label>Topic:</label><input type="text" id="viewTopic" placeholder="topic_intro">
+<button onclick="loadQuestions()">Load Questions</button>
+<div id="questionsList"></div>
+
+<script>
+function addQuestion(){
+  let exam = document.getElementById("exam").value.trim();
+  let topic = document.getElementById("topic").value.trim();
+  let qText = document.getElementById("q").value.trim();
+  let options = {
+    0: document.getElementById("opt0").value.trim(),
+    1: document.getElementById("opt1").value.trim(),
+    2: document.getElementById("opt2").value.trim(),
+    3: document.getElementById("opt3").value.trim()
+  };
+  let answer = parseInt(document.getElementById("answer").value);
+  let explanation = document.getElementById("explanation").value.trim();
+  let premium = document.getElementById("premiumFlag").value === "true";
+
+  if(!exam || !topic || !qText || isNaN(answer)) { alert("Fill all fields"); return; }
+
+  let newQRef = firebase.database().ref(`tests/${exam}/${topic}/questions`).push();
+  newQRef.set({
+    q: qText,
+    options: options,
+    answer: answer,
+    explanation: explanation,
+    premium: premium
+  }).then(()=>{alert("Question added!")});
+}
+
+function loadQuestions(){
+  let exam = document.getElementById("viewExam").value.trim();
+  let topic = document.getElementById("viewTopic").value.trim();
+  if(!exam || !topic){ alert("Enter exam & topic"); return; }
+
+  let ref = firebase.database().ref(`tests/${exam}/${topic}/questions`);
+  ref.once("value").then(snapshot=>{
+    let html = "";
+    snapshot.forEach(child=>{
+      let q = child.val();
+      html += `<div>
+        <b>Q:</b> ${q.q} <br>
+        <b>Options:</b> ${Object.values(q.options).join(", ")} <br>
+        <b>Answer:</b> ${q.answer} | Premium: ${q.premium} 
+        <button onclick="deleteQuestion('${exam}','${topic}','${child.key}')">Delete</button>
+        <hr>
+      </div>`;
+    });
+    document.getElementById("questionsList").innerHTML = html;
+  });
+}
+
+function deleteQuestion(exam, topic, key){
+  if(confirm("Delete this question?")){
+    firebase.database().ref(`tests/${exam}/${topic}/questions/${key}`).remove()
+    .then(()=>{alert("Deleted"); loadQuestions();});
+  }
+}
+</script>
+</body>
+</html>
