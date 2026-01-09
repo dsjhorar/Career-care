@@ -2,28 +2,78 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Premium Test Series</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Career Care Premium</title>
+
+<script src="firebase.js"></script>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
 <style>
-body{font-family:Arial;background:#f4f6f8;margin:0}
-header{background:#1e88e5;color:#fff;padding:12px;text-align:center}
-.box{
-  background:white;
-  margin:15px;
-  padding:15px;
-  border-radius:6px;
+body{
+  font-family:Arial;
+  background:#f4f6f8;
+  text-align:center;
+  padding:20px;
+}
+.card{
+  background:#fff;
+  padding:20px;
+  border-radius:10px;
+}
+button{
+  background:#0a7cff;
+  color:#fff;
+  border:none;
+  padding:12px 20px;
+  border-radius:8px;
+  font-size:16px;
+  cursor:pointer;
 }
 </style>
 </head>
+
 <body>
 
-<header>Premium Test Series</header>
+<div class="card">
+  <h2>Career Care Premium</h2>
+  <p>✔ All Premium Tests<br>
+     ✔ Unlimited Access<br>
+     ✔ Full Length Exams</p>
 
-<div class="box">
-  ⭐ Unlock full syllabus tests  
-  <br><br>
-  💰 Coming Soon
+  <h3>₹199 / Year</h3>
+
+  <button onclick="payNow()">Unlock Premium</button>
 </div>
+
+<script>
+const params = new URLSearchParams(location.search);
+const mobile = params.get("mobile");
+
+function payNow(){
+
+  var options = {
+    "key": "rzp_test_xxxxxxxxxx",  // 👈 YOUR RAZORPAY KEY
+    "amount": 19900, // ₹199
+    "currency": "INR",
+    "name": "Career Care",
+    "description": "Premium Test Series",
+    "handler": function (response){
+
+      // PAYMENT SUCCESS
+      firebase.database().ref("students/"+mobile).update({
+        premium: true,
+        premiumDate: new Date().toLocaleDateString(),
+        razorpay_payment_id: response.razorpay_payment_id
+      });
+
+      alert("Premium Activated Successfully!");
+      window.location = "index.html?mobile="+mobile;
+    }
+  };
+
+  var rzp = new Razorpay(options);
+  rzp.open();
+}
+</script>
 
 </body>
 </html>
