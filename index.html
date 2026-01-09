@@ -2,7 +2,13 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Career Care</title>
+  <div class="header">
+  <div style="display:flex; align-items:center; gap:10px;">
+    <img src="logo.png" style="height:35px; width:35px; border-radius:6px;">
+    <h2 style="margin:0;">Career Care</h2>
+  </div>
+  <span onclick="toggleMenu()">⋮</span>
+  </div>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
   .menu-item{
@@ -150,7 +156,7 @@
     if(navigator.share){
       navigator.share({
         title: 'Career Care App',
-        text: 'Download Career Care app for exam preparation',
+        text: 'Download Career Care app for Govt exam preparation',
         url: window.location.href
       });
     }else{
