@@ -1,121 +1,69 @@
 <!DOCTYPE html>
-<html lang="en">
-  <script>
-if(!localStorage.getItem("userMobile")){
-  window.location.href="login.html";
-}
-  </script>
+<html lang="hi">
 <head>
 <meta charset="UTF-8">
-<title>Test</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Online Test</title>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
 <style>
-body{
-  margin:0;
-  font-family:Arial;
-  background:#f4f6f8;
+body { font-family: Arial; padding: 15px; background:#f5f7fa; }
+
+h2 { color:#333; }
+
+.option {
+  padding: 12px;
+  margin: 8px 0;
+  border-radius: 6px;
+  border: 1px solid #aaa;
+  cursor: pointer;
+  background:#fff;
 }
-header{
-  background:#1e88e5;
-  color:white;
-  padding:12px;
-  text-align:center;
-  font-size:18px;
+
+.option:hover { background:#f1f1f1; }
+
+.selected { background:#87CEFA; }     /* Sky Blue */
+.correct { background:#9cff9c; }
+.wrong { background:#ff9c9c; }
+
+.btn {
+  padding: 10px 15px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  margin: 5px;
+  color:#fff;
 }
-.container{
-  padding:15px;
-}
-.timer{
-  background:#fb8c00;
-  color:white;
-  padding:8px;
-  text-align:center;
-  border-radius:6px;
-  margin-bottom:10px;
-  font-weight:bold;
-}
-.question{
-  font-size:17px;
-  margin-bottom:12px;
-}
-.option{
-  background:white;
-  border:1px solid #ddd;
-  padding:12px;
-  margin-bottom:8px;
-  border-radius:6px;
-  cursor:pointer;
-}
-.option.selected{
-  background:#e3f2fd;
-  border-color:#1e88e5;
-}
-.correct{
-  background:#c8e6c9 !important;
-}
-.wrong{
-  background:#ffcdd2 !important;
-}
-.btn{
-  width:100%;
-  padding:14px;
-  margin-top:12px;
-  border:none;
-  border-radius:6px;
-  background:#43a047;
-  color:white;
-  font-size:16px;
-  cursor:pointer;
-}
-.explanation{
-  background:#fffde7;
-  border:1px solid #fbc02d;
-  padding:10px;
-  margin-top:6px;
-  border-radius:6px;
-  font-size:14px;
-}
-hr{
-  margin:15px 0;
-}
+
+.back { background:#6c757d; }
+.next { background:#007bff; }
+.skip { background:#ffc107; color:#000; }
+.submit { background:#28a745; }
+
+#timer { font-size:18px; font-weight:bold; }
 </style>
 </head>
 
 <body>
 
-<header id="testTitle">Test</header>
+<h2>Test</h2>
+<div id="timer">00:00</div>
+<hr>
 
-<div class="container">
+<div id="question"></div>
+<div id="options"></div>
 
-  <div class="timer">
-    Time Left: <span id="time">10:00</span>
-  </div>
-
-  <!-- TEST AREA -->
-  <div id="quiz">
-    <div class="question" id="question"></div>
-    <div id="options"></div>
-    <button class="btn" onclick="nextQuestion()">Next</button>
-    <button class="btn" style="background:#d32f2f" onclick="finishTest()">Submit Test</button>
-  </div>
-
-  <!-- RESULT / REVIEW -->
-  <div id="result" style="display:none;">
-    <h2>Test Analysis</h2>
-    <p id="scoreText"></p>
-    <div id="review"></div>
-    <button class="btn" onclick="goHome()">Go Home</button>
-  </div>
-
-</div>
+<hr>
+<button class="btn back" onclick="prevQ()">Back</button>
+<button class="btn skip" onclick="skipQ()">Skip</button>
+<button class="btn next" onclick="nextQ()">Next</button>
+<button class="btn submit" onclick="submitTest()">Submit</button>
 
 <script>
-/* ================= QUESTION DATA ================= */
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-
-<script>
+/* ================= FIREBASE ================= */
 var firebaseConfig = {
   apiKey: "AIzaSyBCuefZt2WuNsNiFme8M-HUHm_BZYKJAi4",
   authDomain: "career-care-afb64.firebaseapp.com",
@@ -123,132 +71,122 @@ var firebaseConfig = {
   projectId: "career-care-afb64",
 };
 firebase.initializeApp(firebaseConfig);
-  <script>
-let questions = [];
-
-const exam = localStorage.getItem("selectedExam") || "rajasthan_si";
-const type = localStorage.getItem("testType") || "topic";
-const subject = localStorage.getItem("selectedSubject") || "history";
-
-firebase.database()
-.ref(`questions/${exam}/${type}/${subject}/test1`)
-.once("value")
-.then(snapshot=>{
-  snapshot.forEach(child=>{
-    questions.push(child.val());
-  });
-  loadQuestion();
-});
-
-
+var db = firebase.database();
 
 /* ================= VARIABLES ================= */
-
-let current = 0;
-let selected = null;
-let userAnswers = [];
+let questions = [];
+let index = 0;
+let answers = [];
 let score = 0;
-let time = 10 * 60;
-let timer;
+let time = 0;
+const NEGATIVE = 1/3;
 
-/* ================= INIT ================= */
+/* ================= TIMER ================= */
+setInterval(() => {
+  time++;
+  document.getElementById("timer").innerText =
+    new Date(time * 1000).toISOString().substr(14, 5);
+}, 1000);
 
-document.getElementById("testTitle").innerText =
-  (localStorage.getItem("selectedExam") || "Exam") + " Test";
+/* ================= LOAD QUESTIONS ================= */
+db.ref("tests/first_grade/topic_intro/questions")
+.once("value", snapshot => {
+  let data = snapshot.val();
 
-loadQuestion();
-startTimer();
+  questions = Object.keys(data).map(key => {
+    return {
+      question: data[key].q,
+      options: Object.values(data[key].options),
+      answer: data[key].answer,
+      explanation: data[key].explanation
+    };
+  });
 
-/* ================= FUNCTIONS ================= */
+  showQuestion();
+});
 
-function loadQuestion(){
-  selected = null;
-  const q = questions[current];
-  document.getElementById("question").innerText =
-    (current+1) + ". " + q.q;
+/* ================= SHOW QUESTION ================= */
+function showQuestion() {
+  let q = questions[index];
 
-  const optDiv = document.getElementById("options");
+  document.getElementById("question").innerHTML =
+    `<b>Q${index + 1}.</b> ${q.question}`;
+
+  let optDiv = document.getElementById("options");
   optDiv.innerHTML = "";
 
-  q.options.forEach((opt,i)=>{
-    const div = document.createElement("div");
+  q.options.forEach((opt, i) => {
+    let div = document.createElement("div");
     div.className = "option";
     div.innerText = opt;
-    div.onclick = ()=>selectOption(div,i);
+
+    if (answers[index]?.selected === i)
+      div.classList.add("selected");
+
+    div.onclick = () => selectOption(i);
     optDiv.appendChild(div);
   });
 }
 
-function selectOption(div,index){
-  selected = index;
-  document.querySelectorAll(".option")
-    .forEach(o=>o.classList.remove("selected"));
-  div.classList.add("selected");
+/* ================= SELECT ================= */
+function selectOption(i) {
+  answers[index] = { selected: i, skipped: false };
+  showQuestion();
 }
 
-function nextQuestion(){
-  if(selected===null){
-    alert("Please select an option");
-    return;
-  }
-  userAnswers[current]=selected;
-  current++;
-  if(current<questions.length){
-    loadQuestion();
-  }else{
-    finishTest();
+/* ================= NAVIGATION ================= */
+function nextQ() {
+  if (index < questions.length - 1) {
+    index++;
+    showQuestion();
   }
 }
 
-function finishTest(){
-  clearInterval(timer);
-  document.getElementById("quiz").style.display="none";
-  document.getElementById("result").style.display="block";
+function prevQ() {
+  if (index > 0) {
+    index--;
+    showQuestion();
+  }
+}
 
-  // calculate score
-  questions.forEach((q,i)=>{
-    if(userAnswers[i]===q.answer) score++;
+function skipQ() {
+  answers[index] = { selected: null, skipped: true };
+  nextQ();
+}
+
+/* ================= SUBMIT ================= */
+function submitTest() {
+  score = 0;
+
+  questions.forEach((q, i) => {
+    let a = answers[i];
+    if (!a || a.skipped) return;
+    if (a.selected === q.answer) score += 1;
+    else score -= NEGATIVE;
   });
 
-  document.getElementById("scoreText").innerText =
-    `Score: ${score} / ${questions.length}`;
-
-  showReview();
+  showResult();
 }
 
-function showReview(){
-  const review = document.getElementById("review");
-  review.innerHTML="";
+/* ================= RESULT ================= */
+function showResult() {
+  let html = `<h2>Result</h2>`;
+  html += `<p><b>Score:</b> ${score.toFixed(2)}</p><hr>`;
 
-  questions.forEach((q,i)=>{
-    let html = `<p><b>Q${i+1}. ${q.q}</b></p>`;
-    q.options.forEach((opt,idx)=>{
-      let cls="";
-      if(idx===q.answer) cls="correct";
-      else if(userAnswers[i]===idx) cls="wrong";
+  questions.forEach((q, i) => {
+    html += `<p><b>Q${i+1}.</b> ${q.question}</p>`;
+
+    q.options.forEach((opt, j) => {
+      let cls = "";
+      if (j === q.answer) cls = "correct";
+      if (answers[i]?.selected === j && j !== q.answer) cls = "wrong";
       html += `<div class="option ${cls}">${opt}</div>`;
     });
-    html += `<div class="explanation"><b>Explanation:</b> ${q.explanation}</div><hr>`;
-    review.innerHTML += html;
+
+    html += `<i>Explanation:</i> ${q.explanation}<hr>`;
   });
-}
 
-function startTimer(){
-  timer = setInterval(()=>{
-    if(time<=0){
-      finishTest();
-      return;
-    }
-    time--;
-    let m=Math.floor(time/60);
-    let s=time%60;
-    document.getElementById("time").innerText =
-      `${m}:${s<10?"0":""}${s}`;
-  },1000);
-}
-
-function goHome(){
-  window.location.href="index.html";
+  document.body.innerHTML = html;
 }
 </script>
 
