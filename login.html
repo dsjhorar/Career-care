@@ -30,19 +30,25 @@ let confirmationResult;
 
 function sendOTP(){
   let mobile = document.getElementById("mobile").value;
+  console.log("Mobile entered:", mobile); // DEBUG
   if(mobile.length != 10){ alert("Enter valid mobile"); return; }
 
   window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container',{
-    size: 'invisible'
+    size: 'invisible',
+    callback: function(response){
+      console.log("Recaptcha solved", response);
+    }
   });
 
   firebase.auth().signInWithPhoneNumber("+91"+mobile, window.recaptchaVerifier)
   .then(function(result){
+    console.log("OTP sent result", result);
     confirmationResult = result;
     alert("OTP sent!");
     document.getElementById("loginDiv").style.display="none";
     document.getElementById("otpDiv").style.display="block";
   }).catch(function(error){
+    console.log("OTP send error:", error);
     alert(error.message);
   });
 }
