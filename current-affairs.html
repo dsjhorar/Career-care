@@ -1,1 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Daily Current Affairs</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+body{font-family:Arial;background:#f4f6f8;margin:0}
+header{background:#1e88e5;color:#fff;padding:12px;text-align:center}
+.btn{
+  background:white;
+  padding:14px;
+  margin:10px;
+  border-radius:6px;
+  border:1px solid #ddd;
+}
+</style>
+</head>
+<body>
 
+<header>Daily Current Affairs Quiz</header>
+
+<div class="btn" onclick="startCA()">📰 Today Quiz</div>
+<div class="btn">📅 Previous Quizzes (coming soon)</div>
+
+<script>
+function startCA(){
+  localStorage.setItem("selectedExam","Current Affairs");
+  window.location.href="test.html";
+}
+</script>
+
+</body>
+</html>
