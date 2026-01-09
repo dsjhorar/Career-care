@@ -2,138 +2,248 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>MCQ Test</title>
+<title>Test</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-body{font-family:Arial;margin:0;background:#f4f6f8}
-.header{background:#1e88e5;color:#fff;padding:15px;text-align:center}
-.timer{background:#fff;padding:10px;text-align:center;font-weight:bold}
-.card{background:#fff;margin:10px;padding:15px;border-radius:6px}
-.option{margin:8px 0}
-.btn{padding:10px;border:none;border-radius:5px}
-.next{background:#1e88e5;color:#fff}
-.prev{background:#777;color:#fff}
-.submit{background:#43a047;color:#fff;width:100%;margin-top:10px}
+body{
+  margin:0;
+  font-family:Arial;
+  background:#f4f6f8;
+}
+header{
+  background:#1e88e5;
+  color:white;
+  padding:12px;
+  text-align:center;
+  font-size:18px;
+}
+.container{
+  padding:15px;
+}
+.timer{
+  background:#fb8c00;
+  color:white;
+  padding:8px;
+  text-align:center;
+  border-radius:6px;
+  margin-bottom:10px;
+  font-weight:bold;
+}
+.question{
+  font-size:17px;
+  margin-bottom:12px;
+}
+.option{
+  background:white;
+  border:1px solid #ddd;
+  padding:12px;
+  margin-bottom:8px;
+  border-radius:6px;
+  cursor:pointer;
+}
+.option.selected{
+  background:#e3f2fd;
+  border-color:#1e88e5;
+}
+.correct{
+  background:#c8e6c9 !important;
+}
+.wrong{
+  background:#ffcdd2 !important;
+}
+.btn{
+  width:100%;
+  padding:14px;
+  margin-top:12px;
+  border:none;
+  border-radius:6px;
+  background:#43a047;
+  color:white;
+  font-size:16px;
+  cursor:pointer;
+}
+.explanation{
+  background:#fffde7;
+  border:1px solid #fbc02d;
+  padding:10px;
+  margin-top:6px;
+  border-radius:6px;
+  font-size:14px;
+}
+hr{
+  margin:15px 0;
+}
 </style>
 </head>
 
 <body>
-
-<!-- 🔐 Login Protection -->
+  <!-- 🔐 Login Protection -->
 <script>
 if(!localStorage.getItem("userMobile")){
   window.location.href="login.html";
 }
 </script>
 
-<div class="header">Test</div>
+<header id="testTitle">Test</header>
 
-<div class="timer">
-  ⏱ Time Left: <span id="time">01:00</span>
+<div class="container">
+
+  <div class="timer">
+    Time Left: <span id="time">10:00</span>
+  </div>
+
+  <!-- TEST AREA -->
+  <div id="quiz">
+    <div class="question" id="question"></div>
+    <div id="options"></div>
+    <button class="btn" onclick="nextQuestion()">Next</button>
+    <button class="btn" style="background:#d32f2f" onclick="finishTest()">Submit Test</button>
+  </div>
+
+  <!-- RESULT / REVIEW -->
+  <div id="result" style="display:none;">
+    <h2>Test Analysis</h2>
+    <p id="scoreText"></p>
+    <div id="review"></div>
+    <button class="btn" onclick="goHome()">Go Home</button>
+  </div>
+
 </div>
 
-<div class="card">
-  <div id="question"></div>
-  <div id="options"></div>
-</div>
-
-<div class="card">
-  <button class="btn prev" onclick="prevQ()">Previous</button>
-  <button class="btn next" onclick="nextQ()">Next</button>
-  <button class="btn submit" onclick="submitTest()">Submit Test</button>
-</div>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-  <script>
-var firebaseConfig = {
-  apiKey: "AIzaSyBCuefZt2WuNsNiFme8M-HUHm_BZYKJAi4",
-  authDomain: "career-care-afb64.firebaseapp.com",
-  databaseURL: "https://career-care-afb64-default-rtdb.firebaseio.com",
-  projectId: "career-care-afb64"
-};
-
-firebase.initializeApp(firebaseConfig);
-  </script>
-  
-<!-- 🔽 JAVASCRIPT STARTS HERE -->
-  <script>
-let questions = [];
-let index = 0;
-let answers = {};
-
-firebase.database()
-.ref("questions/RAS/test1")
-.once("value")
-.then(snapshot=>{
-  snapshot.forEach(child=>{
-    questions.push(child.val());
-  });
-  loadQ();
-});
-  </script>
 <script>
-/* 🔹 VARIABLES */
-let index = 0;
-let answers = {};
+/* ================= QUESTION DATA ================= */
 
-/* 🔹 LOAD QUESTION */
-function loadQ(){
- document.getElementById("question").innerHTML =
-   "<b>Q"+(index+1)+".</b> "+questions[index].q;
+const questions = [
+  {
+    q:"Rajasthan was formed in which year?",
+    options:["1947","1948","1949","1950"],
+    answer:2,
+    explanation:"Rajasthan ka ekikaran 30 March 1949 ko hua."
+  },
+  {
+    q:"Capital of Rajasthan?",
+    options:["Jodhpur","Udaipur","Jaipur","Ajmer"],
+    answer:2,
+    explanation:"Jaipur ko 1949 me Rajasthan ki rajdhani banaya gaya."
+  },
+  {
+    q:"Longest river of Rajasthan?",
+    options:["Luni","Banas","Chambal","Mahi"],
+    answer:2,
+    explanation:"Chambal Rajasthan ki sabse lambi nadi hai."
+  }
+];
 
- let html="";
- questions[index].o.forEach((opt,i)=>{
-  html += `
-   <div class="option">
-    <input type="radio" name="opt"
-    ${answers[index]==i?"checked":""}
-    onclick="answers[${index}]=${i}">
-    ${opt}
-   </div>`;
- });
- document.getElementById("options").innerHTML = html;
+/* ================= VARIABLES ================= */
+
+let current = 0;
+let selected = null;
+let userAnswers = [];
+let score = 0;
+let time = 10 * 60;
+let timer;
+
+/* ================= INIT ================= */
+
+document.getElementById("testTitle").innerText =
+  (localStorage.getItem("selectedExam") || "Exam") + " Test";
+
+loadQuestion();
+startTimer();
+
+/* ================= FUNCTIONS ================= */
+
+function loadQuestion(){
+  selected = null;
+  const q = questions[current];
+  document.getElementById("question").innerText =
+    (current+1) + ". " + q.q;
+
+  const optDiv = document.getElementById("options");
+  optDiv.innerHTML = "";
+
+  q.options.forEach((opt,i)=>{
+    const div = document.createElement("div");
+    div.className = "option";
+    div.innerText = opt;
+    div.onclick = ()=>selectOption(div,i);
+    optDiv.appendChild(div);
+  });
 }
-loadQ();
 
-/* 🔹 NAVIGATION */
-function nextQ(){
- if(index < questions.length-1){
-   index++;
-   loadQ();
- }
+function selectOption(div,index){
+  selected = index;
+  document.querySelectorAll(".option")
+    .forEach(o=>o.classList.remove("selected"));
+  div.classList.add("selected");
 }
 
-function prevQ(){
- if(index > 0){
-   index--;
-   loadQ();
- }
+function nextQuestion(){
+  if(selected===null){
+    alert("Please select an option");
+    return;
+  }
+  userAnswers[current]=selected;
+  current++;
+  if(current<questions.length){
+    loadQuestion();
+  }else{
+    finishTest();
+  }
 }
 
-/* 🔹 SUBMIT */
-function submitTest(){
- let score = 0;
- questions.forEach((q,i)=>{
-  if(answers[i] == q.a) score++;
- });
- localStorage.setItem("score", score);
- window.location.href = "result.html";
+function finishTest(){
+  clearInterval(timer);
+  document.getElementById("quiz").style.display="none";
+  document.getElementById("result").style.display="block";
+
+  // calculate score
+  questions.forEach((q,i)=>{
+    if(userAnswers[i]===q.answer) score++;
+  });
+
+  document.getElementById("scoreText").innerText =
+    `Score: ${score} / ${questions.length}`;
+
+  showReview();
 }
 
-/* 🔹 TIMER */
-let t = 60;
-setInterval(()=>{
- let m = Math.floor(t/60);
- let s = t % 60;
- document.getElementById("time").innerText =
-  `0${m}:${s<10?"0"+s:s}`;
- if(t == 0) submitTest();
- t--;
-},1000);
+function showReview(){
+  const review = document.getElementById("review");
+  review.innerHTML="";
 
+  questions.forEach((q,i)=>{
+    let html = `<p><b>Q${i+1}. ${q.q}</b></p>`;
+    q.options.forEach((opt,idx)=>{
+      let cls="";
+      if(idx===q.answer) cls="correct";
+      else if(userAnswers[i]===idx) cls="wrong";
+      html += `<div class="option ${cls}">${opt}</div>`;
+    });
+    html += `<div class="explanation"><b>Explanation:</b> ${q.explanation}</div><hr>`;
+    review.innerHTML += html;
+  });
+}
+
+function startTimer(){
+  timer = setInterval(()=>{
+    if(time<=0){
+      finishTest();
+      return;
+    }
+    time--;
+    let m=Math.floor(time/60);
+    let s=time%60;
+    document.getElementById("time").innerText =
+      `${m}:${s<10?"0":""}${s}`;
+  },1000);
+}
+
+function goHome(){
+  window.location.href="index.html";
+}
 </script>
-<!-- 🔼 JAVASCRIPT ENDS HERE -->
 
 </body>
 </html>
