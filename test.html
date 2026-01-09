@@ -3,6 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <title>Online Test</title>
+  <script>
+const params = new URLSearchParams(window.location.search);
+
+const exam = params.get("exam");        // first_grade
+const type = params.get("type");        // topic / full
+const topic = params.get("topic");      // topic_intro
+const test = params.get("test");        // test1
+  </script>
 
 <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
@@ -89,18 +97,25 @@ setInterval(() => {
 }, 1000);
 
 /* ================= LOAD QUESTIONS ================= */
-db.ref("tests/first_grade/topic_intro/questions")
-.once("value", snapshot => {
+let path = "";
+
+if (type === "topic") {
+  path = `tests/${exam}/${topic}/questions`;
+}
+
+if (type === "full") {
+  path = `tests/${exam}/full_test/${test}/questions`;
+}
+
+db.ref(path).once("value", snapshot => {
   let data = snapshot.val();
 
-  questions = Object.keys(data).map(key => {
-    return {
-      question: data[key].q,
-      options: Object.values(data[key].options),
-      answer: data[key].answer,
-      explanation: data[key].explanation
-    };
-  });
+  questions = Object.keys(data).map(key => ({
+    question: data[key].q,
+    options: Object.values(data[key].options),
+    answer: data[key].answer,
+    explanation: data[key].explanation
+  }));
 
   showQuestion();
 });
@@ -187,6 +202,25 @@ function showResult() {
   });
 
   document.body.innerHTML = html;
+}
+  
+</script>
+  <button onclick="openTopic('first_grade','topic_intro')">
+  Rajasthan Intro
+</button>
+
+<script>
+function openTopic(exam, topic){
+  location.href = `test.html?exam=${exam}&type=topic&topic=${topic}`;
+}
+</script>
+  <button onclick="openFullTest('first_grade','test1')">
+  Full Test 1
+</button>
+
+<script>
+function openFullTest(exam,test){
+  location.href = `test.html?exam=${exam}&type=full&test=${test}`;
 }
 </script>
 
