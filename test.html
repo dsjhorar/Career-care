@@ -1,226 +1,101 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html>
 <head>
 <meta charset="UTF-8">
-<title>Online Test</title>
-  <script>
-const params = new URLSearchParams(window.location.search);
+<title>Career Care Test</title>
 
-const exam = params.get("exam");        // first_grade
-const type = params.get("type");        // topic / full
-const topic = params.get("topic");      // topic_intro
-const test = params.get("test");        // test1
-  </script>
-
-<!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+<script src="firebase.js"></script>
 
 <style>
-body { font-family: Arial; padding: 15px; background:#f5f7fa; }
-
-h2 { color:#333; }
-
-.option {
-  padding: 12px;
-  margin: 8px 0;
-  border-radius: 6px;
-  border: 1px solid #aaa;
-  cursor: pointer;
-  background:#fff;
-}
-
-.option:hover { background:#f1f1f1; }
-
-.selected { background:#87CEFA; }     /* Sky Blue */
-.correct { background:#9cff9c; }
-.wrong { background:#ff9c9c; }
-
-.btn {
-  padding: 10px 15px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 14px;
-  margin: 5px;
-  color:#fff;
-}
-
-.back { background:#6c757d; }
-.next { background:#007bff; }
-.skip { background:#ffc107; color:#000; }
-.submit { background:#28a745; }
-
-#timer { font-size:18px; font-weight:bold; }
+body{font-family:Arial;background:#f4f6f8;padding:10px}
+.option{background:#fff;padding:12px;margin:8px 0;border-radius:8px;border:1px solid #ddd;cursor:pointer}
+.option.selected{background:#cceeff}
+.option.correct{background:#b6f2c1}
+.option.wrong{background:#f7b2b2}
+button{padding:10px;margin:5px;border:none;border-radius:6px;font-weight:bold}
+#explanation{display:none;background:#fff;padding:10px;border-radius:6px;margin-top:10px}
 </style>
 </head>
 
 <body>
 
-<h2>Test</h2>
-<div id="timer">00:00</div>
-<hr>
+<h2 id="title">Loading...</h2>
+<p>⏱ <span id="timer">00:00</span></p>
 
-<div id="question"></div>
+<h3 id="question"></h3>
 <div id="options"></div>
 
-<hr>
-<button class="btn back" onclick="prevQ()">Back</button>
-<button class="btn skip" onclick="skipQ()">Skip</button>
-<button class="btn next" onclick="nextQ()">Next</button>
-<button class="btn submit" onclick="submitTest()">Submit</button>
+<button onclick="prevQ()">⬅ Back</button>
+<button onclick="skipQ()">⏭ Skip</button>
+<button onclick="nextQ()">Next ➡</button>
+<button onclick="submitTest()">Submit</button>
+
+<div id="explanation"></div>
+<h3 id="score"></h3>
 
 <script>
-/* ================= FIREBASE ================= */
-var firebaseConfig = {
-  apiKey: "AIzaSyBCuefZt2WuNsNiFme8M-HUHm_BZYKJAi4",
-  authDomain: "career-care-afb64.firebaseapp.com",
-  databaseURL: "https://career-care-afb64-default-rtdb.firebaseio.com",
-  projectId: "career-care-afb64",
-};
-firebase.initializeApp(firebaseConfig);
-var db = firebase.database();
+/* URL PARAMS */
+const p = new URLSearchParams(location.search);
+const exam = p.get("exam");
+const type = p.get("type");
+const topic = p.get("topic");
 
-/* ================= VARIABLES ================= */
-let questions = [];
-let index = 0;
-let answers = [];
-let score = 0;
-let time = 0;
-const NEGATIVE = 1/3;
+let path = `tests/${exam}/${topic}/questions`;
 
-/* ================= TIMER ================= */
-setInterval(() => {
-  time++;
-  document.getElementById("timer").innerText =
-    new Date(time * 1000).toISOString().substr(14, 5);
-}, 1000);
+let questions=[],answers={},current=0,submitted=false,score=0;
+let sec=0;
 
-/* ================= LOAD QUESTIONS ================= */
-let path = "";
+setInterval(()=>{
+ sec++;
+ document.getElementById("timer").innerText=
+ String(Math.floor(sec/60)).padStart(2,"0")+":"+
+ String(sec%60).padStart(2,"0");
+},1000);
 
-if (type === "topic") {
-  path = `tests/${exam}/${topic}/questions`;
-}
-
-if (type === "full") {
-  path = `tests/${exam}/full_test/${test}/questions`;
-}
-
-db.ref(path).once("value", snapshot => {
-  let data = snapshot.val();
-
-  questions = Object.keys(data).map(key => ({
-    question: data[key].q,
-    options: Object.values(data[key].options),
-    answer: data[key].answer,
-    explanation: data[key].explanation
-  }));
-
-  showQuestion();
+/* LOAD QUESTIONS */
+firebase.database().ref(path).once("value",snap=>{
+ snap.forEach(c=>questions.push(c.val()));
+ document.getElementById("title").innerText =
+ exam.replace("_"," ").toUpperCase()+" Test";
+ loadQ();
 });
 
-/* ================= SHOW QUESTION ================= */
-function showQuestion() {
-  let q = questions[index];
-
-  document.getElementById("question").innerHTML =
-    `<b>Q${index + 1}.</b> ${q.question}`;
-
-  let optDiv = document.getElementById("options");
-  optDiv.innerHTML = "";
-
-  q.options.forEach((opt, i) => {
-    let div = document.createElement("div");
-    div.className = "option";
-    div.innerText = opt;
-
-    if (answers[index]?.selected === i)
-      div.classList.add("selected");
-
-    div.onclick = () => selectOption(i);
-    optDiv.appendChild(div);
-  });
-}
-
-/* ================= SELECT ================= */
-function selectOption(i) {
-  answers[index] = { selected: i, skipped: false };
-  showQuestion();
-}
-
-/* ================= NAVIGATION ================= */
-function nextQ() {
-  if (index < questions.length - 1) {
-    index++;
-    showQuestion();
+function loadQ(){
+ let q=questions[current];
+ document.getElementById("question").innerText=(current+1)+". "+q.q;
+ let html="";
+ Object.keys(q.options).forEach(i=>{
+  let cls="option";
+  if(answers[current]==i)cls+=" selected";
+  if(submitted){
+   if(i==q.answer)cls+=" correct";
+   else if(answers[current]==i)cls+=" wrong";
   }
+  html+=`<div class="${cls}" onclick="selectOpt(${i})">${q.options[i]}</div>`;
+ });
+ document.getElementById("options").innerHTML=html;
+
+ if(submitted){
+  document.getElementById("explanation").style.display="block";
+  document.getElementById("explanation").innerHTML="<b>Explanation:</b> "+q.explanation;
+ }
 }
 
-function prevQ() {
-  if (index > 0) {
-    index--;
-    showQuestion();
+function selectOpt(i){if(!submitted){answers[current]=i;loadQ();}}
+function nextQ(){if(current<questions.length-1){current++;loadQ();}}
+function prevQ(){if(current>0){current--;loadQ();}}
+function skipQ(){nextQ();}
+
+function submitTest(){
+ submitted=true;score=0;
+ questions.forEach((q,i)=>{
+  if(answers[i]!=null){
+   if(answers[i]==q.answer)score+=1;
+   else score-=0.33;
   }
-}
-
-function skipQ() {
-  answers[index] = { selected: null, skipped: true };
-  nextQ();
-}
-
-/* ================= SUBMIT ================= */
-function submitTest() {
-  score = 0;
-
-  questions.forEach((q, i) => {
-    let a = answers[i];
-    if (!a || a.skipped) return;
-    if (a.selected === q.answer) score += 1;
-    else score -= NEGATIVE;
-  });
-
-  showResult();
-}
-
-/* ================= RESULT ================= */
-function showResult() {
-  let html = `<h2>Result</h2>`;
-  html += `<p><b>Score:</b> ${score.toFixed(2)}</p><hr>`;
-
-  questions.forEach((q, i) => {
-    html += `<p><b>Q${i+1}.</b> ${q.question}</p>`;
-
-    q.options.forEach((opt, j) => {
-      let cls = "";
-      if (j === q.answer) cls = "correct";
-      if (answers[i]?.selected === j && j !== q.answer) cls = "wrong";
-      html += `<div class="option ${cls}">${opt}</div>`;
-    });
-
-    html += `<i>Explanation:</i> ${q.explanation}<hr>`;
-  });
-
-  document.body.innerHTML = html;
-}
-  
-</script>
-  <button onclick="openTopic('first_grade','topic_intro')">
-  Rajasthan Intro
-</button>
-
-<script>
-function openTopic(exam, topic){
-  location.href = `test.html?exam=${exam}&type=topic&topic=${topic}`;
-}
-</script>
-  <button onclick="openFullTest('first_grade','test1')">
-  Full Test 1
-</button>
-
-<script>
-function openFullTest(exam,test){
-  location.href = `test.html?exam=${exam}&type=full&test=${test}`;
+ });
+ document.getElementById("score").innerText="Final Score: "+score.toFixed(2);
+ loadQ();
 }
 </script>
 
