@@ -1,1 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Exam</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  body{margin:0;font-family:Arial;background:#f4f6f8;}
+  header{background:#1e88e5;color:#fff;padding:15px;text-align:center;font-size:20px;}
+  .container{padding:15px;}
+  .btn{
+    width:100%;padding:15px;margin-bottom:12px;
+    border:none;border-radius:8px;
+    font-size:16px;cursor:pointer;
+    background:#fff;border:1px solid #ddd;
+  }
+  .btn:hover{background:#e3f2fd;}
+  .primary{background:#43a047;color:#fff;border:none;}
+  .secondary{background:#fb8c00;color:#fff;border:none;}
+  .hidden{display:none;}
+</style>
+</head>
 
+<body>
+
+<header id="examTitle">Exam</header>
+
+<div class="container">
+
+  <!-- STEP 1 -->
+  <div id="step1">
+    <button class="btn primary" onclick="openTopicWise()">📚 Topic Wise Test</button>
+    <button class="btn secondary" onclick="openFullTest()">📝 Full Test</button>
+  </div>
+
+  <!-- STEP 2 : SUBJECTS -->
+  <div id="subjects" class="hidden">
+    <h3>Select Subject</h3>
+    <button class="btn" onclick="openTopics('History')">History</button>
+    <button class="btn" onclick="openTopics('Polity')">Polity</button>
+    <button class="btn" onclick="openTopics('Geography')">Geography</button>
+    <button class="btn" onclick="openTopics('Economy')">Economy</button>
+    <button class="btn" onclick="openTopics('Rajasthan GK')">Rajasthan GK</button>
+  </div>
+
+  <!-- STEP 3 : TOPICS -->
+  <div id="topics" class="hidden">
+    <h3 id="subjectTitle"></h3>
+    <button class="btn" onclick="startTest('Introduction')">Introduction</button>
+    <button class="btn" onclick="startTest('Ancient Period')">Ancient Period</button>
+    <button class="btn" onclick="startTest('Medieval Period')">Medieval Period</button>
+    <button class="btn" onclick="startTest('Modern Period')">Modern Period</button>
+  </div>
+
+  <!-- STEP 4 : FULL TEST LIST -->
+  <div id="fullTests" class="hidden">
+    <h3>Full Tests</h3>
+    <button class="btn" onclick="startFullTest('Test 1')">Full Test 1</button>
+    <button class="btn" onclick="startFullTest('Test 2')">Full Test 2</button>
+    <button class="btn" onclick="startFullTest('Test 3')">Full Test 3</button>
+  </div>
+
+</div>
+
+<script>
+  // exam name from home page
+  const exam = localStorage.getItem("selectedExam");
+  document.getElementById("examTitle").innerText = exam || "Exam";
+
+  function openTopicWise(){
+    document.getElementById("step1").classList.add("hidden");
+    document.getElementById("subjects").classList.remove("hidden");
+  }
+
+  function openFullTest(){
+    document.getElementById("step1").classList.add("hidden");
+    document.getElementById("fullTests").classList.remove("hidden");
+  }
+
+  function openTopics(subject){
+    localStorage.setItem("selectedSubject", subject);
+    document.getElementById("subjects").classList.add("hidden");
+    document.getElementById("topics").classList.remove("hidden");
+    document.getElementById("subjectTitle").innerText = subject + " Topics";
+  }
+
+  function startTest(topic){
+    localStorage.setItem("selectedTopic", topic);
+    localStorage.setItem("testType", "topic");
+    window.location.href = "test.html";
+  }
+
+  function startFullTest(test){
+    localStorage.setItem("selectedTest", test);
+    localStorage.setItem("testType", "full");
+    window.location.href = "test.html";
+  }
+</script>
+
+</body>
+</html>
