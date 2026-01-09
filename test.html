@@ -113,7 +113,10 @@ let submitted = false;
 let score = 0;
 
 /* TEMP USER (login step me dynamic hoga) */
-let userMobile = "9999999999";
+// OLD: let userMobile = "9999999999";
+// NEW: get from URL
+const urlParams = new URLSearchParams(window.location.search);
+let userMobile = urlParams.get("mobile") || "9999999999";
 
 /* ================================
    TIMER
