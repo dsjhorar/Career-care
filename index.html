@@ -2,13 +2,44 @@
 <html lang="en">
 <head>
   <div class="header">
-  <div style="display:flex; align-items:center; gap:10px;">
-    <img src="logo.png" style="height:35px; width:35px; border-radius:6px;">
-    <h2 style="margin:0;">Career Care</h2>
+  <div class="header-left">
+    <img src="logo.png" alt="Career Care Logo">
+    <span class="app-name">Career Care</span>
   </div>
-  <span onclick="toggleMenu()">⋮</span>
+  <span class="menu-btn" onclick="toggleMenu()">⋮</span>
   </div>
   <style>
+    .header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  background: #ffffff;
+  border-bottom: 1px solid #ddd;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.header-left img {
+  height: 40px;
+  width: 40px;
+  object-fit: contain;
+}
+
+.app-name {
+  font-size: 20px;
+  font-weight: 600;
+  color: #222;
+}
+
+.menu-btn {
+  font-size: 22px;
+  cursor: pointer;
+}
   .menu-item{
     padding:14px;
     cursor:pointer;
