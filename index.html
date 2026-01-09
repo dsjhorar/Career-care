@@ -1,179 +1,174 @@
-<script>
-if(!localStorage.getItem("userMobile")){
-  window.location.href = "login.html";
-}
-</script><!DOCTYPE html>
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Career Care</title>
+  <meta charset="UTF-8">
+  <title>Career Care</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+  .menu-item{
+    padding:14px;
+    cursor:pointer;
+    border-bottom:1px solid #eee;
+    font-size:15px;
+  }
+  .menu-item:hover{
+    background:#f5f5f5;
+  }
+  .logout{
+    color:red;
+    border-bottom:none;
+  }
+    body{
+      margin:0;
+      font-family: Arial, sans-serif;
+      background:#f4f6f8;
+    }
+    header{
+      background:#1e88e5;
+      color:white;
+      padding:15px;
+      text-align:center;
+      font-size:22px;
+      font-weight:bold;
+    }
+    .container{
+      padding:15px;
+    }
+    .top-buttons button{
+      width:100%;
+      padding:14px;
+      margin-bottom:10px;
+      font-size:16px;
+      border:none;
+      border-radius:6px;
+      color:white;
+      cursor:pointer;
+    }
+    .ca-btn{ background:#43a047; }
+    .news-btn{ background:#fb8c00; }
 
-<style>
-body{
-  margin:0;
-  font-family: Arial, sans-serif;
-  background:#f4f6f8;
-}
-
-/* Header */
-.header{
-  background:#1e88e5;
-  color:white;
-  padding:15px;
-  text-align:center;
-  font-size:20px;
-  font-weight:bold;
-}
-
-/* User bar */
-.user-bar{
-  background:#ffffff;
-  padding:10px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  border-bottom:1px solid #ddd;
-}
-
-.logout{
-  background:#e53935;
-  color:white;
-  border:none;
-  padding:6px 10px;
-  border-radius:4px;
-}
-
-/* Sections */
-.section{
-  padding:15px;
-}
-
-.section h3{
-  margin-bottom:10px;
-}
-
-/* Cards */
-.card{
-  background:white;
-  padding:15px;
-  margin-bottom:10px;
-  border-radius:8px;
-  box-shadow:0 2px 4px rgba(0,0,0,0.1);
-}
-
-.card button{
-  background:#1e88e5;
-  color:white;
-  border:none;
-  padding:8px 12px;
-  border-radius:5px;
-  margin-top:8px;
-}
-
-/* Bottom nav */
-.nav{
-  position:fixed;
-  bottom:0;
-  width:100%;
-  background:white;
-  border-top:1px solid #ddd;
-  display:flex;
-}
-
-.nav div{
-  flex:1;
-  text-align:center;
-  padding:10px;
-  font-size:14px;
-}
-</style>
+    h3{
+      margin-top:20px;
+      margin-bottom:10px;
+      color:#333;
+    }
+    .exam-grid{
+      display:grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap:10px;
+    }
+    .exam-btn{
+      background:white;
+      border-radius:8px;
+      padding:15px;
+      text-align:center;
+      font-size:15px;
+      border:1px solid #ddd;
+      cursor:pointer;
+    }
+    .exam-btn:hover{
+      background:#e3f2fd;
+    }
+  </style>
 </head>
-
 <body>
 
-<!-- 🔐 Login Check -->
-<script>
-if(!localStorage.getItem("userMobile")){
-  window.location.href="login.html";
-}
-</script>
-
-<div class="header">
-  Career Care
+<header style="display:flex;justify-content:space-between;align-items:center;position:relative;">
+  <span>Career Care</span>
+  <span style="font-size:26px;cursor:pointer;" onclick="toggleMenu()">⋮</span>
+</header>
+<div id="menu" style="
+  display:none;
+  position:absolute;
+  top:60px;
+  right:10px;
+  background:white;
+  border:1px solid #ddd;
+  border-radius:8px;
+  box-shadow:0 4px 10px rgba(0,0,0,0.2);
+  z-index:1000;
+  width:200px;
+">
+  <div class="menu-item" onclick="openProfile()">👤 My Profile</div>
+  <div class="menu-item" onclick="openPremium()">⭐ Premium Test Series</div>
+  <div class="menu-item" onclick="shareApp()">📤 Share App</div>
+  <div class="menu-item logout" onclick="logout()">🚪 Logout</div>
 </div>
+<div class="container">
 
-<div class="user-bar">
-  <div id="userMobile">Welcome</div>
-  <button class="logout" onclick="logout()">Logout</button>
-</div>
-
-<!-- Exams Section -->
-<div class="section">
-  <h3>📘 Exams</h3>
-
-  <div class="card">
-    <b>RAS</b><br>
-    Topic-wise & Full Tests
-    <br>
-    <button onclick="openExam('RAS')">Open</button>
+  <!-- Daily Section -->
+  <div class="top-buttons">
+    <button class="ca-btn" onclick="goToCA()">📰 Daily Current Affairs Quiz</button>
+    <button class="news-btn" onclick="goToNews()">📢 Exam News</button>
   </div>
 
-  <div class="card">
-    <b>1st Grade</b><br>
-    Subject-wise Tests
-    <br>
-    <button onclick="openExam('1st Grade')">Open</button>
+  <!-- Exams -->
+  <h3>Select Exam</h3>
+  <div class="exam-grid">
+    <div class="exam-btn" onclick="openExam('1st Grade')">1st Grade</div>
+    <div class="exam-btn" onclick="openExam('2nd Grade')">2nd Grade</div>
+    <div class="exam-btn" onclick="openExam('REET')">REET</div>
+    <div class="exam-btn" onclick="openExam('Forester')">Forester</div>
+    <div class="exam-btn" onclick="openExam('Female Supervisor')">Female Supervisor</div>
+    <div class="exam-btn" onclick="openExam('Agriculture Supervisor')">Agriculture Supervisor</div>
+    <div class="exam-btn" onclick="openExam('Lab Assistant')">Lab Assistant</div>
+    <div class="exam-btn" onclick="openExam('Rajasthan SI')">Rajasthan SI</div>
+    <div class="exam-btn" onclick="openExam('Railway Group D')">Railway Group D</div>
   </div>
 
-  <div class="card">
-    <b>2nd Grade</b><br>
-    Chapter-wise Tests
-    <br>
-    <button onclick="openExam('2nd Grade')">Open</button>
-  </div>
-
-  <div class="card">
-    <b>REET</b><br>
-    Practice + Mock Tests
-    <br>
-    <button onclick="openExam('REET')">Open</button>
-  </div>
-</div>
-
-<!-- Current Affairs -->
-<div class="section">
-  <h3>📰 Daily Current Affairs</h3>
-
-  <div class="card">
-    Daily Quiz (Hindi / English)
-    <br>
-    <button onclick="alert('Current Affairs coming soon')">Start Quiz</button>
-  </div>
-</div>
-
-<!-- Bottom Navigation -->
-<div class="nav">
-  <div>🏠 Home</div>
-  <div>📝 Tests</div>
-  <div>📊 Results</div>
-  <div>💳 Paid</div>
 </div>
 
 <script>
-document.getElementById("userMobile").innerText =
-  "Mobile: " + localStorage.getItem("userMobile");
+  function openExam(exam){
+    localStorage.setItem("selectedExam", exam);
+    window.location.href = "exam.html";
+  }
 
-function logout(){
-  localStorage.removeItem("userMobile");
-  window.location.href="login.html";
-}
+  function goToCA(){
+    window.location.href = "current-affairs.html";
+  }
 
-function openExam(exam){
-  window.location.href="test.html";
-}
+  function goToNews(){
+    window.location.href = "exam-news.html";
+  }
 </script>
+  <script>
+  function toggleMenu(){
+    const menu = document.getElementById("menu");
+    menu.style.display = menu.style.display === "block" ? "none" : "block";
+  }
+
+  function openProfile(){
+    window.location.href = "profile.html";
+  }
+
+  function openPremium(){
+    window.location.href = "premium.html";
+  }
+
+  function shareApp(){
+    if(navigator.share){
+      navigator.share({
+        title: 'Career Care App',
+        text: 'Download Career Care app for exam preparation',
+        url: window.location.href
+      });
+    }else{
+      alert("Share this link: " + window.location.href);
+    }
+  }
+
+  function logout(){
+    localStorage.clear();
+    window.location.href = "login.html";
+  }
+
+  document.addEventListener("click", function(e){
+    if(!e.target.innerText.includes("⋮")){
+      document.getElementById("menu").style.display="none";
+    }
+  });
+  </script>
 
 </body>
 </html>
