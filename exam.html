@@ -63,6 +63,18 @@
 </div>
 
 <script>
+  function openPremiumTest(exam,topic){
+ firebase.database().ref("students/"+userMobile+"/premium")
+ .once("value",snap=>{
+   if(snap.val()===true){
+     window.location =
+      `test.html?exam=${exam}&topic=${topic}&mobile=${userMobile}`;
+   }else{
+     window.location =
+      `premium.html?mobile=${userMobile}`;
+   }
+ });
+  }
   // exam name from home page
   const exam = localStorage.getItem("selectedExam");
   document.getElementById("examTitle").innerText = exam || "Exam";
