@@ -57,22 +57,22 @@ firebase.initializeApp(firebaseConfig);
   </script>
   
 <!-- 🔽 JAVASCRIPT STARTS HERE -->
+  <script>
+let questions = [];
+let index = 0;
+let answers = {};
+
+firebase.database()
+.ref("questions/RAS/test1")
+.once("value")
+.then(snapshot=>{
+  snapshot.forEach(child=>{
+    questions.push(child.val());
+  });
+  loadQ();
+});
+  </script>
 <script>
-
-/* 🔹 QUESTIONS DATA */
-let questions = [
- {
-  q:"भारत का संविधान कब लागू हुआ?",
-  o:["1947","1950","1952","1949"],
-  a:1
- },
- {
-  q:"राजस्थान की राजधानी क्या है?",
-  o:["जोधपुर","कोटा","जयपुर","बीकानेर"],
-  a:2
- }
-];
-
 /* 🔹 VARIABLES */
 let index = 0;
 let answers = {};
