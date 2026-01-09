@@ -1,6 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
-  <div id="question-container">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Career Care - Test</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    #question-container { margin-bottom: 20px; }
+    .option-btn { display: block; margin: 5px 0; padding: 10px; width: 100%; }
+    #timer { font-size: 18px; margin-bottom: 10px; }
+    #back-btn, #skip-btn, #submit-btn { margin-right: 10px; padding: 10px 15px; }
+    #explanation-container { margin-top: 10px; font-style: italic; }
+    #score-container { margin-top: 20px; font-size: 20px; font-weight: bold; }
+  </style>
+</head>
+<body>
+
+<h2>Test</h2>
+
+<div id="question-container">
   <div id="timer">00:00</div>
   <div id="question-text"></div>
   <div id="options-container"></div>
@@ -12,447 +30,185 @@
 
 <div id="explanation-container"></div>
 <div id="score-container"></div>
-  
-<head>
-<meta charset="UTF-8">
-<title>Test</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<style>
-body{
-  margin:0;
-  font-family:Arial;
-  background:#f4f6f8;
-}
-header{
-  background:#1e88e5;
-  color:white;
-  padding:12px;
-  text-align:center;
-  font-size:18px;
-}
-.container{
-  padding:15px;
-}
-.timer{
-  background:#fb8c00;
-  color:white;
-  padding:8px;
-  text-align:center;
-  border-radius:6px;
-  margin-bottom:10px;
-  font-weight:bold;
-}
-.question{
-  font-size:17px;
-  margin-bottom:12px;
-}
-.option{
-  background:white;
-  border:1px solid #ddd;
-  padding:12px;
-  margin-bottom:8px;
-  border-radius:6px;
-  cursor:pointer;
-}
-.option.selected{
-  background:#e3f2fd;
-  border-color:#1e88e5;
-}
-.correct{
-  background:#c8e6c9 !important;
-}
-.wrong{
-  background:#ffcdd2 !important;
-}
-.btn{
-  width:100%;
-  padding:14px;
-  margin-top:12px;
-  border:none;
-  border-radius:6px;
-  background:#43a047;
-  color:white;
-  font-size:16px;
-  cursor:pointer;
-}
-.explanation{
-  background:#fffde7;
-  border:1px solid #fbc02d;
-  padding:10px;
-  margin-top:6px;
-  border-radius:6px;
-  font-size:14px;
-}
-hr{
-  margin:15px 0;
-}
-</style>
-</head>
-
-<body>
-  <!-- 🔐 Login Protection -->
-<script>
-if(!localStorage.getItem("userMobile")){
-  window.location.href="login.html";
-}
-</script>
-
-<header id="testTitle">Test</header>
-
-<div class="container">
-
-  <div class="timer">
-    Time Left: <span id="time">10:00</span>
-  </div>
-
-  <!-- TEST AREA -->
-  <div id="quiz">
-    <div class="question" id="question"></div>
-    <div id="options"></div>
-    <button class="btn" onclick="nextQuestion()">Next</button>
-    <button class="btn" style="background:#d32f2f" onclick="finishTest()">Submit Test</button>
-  </div>
-
-  <!-- RESULT / REVIEW -->
-  <div id="result" style="display:none;">
-    <h2>Test Analysis</h2>
-    <p id="scoreText"></p>
-    <div id="review"></div>
-    <button class="btn" onclick="goHome()">Go Home</button>
-  </div>
-
-</div>
-
-<script>
-/* ================= QUESTION DATA ================= */
-
-const questions = [
-  {
-    q:"Rajasthan was formed in which year?",
-    options:["1947","1948","1949","1950"],
-    answer:2,
-    explanation:"Rajasthan ka ekikaran 30 March 1949 ko hua."
-  },
-  {
-    q:"Capital of Rajasthan?",
-    options:["Jodhpur","Udaipur","Jaipur","Ajmer"],
-    answer:2,
-    explanation:"Jaipur ko 1949 me Rajasthan ki rajdhani banaya gaya."
-  },
-  {
-    q:"Longest river of Rajasthan?",
-    options:["Luni","Banas","Chambal","Mahi"],
-    answer:2,
-    explanation:"Chambal Rajasthan ki sabse lambi nadi hai."
-  }
-];
-
-/* ================= VARIABLES ================= */
-
-let current = 0;
-let selected = null;
-let userAnswers = [];
-let score = 0;
-let time = 10 * 60;
-let timer;
-
-/* ================= INIT ================= */
-
-document.getElementById("testTitle").innerText =
-  (localStorage.getItem("selectedExam") || "Exam") + " Test";
-
-loadQuestion();
-startTimer();
-
-/* ================= FUNCTIONS ================= */
-
-function loadQuestion(){
-  selected = null;
-  const q = questions[current];
-  document.getElementById("question").innerText =
-    (current+1) + ". " + q.q;
-
-  const optDiv = document.getElementById("options");
-  optDiv.innerHTML = "";
-
-  q.options.forEach((opt,i)=>{
-    const div = document.createElement("div");
-    div.className = "option";
-    div.innerText = opt;
-    div.onclick = ()=>selectOption(div,i);
-    optDiv.appendChild(div);
-  });
-}
-
-function selectOption(div,index){
-  selected = index;
-  document.querySelectorAll(".option")
-    .forEach(o=>o.classList.remove("selected"));
-  div.classList.add("selected");
-}
-
-function nextQuestion(){
-  if(selected===null){
-    alert("Please select an option");
-    return;
-  }
-  userAnswers[current]=selected;
-  current++;
-  if(current<questions.length){
-    loadQuestion();
-  }else{
-    finishTest();
-  }
-}
-
-function finishTest(){
-  clearInterval(timer);
-  document.getElementById("quiz").style.display="none";
-  document.getElementById("result").style.display="block";
-
-  // calculate score
-  questions.forEach((q,i)=>{
-    if(userAnswers[i]===q.answer) score++;
-  });
-
-  document.getElementById("scoreText").innerText =
-    `Score: ${score} / ${questions.length}`;
-
-  showReview();
-}
-
-function showReview(){
-  const review = document.getElementById("review");
-  review.innerHTML="";
-
-  questions.forEach((q,i)=>{
-    let html = `<p><b>Q${i+1}. ${q.q}</b></p>`;
-    q.options.forEach((opt,idx)=>{
-      let cls="";
-      if(idx===q.answer) cls="correct";
-      else if(userAnswers[i]===idx) cls="wrong";
-      html += `<div class="option ${cls}">${opt}</div>`;
-    });
-    html += `<div class="explanation"><b>Explanation:</b> ${q.explanation}</div><hr>`;
-    review.innerHTML += html;
-  });
-}
-
-function startTimer(){
-  timer = setInterval(()=>{
-    if(time<=0){
-      finishTest();
-      return;
-    }
-    time--;
-    let m=Math.floor(time/60);
-    let s=time%60;
-    document.getElementById("time").innerText =
-      `${m}:${s<10?"0":""}${s}`;
-  },1000);
-}
-
-function goHome(){
-  window.location.href="index.html";
-}
-</script>
-  <!-- Your existing HTML content -->
-
+<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js"></script>
 
 <script>
-  var examPath = "tests/first_grade/topic_intro/questions"; // Dynamic
-var questions = [];
-var currentQ = 0;
-var score = 0;
-var timerInterval;
-var timePerQuestion = 60;
-var timeLeft = timePerQuestion;
-
-// Track answers
-var userAnswers = []; // Stores {selected, correct, skipped}
-
-function fetchQuestions() {
-  firebase.database().ref(examPath).once("value").then(snapshot=>{
-    snapshot.forEach(child=>{
-      questions.push(child.val());
-      userAnswers.push({selected:null, correct:null, skipped:false});
-    });
-    displayQuestion();
-    startTimer();
-  });
-}
-
-function displayQuestion() {
-  if(currentQ >= questions.length){
-    endTest();
-    return;
-  }
-
-  timeLeft = timePerQuestion;
-  document.getElementById("timer").innerText = formatTime(timeLeft);
-
-  let q = questions[currentQ];
-  document.getElementById("question-text").innerText = q.q;
-
-  let optionsHtml = "";
-  for(let i=0;i<4;i++){
-    optionsHtml += `<button class="option-btn" data-index="${i}">${q.options[i]}</button>`;
-  }
-  document.getElementById("options-container").innerHTML = optionsHtml;
-
-  document.querySelectorAll(".option-btn").forEach(btn=>{
-    btn.addEventListener("click", optionClick);
-  });
-
-  // Show explanation only if already answered
-  if(userAnswers[currentQ].selected !== null){
-    showAnswerFeedback(currentQ);
-  } else {
-    document.getElementById("explanation-container").innerText = "";
-  }
-
-  updateNavigationButtons();
-}
-
-function updateNavigationButtons(){
-  document.getElementById("back-btn").style.display = currentQ>0 ? "inline-block":"none";
-  document.getElementById("skip-btn").style.display = currentQ<questions.length ? "inline-block":"none";
-}
-
-function optionClick(e){
-  clearInterval(timerInterval);
-  let selected = parseInt(e.target.dataset.index);
-  let q = questions[currentQ];
-
-  // Record answer
-  userAnswers[currentQ] = {
-    selected: selected,
-    correct: (selected === q.answer),
-    skipped: false
+  // 🔹 Firebase Config
+  const firebaseConfig = {
+    apiKey: "AIzaSyBCuefZt2WuNsNiFme8M-HUHm_BZYKJAi4",
+    authDomain: "career-care-afb64.firebaseapp.com",
+    databaseURL: "https://career-care-afb64-default-rtdb.firebaseio.com",
+    projectId: "career-care-afb64",
+    storageBucket: "career-care-afb64.firebasestorage.app",
+    messagingSenderId: "267890746286",
+    appId: "1:267890746286:web:2c38f0980119d01b145e3f"
   };
+  firebase.initializeApp(firebaseConfig);
 
-  calculateScore(currentQ);
+  // 🔹 Variables
+  var examPath = "tests/first_grade/topic_intro/questions"; // Change dynamically
+  var questions = [];
+  var currentQ = 0;
+  var score = 0;
+  var timerInterval;
+  var timePerQuestion = 60;
+  var timeLeft = timePerQuestion;
+  var userAnswers = []; // Track answers
 
-  showAnswerFeedback(currentQ);
-
-  // Auto next after 3 sec
-  setTimeout(()=>{
-    if(currentQ < questions.length-1){
-      currentQ++;
+  // 🔹 Fetch Questions
+  function fetchQuestions() {
+    firebase.database().ref(examPath).once("value").then(snapshot=>{
+      snapshot.forEach(child=>{
+        questions.push(child.val());
+        userAnswers.push({selected:null, correct:null, skipped:false});
+      });
       displayQuestion();
       startTimer();
-    } else {
+    });
+  }
+
+  // 🔹 Display Question
+  function displayQuestion() {
+    if(currentQ >= questions.length){
       endTest();
+      return;
     }
-  },3000);
-}
-
-function calculateScore(index){
-  let ua = userAnswers[index];
-  if(ua.correct){
-    score += 1;
-  } else if(ua.selected !== null && !ua.correct){
-    score -= 1/3; // Negative marking
-  }
-  // Skip gives 0 points
-}
-
-function showAnswerFeedback(index){
-  let q = questions[index];
-  let ua = userAnswers[index];
-  
-  document.querySelectorAll(".option-btn").forEach((btn,i)=>{
-    if(i == q.answer){
-      btn.style.backgroundColor = "green";
-    } else if(i === ua.selected){
-      btn.style.backgroundColor = "red";
-    } else {
-      btn.style.backgroundColor = "";
-    }
-    btn.disabled = true;
-  });
-
-  if(ua.skipped){
-    document.getElementById("explanation-container").innerText = "Skipped";
-  } else {
-    document.getElementById("explanation-container").innerText = q.explanation;
-  }
-}
-
-// Timer
-function startTimer(){
-  clearInterval(timerInterval);
-  timerInterval = setInterval(()=>{
-    timeLeft--;
+    timeLeft = timePerQuestion;
     document.getElementById("timer").innerText = formatTime(timeLeft);
-    if(timeLeft <=0){
-      clearInterval(timerInterval);
-      skipQuestion();
+    let q = questions[currentQ];
+    document.getElementById("question-text").innerText = q.q;
+    let optionsHtml = "";
+    for(let i=0;i<4;i++){
+      optionsHtml += `<button class="option-btn" data-index="${i}">${q.options[i]}</button>`;
     }
-  },1000);
-}
+    document.getElementById("options-container").innerHTML = optionsHtml;
+    document.querySelectorAll(".option-btn").forEach(btn=>{
+      btn.addEventListener("click", optionClick);
+    });
 
-function skipQuestion(){
-  userAnswers[currentQ].skipped = true;
-  userAnswers[currentQ].selected = null;
-  userAnswers[currentQ].correct = false;
+    if(userAnswers[currentQ].selected !== null){
+      showAnswerFeedback(currentQ);
+    } else {
+      document.getElementById("explanation-container").innerText = "";
+    }
 
-  showAnswerFeedback(currentQ);
+    updateNavigationButtons();
+  }
 
-  // Auto next after 1 sec for skipped
-  setTimeout(()=>{
-    if(currentQ < questions.length-1){
-      currentQ++;
+  function updateNavigationButtons(){
+    document.getElementById("back-btn").style.display = currentQ>0 ? "inline-block":"none";
+    document.getElementById("skip-btn").style.display = currentQ<questions.length ? "inline-block":"none";
+  }
+
+  // 🔹 Option Click
+  function optionClick(e){
+    clearInterval(timerInterval);
+    let selected = parseInt(e.target.dataset.index);
+    let q = questions[currentQ];
+
+    userAnswers[currentQ] = { selected: selected, correct: (selected===q.answer), skipped: false };
+    calculateScore(currentQ);
+    showAnswerFeedback(currentQ);
+
+    setTimeout(()=>{
+      if(currentQ < questions.length-1){
+        currentQ++;
+        displayQuestion();
+        startTimer();
+      } else {
+        endTest();
+      }
+    },3000);
+  }
+
+  // 🔹 Calculate Score
+  function calculateScore(index){
+    let ua = userAnswers[index];
+    if(ua.correct) score +=1;
+    else if(ua.selected !== null && !ua.correct) score -= 1/3;
+  }
+
+  // 🔹 Show Answer Feedback
+  function showAnswerFeedback(index){
+    let q = questions[index];
+    let ua = userAnswers[index];
+    document.querySelectorAll(".option-btn").forEach((btn,i)=>{
+      if(i == q.answer) btn.style.backgroundColor = "green";
+      else if(i === ua.selected) btn.style.backgroundColor = "red";
+      else btn.style.backgroundColor = "";
+      btn.disabled = true;
+    });
+    document.getElementById("explanation-container").innerText = ua.skipped ? "Skipped" : q.explanation;
+  }
+
+  // 🔹 Timer
+  function startTimer(){
+    clearInterval(timerInterval);
+    timerInterval = setInterval(()=>{
+      timeLeft--;
+      document.getElementById("timer").innerText = formatTime(timeLeft);
+      if(timeLeft <=0){
+        clearInterval(timerInterval);
+        skipQuestion();
+      }
+    },1000);
+  }
+
+  function skipQuestion(){
+    userAnswers[currentQ].skipped = true;
+    userAnswers[currentQ].selected = null;
+    userAnswers[currentQ].correct = false;
+    showAnswerFeedback(currentQ);
+    setTimeout(()=>{
+      if(currentQ < questions.length-1){
+        currentQ++;
+        displayQuestion();
+        startTimer();
+      } else {
+        endTest();
+      }
+    },1000);
+  }
+
+  // 🔹 Navigation Buttons
+  document.getElementById("back-btn").addEventListener("click", ()=>{
+    if(currentQ>0){
+      currentQ--;
       displayQuestion();
       startTimer();
-    } else {
-      endTest();
     }
-  },1000);
-}
-
-// Navigation buttons
-document.getElementById("back-btn").addEventListener("click", ()=>{
-  if(currentQ>0){
-    currentQ--;
-    displayQuestion();
-    startTimer();
-  }
-});
-
-document.getElementById("skip-btn").addEventListener("click", ()=>{
-  skipQuestion();
-});
-
-document.getElementById("submit-btn").addEventListener("click", endTest);
-
-function endTest(){
-  clearInterval(timerInterval);
-  document.getElementById("question-container").style.display = "none";
-  document.getElementById("submit-btn").style.display = "none";
-  document.getElementById("score-container").innerText = `Score: ${score.toFixed(2)} / ${questions.length}`;
-
-  // Save result
-  var userId = firebase.auth().currentUser.uid;
-  firebase.database().ref(`results/${userId}/first_grade`).set({
-    score: score,
-    total: questions.length,
-    timestamp: Date.now()
   });
-}
 
-function formatTime(sec){
-  let m = Math.floor(sec/60);
-  let s = sec%60;
-  return `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
-}
+  document.getElementById("skip-btn").addEventListener("click", ()=>{ skipQuestion(); });
 
-fetchQuestions();
+  document.getElementById("submit-btn").addEventListener("click", endTest);
+
+  // 🔹 End Test
+  function endTest(){
+    clearInterval(timerInterval);
+    document.getElementById("question-container").style.display = "none";
+    document.getElementById("submit-btn").style.display = "none";
+    document.getElementById("score-container").innerText = `Score: ${score.toFixed(2)} / ${questions.length}`;
+
+    var userId = firebase.auth().currentUser.uid;
+    firebase.database().ref(`results/${userId}/first_grade`).set({
+      score: score,
+      total: questions.length,
+      timestamp: Date.now()
+    });
+  }
+
+  function formatTime(sec){
+    let m = Math.floor(sec/60);
+    let s = sec%60;
+    return `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+  }
+
+  fetchQuestions();
 </script>
-
 </body>
 </html>
