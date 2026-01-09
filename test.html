@@ -1,172 +1,255 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="en">
+  <script>
+if(!localStorage.getItem("userMobile")){
+  window.location.href="login.html";
+}
+  </script>
 <head>
 <meta charset="UTF-8">
 <title>Test</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-body { font-family: Arial; padding: 15px; }
-.option {
-  display: block;
-  margin: 8px 0;
-  padding: 10px;
-  border: 1px solid #aaa;
-  cursor: pointer;
+body{
+  margin:0;
+  font-family:Arial;
+  background:#f4f6f8;
 }
-.option:hover { background: #f0f0f0; }
-.selected { background: #d0ebff; }
-.green { color: green; }
-.red { color: red; }
-button { margin: 5px; padding: 8px 12px; }
+header{
+  background:#1e88e5;
+  color:white;
+  padding:12px;
+  text-align:center;
+  font-size:18px;
+}
+.container{
+  padding:15px;
+}
+.timer{
+  background:#fb8c00;
+  color:white;
+  padding:8px;
+  text-align:center;
+  border-radius:6px;
+  margin-bottom:10px;
+  font-weight:bold;
+}
+.question{
+  font-size:17px;
+  margin-bottom:12px;
+}
+.option{
+  background:white;
+  border:1px solid #ddd;
+  padding:12px;
+  margin-bottom:8px;
+  border-radius:6px;
+  cursor:pointer;
+}
+.option.selected{
+  background:#e3f2fd;
+  border-color:#1e88e5;
+}
+.correct{
+  background:#c8e6c9 !important;
+}
+.wrong{
+  background:#ffcdd2 !important;
+}
+.btn{
+  width:100%;
+  padding:14px;
+  margin-top:12px;
+  border:none;
+  border-radius:6px;
+  background:#43a047;
+  color:white;
+  font-size:16px;
+  cursor:pointer;
+}
+.explanation{
+  background:#fffde7;
+  border:1px solid #fbc02d;
+  padding:10px;
+  margin-top:6px;
+  border-radius:6px;
+  font-size:14px;
+}
+hr{
+  margin:15px 0;
+}
 </style>
 </head>
 
 <body>
 
-<h2>Test</h2>
-<div id="timer">00:00</div>
+<header id="testTitle">Test</header>
 
-<hr>
+<div class="container">
 
-<div id="question"></div>
-<div id="options"></div>
+  <div class="timer">
+    Time Left: <span id="time">10:00</span>
+  </div>
 
-<hr>
+  <!-- TEST AREA -->
+  <div id="quiz">
+    <div class="question" id="question"></div>
+    <div id="options"></div>
+    <button class="btn" onclick="nextQuestion()">Next</button>
+    <button class="btn" style="background:#d32f2f" onclick="finishTest()">Submit Test</button>
+  </div>
 
-<button onclick="prevQuestion()">Back</button>
-<button onclick="skipQuestion()">Skip</button>
-<button onclick="submitTest()">Submit</button>
+  <!-- RESULT / REVIEW -->
+  <div id="result" style="display:none;">
+    <h2>Test Analysis</h2>
+    <p id="scoreText"></p>
+    <div id="review"></div>
+    <button class="btn" onclick="goHome()">Go Home</button>
+  </div>
+
+</div>
 
 <script>
-/* ================= SAMPLE QUESTIONS ================= */
-const questions = [
-  {
-    q: "राजस्थान की राजधानी क्या है?",
-    options: ["जयपुर", "जोधपुर", "कोटा", "बीकानेर"],
-    answer: 0,
-    explanation: "राजस्थान की राजधानी जयपुर है।"
-  },
-  {
-    q: "थार मरुस्थल किस राज्य में है?",
-    options: ["गुजरात", "राजस्थान", "हरियाणा", "पंजाब"],
-    answer: 1,
-    explanation: "थार मरुस्थल मुख्यतः राजस्थान में है।"
-  }
-];
+/* ================= QUESTION DATA ================= */
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+<script>
+var firebaseConfig = {
+  apiKey: "AIzaSyBCuefZt2WuNsNiFme8M-HUHm_BZYKJAi4",
+  authDomain: "career-care-afb64.firebaseapp.com",
+  databaseURL: "https://career-care-afb64-default-rtdb.firebaseio.com",
+  projectId: "career-care-afb64",
+};
+firebase.initializeApp(firebaseConfig);
+  <script>
+let questions = [];
+
+const exam = localStorage.getItem("selectedExam") || "rajasthan_si";
+const type = localStorage.getItem("testType") || "topic";
+const subject = localStorage.getItem("selectedSubject") || "history";
+
+firebase.database()
+.ref(`questions/${exam}/${type}/${subject}/test1`)
+.once("value")
+.then(snapshot=>{
+  snapshot.forEach(child=>{
+    questions.push(child.val());
+  });
+  loadQuestion();
+});
+
+
 
 /* ================= VARIABLES ================= */
-let currentIndex = 0;
+
+let current = 0;
+let selected = null;
 let userAnswers = [];
 let score = 0;
-let timer = 0;
-let interval;
-let autoNextTimeout;
-const NEGATIVE = 1/3;
+let time = 10 * 60;
+let timer;
 
-/* ================= TIMER ================= */
-function startTimer() {
-  interval = setInterval(() => {
-    timer++;
-    document.getElementById("timer").innerText =
-      new Date(timer * 1000).toISOString().substr(14, 5);
-  }, 1000);
-}
+/* ================= INIT ================= */
 
-/* ================= DISPLAY QUESTION ================= */
-function displayQuestion() {
-  clearTimeout(autoNextTimeout);
+document.getElementById("testTitle").innerText =
+  (localStorage.getItem("selectedExam") || "Exam") + " Test";
 
-  const q = questions[currentIndex];
-  document.getElementById("question").innerHTML =
-    `<b>Q${currentIndex + 1}.</b> ${q.q}`;
+loadQuestion();
+startTimer();
+
+/* ================= FUNCTIONS ================= */
+
+function loadQuestion(){
+  selected = null;
+  const q = questions[current];
+  document.getElementById("question").innerText =
+    (current+1) + ". " + q.q;
 
   const optDiv = document.getElementById("options");
   optDiv.innerHTML = "";
 
-  q.options.forEach((opt, index) => {
-    const btn = document.createElement("div");
-    btn.className = "option";
-    btn.innerText = opt;
-
-    if (userAnswers[currentIndex]?.selected === index) {
-      btn.classList.add("selected");
-    }
-
-    btn.onclick = () => selectOption(index);
-    optDiv.appendChild(btn);
+  q.options.forEach((opt,i)=>{
+    const div = document.createElement("div");
+    div.className = "option";
+    div.innerText = opt;
+    div.onclick = ()=>selectOption(div,i);
+    optDiv.appendChild(div);
   });
 }
 
-/* ================= SELECT OPTION ================= */
-function selectOption(index) {
-  userAnswers[currentIndex] = { selected: index, skipped: false };
-
-  autoNextTimeout = setTimeout(() => {
-    if (currentIndex < questions.length - 1) {
-      currentIndex++;
-      displayQuestion();
-    }
-  }, 3000);
+function selectOption(div,index){
+  selected = index;
+  document.querySelectorAll(".option")
+    .forEach(o=>o.classList.remove("selected"));
+  div.classList.add("selected");
 }
 
-/* ================= BACK ================= */
-function prevQuestion() {
-  if (currentIndex > 0) {
-    currentIndex--;
-    displayQuestion();
+function nextQuestion(){
+  if(selected===null){
+    alert("Please select an option");
+    return;
+  }
+  userAnswers[current]=selected;
+  current++;
+  if(current<questions.length){
+    loadQuestion();
+  }else{
+    finishTest();
   }
 }
 
-/* ================= SKIP ================= */
-function skipQuestion() {
-  userAnswers[currentIndex] = { selected: null, skipped: true };
-  if (currentIndex < questions.length - 1) {
-    currentIndex++;
-    displayQuestion();
-  }
-}
+function finishTest(){
+  clearInterval(timer);
+  document.getElementById("quiz").style.display="none";
+  document.getElementById("result").style.display="block";
 
-/* ================= SUBMIT ================= */
-function submitTest() {
-  clearInterval(interval);
-  clearTimeout(autoNextTimeout);
-  score = 0;
-
-  questions.forEach((q, i) => {
-    const ua = userAnswers[i];
-    if (!ua || ua.skipped) return;
-    if (ua.selected === q.answer) score += 1;
-    else score -= NEGATIVE;
+  // calculate score
+  questions.forEach((q,i)=>{
+    if(userAnswers[i]===q.answer) score++;
   });
 
-  showResult();
+  document.getElementById("scoreText").innerText =
+    `Score: ${score} / ${questions.length}`;
+
+  showReview();
 }
 
-/* ================= RESULT ================= */
-function showResult() {
-  let html = `<h2>Result</h2>`;
-  html += `<p>Score: <b>${score.toFixed(2)}</b></p><hr>`;
+function showReview(){
+  const review = document.getElementById("review");
+  review.innerHTML="";
 
-  questions.forEach((q, i) => {
-    const ua = userAnswers[i];
-    html += `<p><b>Q${i + 1}:</b> ${q.q}</p>`;
-
-    q.options.forEach((opt, idx) => {
-      let cls = "";
-      if (idx === q.answer) cls = "green";
-      if (ua && idx === ua.selected && ua.selected !== q.answer) cls = "red";
-      html += `<div class="${cls}">${opt}</div>`;
+  questions.forEach((q,i)=>{
+    let html = `<p><b>Q${i+1}. ${q.q}</b></p>`;
+    q.options.forEach((opt,idx)=>{
+      let cls="";
+      if(idx===q.answer) cls="correct";
+      else if(userAnswers[i]===idx) cls="wrong";
+      html += `<div class="option ${cls}">${opt}</div>`;
     });
-
-    html += `<i>Explanation:</i> ${q.explanation}<hr>`;
+    html += `<div class="explanation"><b>Explanation:</b> ${q.explanation}</div><hr>`;
+    review.innerHTML += html;
   });
-
-  document.body.innerHTML = html;
 }
 
-/* ================= START ================= */
-startTimer();
-displayQuestion();
+function startTimer(){
+  timer = setInterval(()=>{
+    if(time<=0){
+      finishTest();
+      return;
+    }
+    time--;
+    let m=Math.floor(time/60);
+    let s=time%60;
+    document.getElementById("time").innerText =
+      `${m}:${s<10?"0":""}${s}`;
+  },1000);
+}
+
+function goHome(){
+  window.location.href="index.html";
+}
 </script>
 
 </body>
