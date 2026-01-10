@@ -1,267 +1,176 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Career Care Test</title>
+<title>Test</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 <script src="firebase.js"></script>
 
 <style>
-body{
-  font-family: Arial, sans-serif;
-  background:#f4f6f8;
-  margin:0;
-  padding:12px;
-}
-h2,h3{margin:8px 0}
-
-#timer{
-  font-weight:bold;
-  color:#d32f2f;
-}
-
-.option{
-  background:#ffffff;
-  padding:12px;
-  margin:8px 0;
-  border-radius:8px;
-  border:1px solid #ddd;
-  cursor:pointer;
-}
-
-.option.selected{background:#cceeff}
-.option.correct{background:#b6f2c1}
-.option.wrong{background:#f7b2b2}
-
-.controls{
-  margin-top:10px;
-}
-
-button{
-  padding:10px 14px;
-  margin:5px 4px;
-  border:none;
-  border-radius:6px;
-  font-weight:bold;
-  cursor:pointer;
-}
-
-.btn-prev{background:#90caf9}
-.btn-skip{background:#ffe082}
-.btn-next{background:#a5d6a7}
-.btn-submit{background:#ef9a9a}
-
-#explanation{
-  display:none;
-  background:#ffffff;
-  padding:10px;
-  border-radius:6px;
-  margin-top:10px;
-}
-
-#score{
-  margin-top:12px;
-  font-weight:bold;
-}
+body{margin:0;font-family:Arial;background:#f4f6f8}
+header{background:#1e88e5;color:#fff;padding:12px;text-align:center;font-size:18px}
+.container{padding:15px}
+.timer{background:#fb8c00;color:#fff;padding:8px;text-align:center;border-radius:6px;margin-bottom:10px;font-weight:bold}
+.question{font-size:17px;margin-bottom:12px}
+.option{background:#fff;border:1px solid #ddd;padding:12px;margin-bottom:8px;border-radius:6px;cursor:pointer}
+.option.selected{background:#e3f2fd;border-color:#1e88e5}
+.correct{background:#c8e6c9!important}
+.wrong{background:#ffcdd2!important}
+.btn{width:100%;padding:14px;margin-top:10px;border:none;border-radius:6px;color:#fff;font-size:16px;cursor:pointer}
+.prev{background:#5c6bc0}
+.skip{background:#fbc02d;color:#000}
+.next{background:#43a047}
+.submit{background:#d32f2f}
+.explanation{background:#fffde7;border:1px solid #fbc02d;padding:10px;margin-top:6px;border-radius:6px;font-size:14px}
+hr{margin:15px 0}
 </style>
 </head>
 
 <body>
 
-<h2 id="testTitle">Loading Test...</h2>
-<p>⏱ Time: <span id="timer">00:00</span></p>
+<header id="testTitle">Loading Test...</header>
 
-<h3 id="question">Loading...</h3>
-<div id="options"></div>
+<div class="container">
 
-<div class="controls">
-  <button class="btn-prev" onclick="prevQ()">⬅ Previous</button>
-  <button class="btn-skip" onclick="skipQ()">⏭ Skip</button>
-  <button class="btn-next" onclick="nextQ()">Next ➡</button>
-  <button class="btn-submit" onclick="submitTest()">Submit</button>
+<div class="timer">Time: <span id="time">00:00</span></div>
+
+<div id="quiz">
+  <div class="question" id="question">Loading...</div>
+  <div id="options"></div>
+
+  <button class="btn prev" onclick="prevQuestion()">⬅ Previous</button>
+  <button class="btn skip" onclick="skipQuestion()">⏭ Skip</button>
+  <button class="btn next" onclick="nextQuestion()">Next ➡</button>
+  <button class="btn submit" onclick="finishTest()">Submit Test</button>
 </div>
 
-<div id="explanation"></div>
-<div id="score"></div>
+<div id="result" style="display:none">
+  <h2>Test Analysis</h2>
+  <p id="scoreText"></p>
+  <div id="review"></div>
+  <button class="btn next" onclick="location.href='index.html'">Go Home</button>
+</div>
+
+</div>
 
 <script>
-  
-/* ================================
-   URL PARAMETERS (DYNAMIC)
-================================ */
+/* ================= URL PARAMS ================= */
 const params = new URLSearchParams(window.location.search);
-const exam  = params.get("exam");   // first_grade
-const topic = params.get("topic");  // topic_intro
+const exam = params.get("exam");
+const topic = params.get("topic");
 
-if(!exam || !topic){
-  alert("Invalid test link");
-}
-
-/* ================================
-   FIREBASE PATH
-   tests/{exam}/{topic}/questions
-================================ */
-const dbPath = `tests/${exam}/${topic}/questions`;
-
-/* ================================
-   VARIABLES
-================================ */
+/* ================= VARIABLES ================= */
 let questions = [];
 let current = 0;
-let answers = {};
-let submitted = false;
+let userAnswers = {};
 let score = 0;
+let time = 10 * 60;
+let timer;
 
-/* TEMP USER (login step me dynamic hoga) */
-// OLD: let userMobile = "9999999999";
-// NEW: get from URL
-const urlParams = new URLSearchParams(window.location.search);
-let userMobile = urlParams.get("mobile") || "9999999999";
-
-/* ================================
-   TIMER
-================================ */
-let seconds = 0;
-setInterval(()=>{
-  seconds++;
-  let m = String(Math.floor(seconds/60)).padStart(2,"0");
-  let s = String(seconds%60).padStart(2,"0");
-  document.getElementById("timer").innerText = m+":"+s;
-},1000);
-
-/* ================================
-   LOAD QUESTIONS
-================================ */
-firebase.database().ref(dbPath).once("value",snap=>{
-  snap.forEach(child=>{
-    questions.push(child.val());
-  });
-
-  document.getElementById("testTitle").innerText =
-    exam.replaceAll("_"," ").toUpperCase() + " Test";
-
-  if(questions.length === 0){
-    document.getElementById("question").innerText = "No questions found";
+/* ================= LOAD QUESTIONS ================= */
+firebase.database()
+.ref(`tests/${exam}/${topic}/questions`)
+.once("value")
+.then(snapshot=>{
+  if(!snapshot.exists()){
+    document.getElementById("question").innerText="No questions found";
     return;
   }
-
+  snapshot.forEach(q=>{
+    questions.push(q.val());
+  });
+  document.getElementById("testTitle").innerText =
+    exam.replace("_"," ").toUpperCase()+" Test";
   loadQuestion();
+  startTimer();
 });
 
-/* ================================
-   LOAD QUESTION
-================================ */
+/* ================= FUNCTIONS ================= */
 function loadQuestion(){
-  let q = questions[current];
+  const q = questions[current];
   document.getElementById("question").innerText =
-    (current+1) + ". " + q.q;
-
-  let html = "";
+    `Q${current+1}. ${q.q}`;
+  const optDiv=document.getElementById("options");
+  optDiv.innerHTML="";
   Object.keys(q.options).forEach(i=>{
-    let cls = "option";
-    if(answers[current] == i) cls += " selected";
-
-    if(submitted){
-      if(i == q.answer) cls += " correct";
-      else if(answers[current] == i) cls += " wrong";
+    let div=document.createElement("div");
+    div.className="option";
+    div.innerText=q.options[i];
+    if(userAnswers[current]==i) div.classList.add("selected");
+    div.onclick=()=>{
+      userAnswers[current]=i;
+      loadQuestion();
     }
-
-    html += `<div class="${cls}" onclick="selectOption(${i})">
-              ${q.options[i]}
-            </div>`;
+    optDiv.appendChild(div);
   });
-
-  document.getElementById("options").innerHTML = html;
-
-  if(submitted){
-    document.getElementById("explanation").style.display="block";
-    document.getElementById("explanation").innerHTML =
-      "<b>Explanation:</b> " + (q.explanation || "Not available");
-  }else{
-    document.getElementById("explanation").style.display="none";
-  }
 }
 
-/* ================================
-   OPTION SELECT
-================================ */
-function selectOption(i){
-  if(submitted) return;
-  answers[current] = i;
-  loadQuestion();
-}
-
-/* ================================
-   NAVIGATION
-================================ */
-function nextQ(){
-  if(current < questions.length-1){
+function nextQuestion(){
+  if(current<questions.length-1){
     current++;
     loadQuestion();
   }
 }
 
-function prevQ(){
-  if(current > 0){
+function prevQuestion(){
+  if(current>0){
     current--;
     loadQuestion();
   }
 }
 
-function skipQ(){
-  if(current < questions.length-1){
+function skipQuestion(){
+  if(current<questions.length-1){
     current++;
     loadQuestion();
   }
 }
 
-/* ================================
-   SUBMIT TEST
-================================ */
-function submitTest(){
-  if(submitted) return;
-  submitted = true;
-
-  let correct=0, wrong=0, skipped=0;
-  score = 0;
+function finishTest(){
+  clearInterval(timer);
+  document.getElementById("quiz").style.display="none";
+  document.getElementById("result").style.display="block";
 
   questions.forEach((q,i)=>{
-    if(answers[i] === undefined){
-      skipped++;
-    }else if(answers[i] == q.answer){
-      correct++;
-      score += 1;
-    }else{
-      wrong++;
-      score -= 0.33;
-    }
+    if(userAnswers[i]==q.answer) score++;
+    else if(userAnswers[i]!=undefined) score-=0.33;
   });
 
-  document.getElementById("score").innerText =
-    `Score: ${score.toFixed(2)} | Correct: ${correct} | Wrong: ${wrong} | Skipped: ${skipped}`;
+  document.getElementById("scoreText").innerText =
+    `Score: ${score.toFixed(2)} / ${questions.length}`;
 
-  /* SAVE RESULT */
-  firebase.database().ref(
-    `results/${userMobile}/${exam}/${topic}`
-  ).push({
-    score: score.toFixed(2),
-    correct,
-    wrong,
-    skipped,
-    time: document.getElementById("timer").innerText,
-    date: new Date().toLocaleString()
-  });
-
-  loadQuestion();
+  showReview();
 }
-  firebase.database().ref("students/"+userMobile+"/premium")
-.once("value",snap=>{
-  if(snap.val()!==true){
-    alert("This is a premium test");
-    window.location = "premium.html?mobile="+userMobile;
-  }
-});
+
+function showReview(){
+  const r=document.getElementById("review");
+  r.innerHTML="";
+  questions.forEach((q,i)=>{
+    let html=`<b>Q${i+1}. ${q.q}</b>`;
+    Object.keys(q.options).forEach(o=>{
+      let cls="";
+      if(o==q.answer) cls="correct";
+      else if(userAnswers[i]==o) cls="wrong";
+      html+=`<div class="option ${cls}">${q.options[o]}</div>`;
+    });
+    html+=`<div class="explanation">${q.explanation}</div><hr>`;
+    r.innerHTML+=html;
+  });
+}
+
+function startTimer(){
+  timer=setInterval(()=>{
+    if(time<=0){finishTest();return;}
+    time--;
+    let m=Math.floor(time/60),s=time%60;
+    document.getElementById("time").innerText=
+      `${m}:${s<10?"0":""}${s}`;
+  },1000);
+}
 </script>
 
 </body>
