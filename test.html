@@ -86,13 +86,7 @@ button{
 <div id="score"></div>
 
 <script>
-  firebase.database().ref("students/"+userMobile+"/premium")
-.once("value",snap=>{
-  if(snap.val()!==true){
-    alert("This is a premium test");
-    window.location = "premium.html?mobile="+userMobile;
-  }
-});
+  
 /* ================================
    URL PARAMETERS (DYNAMIC)
 ================================ */
@@ -261,6 +255,13 @@ function submitTest(){
 
   loadQuestion();
 }
+  firebase.database().ref("students/"+userMobile+"/premium")
+.once("value",snap=>{
+  if(snap.val()!==true){
+    alert("This is a premium test");
+    window.location = "premium.html?mobile="+userMobile;
+  }
+});
 </script>
 
 </body>
