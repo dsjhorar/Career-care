@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Test History</title>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+<style>
+  body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #f4f6f8; }
+  
+  /* Header */
+  header { background: #1e88e5; color: white; padding: 15px; display: flex; align-items: center; gap: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+  .back-btn { font-size: 24px; cursor: pointer; color: white; text-decoration: none; }
+  .title { font-size: 20px; font-weight: bold; }
+
+  .container { padding: 15px; max-width: 600px; margin: 0 auto; }
+
+  /* History Card Style */
+  .history-card {
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 12px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    border-left: 5px solid #ddd;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  /* Score Colors based on percentage */
+  .pass { border-left-color: #43a047; } /* Green */
+  .fail { border-left-color: #e53935; } /* Red */
+  .avg  { border-left-color: #fb8c00; } /* Orange */
+
+  .exam-info h3 { margin: 0 0 5px 0; font-size: 16px; text-transform: capitalize; color: #333; }
+  .exam-info p { margin: 0; color: #666; font-size: 13px; }
+  
+  .score-badge {
+    text-align: center;
+    background: #f5f5f5;
+    padding: 8px 12px;
+    border-radius: 8px;
+    min-width: 60px;
+  }
+  .marks { font-size: 18px; font-weight: bold; color: #1e88e5; }
+  .total { font-size: 12px; color: #888; }
+  
+  #loader { text-align: center; margin-top: 50px; color: #777; }
+</style>
+</head>
+<body>
+
+<header>
+  <a href="profile.html" class="back-btn">&#8592;</a>
+  <div class="title">Test History</div>
+</header>
+
+<div class="container">
+  <div id="loader">Loading your results...</div>
+  <div id="history-list"></div>
+</div>
+
+<script>
+/* ================= CONFIGURATION ================= */
+const firebaseConfig = {
+  apiKey: "AIzaSyBCuefZt2WuNsNiFme8M-HUHm_BZYKJAi4",
+  authDomain: "career-care-afb64.firebaseapp.com",
+  databaseURL: "https://career-care-afb64-default-rtdb.firebaseio.com",
+  projectId: "career-care-afb64",
+  storageBucket: "career-care-afb64.firebasestorage.app",
+  messagingSenderId: "267890746286",
+  appId: "1:267890746286:web:2c38f0980119d01b145e3f"
+};
+if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+
+/* ================= LOGIC ================= */
+const userUid = localStorage.getItem("userUid");
+const listDiv = document.getElementById("history-list");
+const loader = document.getElementById("loader");
+
+if (!userUid) {
+    window.location.href = "login.html";
+} else {
+    fetchHistory();
+}
+
+function fetchHistory() {
+    const historyRef = firebase.database().ref(`students/${userUid}/history`).orderByChild('timestamp');
+    
+    historyRef.once('value', (snapshot) => {
+        loader.style.display = "none";
+        
+        if (!snapshot.exists()) {
+            listDiv.innerHTML = "<p style='text-align:center'>No tests taken yet. Start practicing!</p>";
+            return;
+        }
+
+        const data = snapshot.val();
+        // Firebase data object mein aata hai, usse Array banakar reverse karein (Latest first)
+        const historyArray = Object.values(data).reverse();
+
+        historyArray.forEach(item => {
+            createCard(item);
+        });
+    });
+}
+
+function createCard(item) {
+    // Percentage calculate karke color decide karein
+    const percentage = (item.score / item.totalQ) * 100;
+    let colorClass = "fail";
+    if (percentage >= 75) colorClass = "pass";
+    else if (percentage >= 40) colorClass = "avg";
+
+    // Exam aur Topic ka naam sundar dikhane ke liye
+    const examName = item.exam ? item.exam.replace(/_/g, " ") : "Unknown Exam";
+    const topicName = item.topic ? item.topic.replace(/_/g, " ") : "General";
+
+    const div = document.createElement("div");
+    div.className = `history-card ${colorClass}`;
+    div.innerHTML = `
+        <div class="exam-info">
+            <h3>${topicName}</h3>
+            <p>${examName} • ${item.date}</p>
+        </div>
+        <div class="score-badge">
+            <div class="marks">${item.score}</div>
+            <div class="total">/ ${item.totalQ}</div>
+        </div>
+    `;
+    listDiv.appendChild(div);
+}
+</script>
+
+</body>
+</html>
