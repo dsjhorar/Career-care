@@ -5,17 +5,16 @@
 <title>Test</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-<script src="firebase.js"></script>
 
 <style>
+/* Styling wahi same rahegi */
 body{margin:0;font-family:Arial;background:#f4f6f8}
 header{background:#1e88e5;color:#fff;padding:12px;text-align:center;font-size:18px}
 .container{padding:15px}
 .timer{background:#fb8c00;color:#fff;padding:8px;text-align:center;border-radius:6px;margin-bottom:10px;font-weight:bold}
-.question{font-size:17px;margin-bottom:12px}
+.question{font-size:17px;margin-bottom:12px; line-height: 1.5;}
 .option{background:#fff;border:1px solid #ddd;padding:12px;margin-bottom:8px;border-radius:6px;cursor:pointer}
 .option.selected{background:#e3f2fd;border-color:#1e88e5}
 .correct{background:#c8e6c9!important}
@@ -27,43 +26,65 @@ header{background:#1e88e5;color:#fff;padding:12px;text-align:center;font-size:18
 .submit{background:#d32f2f}
 .explanation{background:#fffde7;border:1px solid #fbc02d;padding:10px;margin-top:6px;border-radius:6px;font-size:14px}
 hr{margin:15px 0}
+#error-box { color: red; background: #ffebee; padding: 10px; border: 1px solid red; display: none; margin-bottom: 10px; }
 </style>
 </head>
 
 <body>
 
-<header id="testTitle">Loading Test...</header>
+<header id="testTitle">Test Loading...</header>
 
 <div class="container">
+    <div id="error-box"></div>
+    <div class="timer">Time: <span id="time">00:00</span></div>
 
-<div class="timer">Time: <span id="time">00:00</span></div>
+    <div id="quiz">
+      <div class="question" id="question">Initializing Connection...</div>
+      <div id="options"></div>
 
-<div id="quiz">
-  <div class="question" id="question">Loading...</div>
-  <div id="options"></div>
+      <button class="btn prev" onclick="prevQuestion()">⬅ Previous</button>
+      <button class="btn skip" onclick="skipQuestion()">⏭ Skip</button>
+      <button class="btn next" onclick="nextQuestion()">Next ➡</button>
+      <button class="btn submit" onclick="finishTest()">Submit Test</button>
+    </div>
 
-  <button class="btn prev" onclick="prevQuestion()">⬅ Previous</button>
-  <button class="btn skip" onclick="skipQuestion()">⏭ Skip</button>
-  <button class="btn next" onclick="nextQuestion()">Next ➡</button>
-  <button class="btn submit" onclick="finishTest()">Submit Test</button>
-</div>
-
-<div id="result" style="display:none">
-  <h2>Test Analysis</h2>
-  <p id="scoreText"></p>
-  <div id="review"></div>
-  <button class="btn next" onclick="location.href='index.html'">Go Home</button>
-</div>
-
+    <div id="result" style="display:none">
+      <h2>Result</h2>
+      <p id="scoreText"></p>
+      <div id="review"></div>
+      <button class="btn next" onclick="location.href='index.html'">Go Home</button>
+    </div>
 </div>
 
 <script>
-/* ================= URL PARAMS ================= */
+/* ==============================================
+   STEP 1: YAHAN APNI FIREBASE DETAILS DALO
+   ============================================== */
+const firebaseConfig = {
+  apiKey: "AIzaSyBCuefZt2WuNsNiFme8M-HUHm_BZYKJAi4",
+  authDomain: "career-care-afb64.firebaseapp.com",
+  databaseURL: "https://career-care-afb64-default-rtdb.firebaseio.com",
+  projectId: "career-care-afb64",
+  storageBucket: "career-care-afb64.firebasestorage.app",
+  messagingSenderId: "267890746286",
+  appId: "1:267890746286:web:2c38f0980119d01b145e3f"
+};
+
+// Initialize Firebase
+if (!firebase.apps.length) {
+    try {
+        firebase.initializeApp(firebaseConfig);
+        console.log("Firebase initialized");
+    } catch (e) {
+        showError("Firebase Init Error: " + e.message);
+    }
+}
+
+/* ================= LOGIC STARTS ================= */
 const params = new URLSearchParams(window.location.search);
 const exam = params.get("exam");
 const topic = params.get("topic");
 
-/* ================= VARIABLES ================= */
 let questions = [];
 let current = 0;
 let userAnswers = {};
@@ -71,107 +92,111 @@ let score = 0;
 let time = 10 * 60;
 let timer;
 
-/* ================= LOAD QUESTIONS ================= */
-firebase.database()
-.ref(`tests/${exam}/${topic}/questions`)
-.once("value")
-.then(snapshot=>{
-  if(!snapshot.exists()){
-    document.getElementById("question").innerText="No questions found";
-    return;
-  }
-  snapshot.forEach(q=>{
-    questions.push(q.val());
-  });
-  document.getElementById("testTitle").innerText =
-    exam.replace("_"," ").toUpperCase()+" Test";
-  loadQuestion();
-  startTimer();
-});
+// Main Execution
+if (!exam || !topic) {
+    showError("URL Error: '?exam=NAME&topic=NAME' is missing in the link.");
+} else {
+    const dbPath = `tests/${exam}/${topic}/questions`;
+    document.getElementById("question").innerHTML = `Connecting to Database...<br><small>Path: ${dbPath}</small>`;
+    
+    // 5 Second Timeout check
+    setTimeout(() => {
+        if(questions.length === 0 && document.getElementById("question").innerText.includes("Connecting")) {
+            showError("Timeout: Database connect nahi ho pa raha. <br>1. Check Internet<br>2. Check Database Rules (read: true)<br>3. Check Config keys");
+        }
+    }, 8000);
 
-/* ================= FUNCTIONS ================= */
+    firebase.database().ref(dbPath).once("value")
+    .then(snapshot => {
+        if (!snapshot.exists()) {
+            showError(`Data not found at path: ${dbPath}`);
+            return;
+        }
+        let data = snapshot.val();
+        questions = Array.isArray(data) ? data.filter(q=>q) : Object.values(data);
+        
+        if(!questions.length) {
+            showError("Folder is empty (No questions inside).");
+            return;
+        }
+
+        document.getElementById("testTitle").innerText = exam.toUpperCase() + " Test";
+        loadQuestion();
+        startTimer();
+    })
+    .catch(error => {
+        showError("Database Error: " + error.message + "<br>Check if Rules are set to public.");
+    });
+}
+
+/* ================= HELPER FUNCTIONS ================= */
+function showError(msg) {
+    const errBox = document.getElementById("error-box");
+    errBox.style.display = "block";
+    errBox.innerHTML = "<b>⚠️ Problem:</b> " + msg;
+    document.getElementById("question").innerText = "Loading Stopped.";
+}
+
 function loadQuestion(){
-  const q = questions[current];
-  document.getElementById("question").innerText =
-    `Q${current+1}. ${q.q}`;
-  const optDiv=document.getElementById("options");
-  optDiv.innerHTML="";
-  Object.keys(q.options).forEach(i=>{
-    let div=document.createElement("div");
-    div.className="option";
-    div.innerText=q.options[i];
-    if(userAnswers[current]==i) div.classList.add("selected");
-    div.onclick=()=>{
-      userAnswers[current]=i;
-      loadQuestion();
-    }
-    optDiv.appendChild(div);
-  });
+    const q = questions[current];
+    document.getElementById("question").innerText = `Q${current+1}. ${q.q}`;
+    const optDiv = document.getElementById("options");
+    optDiv.innerHTML = "";
+    
+    Object.keys(q.options).forEach(key => {
+        let btn = document.createElement("div");
+        btn.className = "option " + (userAnswers[current] === key ? "selected" : "");
+        btn.innerText = q.options[key];
+        btn.onclick = () => { userAnswers[current] = key; loadQuestion(); };
+        optDiv.appendChild(btn);
+    });
 }
 
 function nextQuestion(){
-  if(current<questions.length-1){
-    current++;
-    loadQuestion();
-  }
+    if(current < questions.length - 1) { current++; loadQuestion(); }
 }
-
 function prevQuestion(){
-  if(current>0){
-    current--;
-    loadQuestion();
-  }
+    if(current > 0) { current--; loadQuestion(); }
 }
-
 function skipQuestion(){
-  if(current<questions.length-1){
-    current++;
-    loadQuestion();
-  }
+    nextQuestion();
 }
 
 function finishTest(){
-  clearInterval(timer);
-  document.getElementById("quiz").style.display="none";
-  document.getElementById("result").style.display="block";
-
-  questions.forEach((q,i)=>{
-    if(userAnswers[i]==q.answer) score++;
-    else if(userAnswers[i]!=undefined) score-=0.33;
-  });
-
-  document.getElementById("scoreText").innerText =
-    `Score: ${score.toFixed(2)} / ${questions.length}`;
-
-  showReview();
-}
-
-function showReview(){
-  const r=document.getElementById("review");
-  r.innerHTML="";
-  questions.forEach((q,i)=>{
-    let html=`<b>Q${i+1}. ${q.q}</b>`;
-    Object.keys(q.options).forEach(o=>{
-      let cls="";
-      if(o==q.answer) cls="correct";
-      else if(userAnswers[i]==o) cls="wrong";
-      html+=`<div class="option ${cls}">${q.options[o]}</div>`;
+    clearInterval(timer);
+    document.getElementById("quiz").style.display = "none";
+    document.getElementById("result").style.display = "block";
+    
+    questions.forEach((q, i) => {
+        if(userAnswers[i] == q.answer) score++;
+        else if(userAnswers[i]) score -= 0.33;
     });
-    html+=`<div class="explanation">${q.explanation}</div><hr>`;
-    r.innerHTML+=html;
-  });
+    
+    document.getElementById("scoreText").innerText = `Score: ${score.toFixed(2)} / ${questions.length}`;
+    
+    const rev = document.getElementById("review");
+    questions.forEach((q, i) => {
+        let ansStatus = userAnswers[i] == q.answer ? "correct" : (userAnswers[i] ? "wrong" : "");
+        let html = `<div><b>Q${i+1}. ${q.q}</b></div>`;
+        Object.keys(q.options).forEach(k => {
+            let cls = "";
+            if(k == q.answer) cls = "correct";
+            else if(userAnswers[i] == k) cls = "wrong";
+            html += `<div class="option ${cls}">${q.options[k]}</div>`;
+        });
+        html += `<div class="explanation">Logic: ${q.explanation || "N/A"}</div><hr>`;
+        rev.innerHTML += html;
+    });
 }
 
 function startTimer(){
-  timer=setInterval(()=>{
-    if(time<=0){finishTest();return;}
-    time--;
-    let m=Math.floor(time/60),s=time%60;
-    document.getElementById("time").innerText=
-      `${m}:${s<10?"0":""}${s}`;
-  },1000);
+    timer = setInterval(() => {
+        if(time-- <= 0) finishTest();
+        let m = Math.floor(time / 60), s = time % 60;
+        document.getElementById("time").innerText = `${m}:${s<10?"0":""}${s}`;
+    }, 1000);
 }
 </script>
 
 </body>
-    </html>
+</html>      
