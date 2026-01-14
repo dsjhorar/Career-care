@@ -43,13 +43,27 @@ const firebaseConfig = {
   appId: "1:267890746286:web:2c38f0980119d01b145e3f"
 };
 firebase.initializeApp(firebaseConfig);
-
-// 2. Check User Login
-const userMobile = localStorage.getItem("userMobile"); // Login ke time save kiya tha
-if(!userMobile){
+// 1. Check User (Updated for Google Login)
+const userUid = localStorage.getItem("userUid"); // Mobile ki jagah UID
+if(!userUid){
     alert("Please Login First");
     window.location = "login.html";
 }
+
+// ... (Razorpay options same rahenge) ...
+
+// 2. Update Database Function (Updated)
+function updateDatabase(){
+    firebase.database().ref("students/" + userUid).update({ // Path mein userUid aayega
+        isPremium: true,
+        paymentDate: new Date().toISOString(),
+        paymentMethod: "Razorpay"
+    }).then(() => {
+        localStorage.setItem("isPremium", "true");
+        alert("🎉 Premium Plan Activated!");
+        window.location = "index.html";
+    });
+  }
 
 // 3. Razorpay Options
 var options = {
