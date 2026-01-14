@@ -2,39 +2,70 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Login - Career Care</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
 <style>
-  body{font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:#f4f6f8; display:flex; justify-content:center; align-items:center; height:100vh; margin:0;}
-  .card{background:white; padding:30px; border-radius:10px; box-shadow:0 4px 10px rgba(0,0,0,0.1); width:100%; max-width:350px; text-align:center;}
-  h2{color:#1e88e5; margin-bottom:20px;}
-  input{padding:12px; margin:10px 0; border:1px solid #ddd; border-radius:6px; width:90%; font-size:16px;}
-  button{padding:12px; margin-top:10px; border:none; border-radius:6px; cursor:pointer; width:100%; font-size:16px; font-weight:bold; color:white; background:#1e88e5;}
-  button:hover{background:#1565c0;}
-  #recaptcha-container{margin-top:10px;}
+  body{
+    font-family: 'Segoe UI', sans-serif; 
+    background: #f0f2f5; 
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    height: 100vh; 
+    margin: 0;
+  }
+  .login-card {
+    background: white; 
+    padding: 40px; 
+    border-radius: 12px; 
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1); 
+    text-align: center; 
+    width: 90%; 
+    max-width: 350px;
+  }
+  .app-logo {
+    width: 80px; 
+    margin-bottom: 20px;
+  }
+  h2 { color: #333; margin-bottom: 5px; }
+  p { color: #666; margin-bottom: 30px; }
+  
+  .google-btn {
+    background: white;
+    color: #444;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 12px;
+    width: 100%;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: 0.2s;
+  }
+  .google-btn:hover { background: #f8f9fa; border-color: #ccc; }
+  .google-btn img { width: 20px; }
 </style>
 </head>
 <body>
 
-<div class="card">
-  <h2>Student Login</h2>
+<div class="login-card">
+  <img src="logo.png" alt="Logo" class="app-logo" onerror="this.src='https://via.placeholder.com/80?text=App'">
+  <h2>Welcome Back</h2>
+  <p>Start your exam preparation journey</p>
 
-  <div id="loginDiv">
-    <input type="number" id="mobile" placeholder="Mobile Number (10 digits)" maxlength="10">
-    <div id="recaptcha-container"></div>
-    <button onclick="sendOTP()" id="sendBtn">Send OTP</button>
-  </div>
-
-  <div id="otpDiv" style="display:none">
-    <p>OTP sent to <span id="sentMobile"></span></p>
-    <input type="number" id="otp" placeholder="Enter 6-digit OTP">
-    <button onclick="verifyOTP()">Verify & Login</button>
-  </div>
+  <button class="google-btn" onclick="googleLogin()">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="G">
+    Sign in with Google
+  </button>
 </div>
 
 <script>
@@ -48,78 +79,51 @@ const firebaseConfig = {
   messagingSenderId: "267890746286",
   appId: "1:267890746286:web:2c38f0980119d01b145e3f"
 };
-firebase.initializeApp(firebaseConfig);
+// Initialize Firebase
+if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 
-let confirmationResult;
-
-function sendOTP(){
-  let mobile = document.getElementById("mobile").value;
-  if(mobile.length != 10){ alert("Please enter valid 10 digit number"); return; }
-
-  // Button disable karein taaki user baar baar click na kare
-  document.getElementById("sendBtn").innerText = "Sending...";
-  document.getElementById("sendBtn").disabled = true;
-
-  if(!window.recaptchaVerifier){
-    window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
-      'size': 'invisible'
+function googleLogin() {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    
+    firebase.auth().signInWithPopup(provider)
+    .then((result) => {
+        const user = result.user;
+        checkUserInDatabase(user);
+    }).catch((error) => {
+        alert("Login Failed: " + error.message);
     });
-  }
-
-  firebase.auth().signInWithPhoneNumber("+91"+mobile, window.recaptchaVerifier)
-  .then(function(result){
-    confirmationResult = result;
-    document.getElementById("loginDiv").style.display="none";
-    document.getElementById("otpDiv").style.display="block";
-    document.getElementById("sentMobile").innerText = "+91 " + mobile;
-  }).catch(function(error){
-    console.error(error);
-    alert("Error: " + error.message);
-    document.getElementById("sendBtn").innerText = "Send OTP";
-    document.getElementById("sendBtn").disabled = false;
-  });
 }
 
-function verifyOTP(){
-  let code = document.getElementById("otp").value;
-  
-  confirmationResult.confirm(code).then(function(result){
-    let user = result.user;
-    let mobileKey = user.phoneNumber.replace("+91", ""); // remove +91 for database key
-
-    // Database Reference
-    const userRef = firebase.database().ref("students/" + mobileKey);
-
-    // Check karein: Kya user pehle se hai?
+function checkUserInDatabase(user) {
+    // Ab hum User ID (UID) use karenge jo unique hoti hai
+    const userRef = firebase.database().ref("students/" + user.uid);
+    
     userRef.once('value').then(snapshot => {
-      if(snapshot.exists()){
-        // USER PURANA HAI:
-        // Sirf login karein, data overwrite na karein (taaki Premium status na hate)
-        let data = snapshot.val();
-        localStorage.setItem("userMobile", mobileKey);
-        localStorage.setItem("isPremium", data.isPremium); // Save status locally
-        alert(`Welcome back! You are a ${data.isPremium ? 'Premium' : 'Free'} user.`);
-        window.location = "index.html";
-      } else {
-        // USER NAYA HAI:
-        // Default 'isPremium: false' set karein
-        userRef.set({
-          uid: user.uid,
-          mobile: user.phoneNumber,
-          isPremium: false,   // <--- IMPORTANT: By default FREE
-          joinDate: new Date().toISOString()
-        }).then(() => {
-          localStorage.setItem("userMobile", mobileKey);
-          localStorage.setItem("isPremium", "false");
-          alert("Login Successful! Account Created.");
-          window.location = "index.html";
-        });
-      }
+        if (snapshot.exists()) {
+            // --- OLD USER ---
+            let data = snapshot.val();
+            saveLocalAndRedirect(user.uid, data.isPremium);
+        } else {
+            // --- NEW USER ---
+            // Naya data save karein (isPremium: false)
+            userRef.set({
+                uid: user.uid,
+                name: user.displayName,
+                email: user.email,
+                photo: user.photoURL,
+                isPremium: false, // FREE USER
+                joinDate: new Date().toISOString()
+            }).then(() => {
+                saveLocalAndRedirect(user.uid, false);
+            });
+        }
     });
+}
 
-  }).catch(function(error){
-    alert("Invalid OTP");
-  });
+function saveLocalAndRedirect(uid, isPremium) {
+    localStorage.setItem("userUid", uid); // Phone ki jagah UID save kar rahe hain
+    localStorage.setItem("isPremium", isPremium);
+    window.location.href = "index.html";
 }
 </script>
 
