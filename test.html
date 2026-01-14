@@ -96,7 +96,9 @@ let timer;
 if (!exam || !topic) {
     showError("URL Error: '?exam=NAME&topic=NAME' is missing in the link.");
 } else {
-    const dbPath = `tests/${exam}/${topic}/questions`;
+    // Logic: Agar user deep structure se aaya hai, to 'exam' variable mein hi pura path hoga
+// Example: exam = "first_grade/topic_wise/history", topic = "mughal_empire"
+const dbPath = `tests/${exam}/${topic}/questions`;
     document.getElementById("question").innerHTML = `Connecting to Database...<br><small>Path: ${dbPath}</small>`;
     
     // 5 Second Timeout check
