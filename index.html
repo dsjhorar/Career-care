@@ -187,12 +187,8 @@
 <script>
   // Navigation Functions
   function openExam(examKey){
-    // Abhi ke liye hum direct test page par bhej rahe hain
-    // Baad mein ise 'topic selection' page par bhej sakte hain
-    console.log("Selected Exam:", examKey);
-    // Example redirect (ise apne hisab se change karein jab topic page ban jaye):
-    // window.location.href = "topics.html?exam=" + examKey;
-    alert("Aapne select kiya: " + examKey + "\n(Iske baad Topics ka page khulega)");
+    // Ab user pehle Dashboard (exam.html) par jayega
+    window.location.href = "exam.html?exam=" + examKey;
   }
 
   function goToCA(){ window.location.href = "current-affairs.html"; }
