@@ -189,7 +189,28 @@ function finishTest(){
         html += `<div class="explanation">Logic: ${q.explanation || "N/A"}</div><hr>`;
         rev.innerHTML += html;
     });
-}
+    // ... (Upar ka purana calculation code waisa hi rahega) ...
+
+    // === YAHAN SE NAYA CODE JODEIN ===
+    const userUid = localStorage.getItem("userUid");
+    
+    if(userUid) {
+        // Database mein save karein
+        const historyRef = firebase.database().ref(`students/${userUid}/history`);
+        const newEntry = historyRef.push(); // Naya ID generate karo
+        
+        newEntry.set({
+            exam: exam,   // URL se aaya exam name (e.g. first_grade)
+            topic: topic, // URL se aaya topic name
+            score: score.toFixed(2),
+            totalQ: questions.length,
+            date: new Date().toLocaleDateString(), // Aaj ki taareekh
+            timestamp: firebase.database.ServerValue.TIMESTAMP // Sorting ke liye
+        });
+        console.log("Result Saved!");
+    }
+    // === NAYA CODE KHATAM ===
+                                                
 
 function startTimer(){
     timer = setInterval(() => {
