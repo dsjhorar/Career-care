@@ -85,14 +85,21 @@ if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 function googleLogin() {
     const provider = new firebase.auth.GoogleAuthProvider();
     
-    firebase.auth().signInWithPopup(provider)
-    .then((result) => {
-        const user = result.user;
-        checkUserInDatabase(user);
-    }).catch((error) => {
-        alert("Login Failed: " + error.message);
-    });
+    // Mobile ke liye Redirect behtar hai (Popup ki jagah)
+    firebase.auth().signInWithRedirect(provider);
 }
+
+// Page load hone par check karein ki kya user Google se wapas aaya hai?
+firebase.auth().getRedirectResult()
+    .then((result) => {
+        if (result.user) {
+            // User login hokar wapas aa gaya
+            checkUserInDatabase(result.user);
+        }
+    }).catch((error) => {
+        console.error(error);
+        alert("Login Error: " + error.message);
+    });
 
 function checkUserInDatabase(user) {
     // Ab hum User ID (UID) use karenge jo unique hoti hai
