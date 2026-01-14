@@ -2,14 +2,15 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Test</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Career Care Test</title>
 
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
 <style>
-/* Styling wahi same rahegi */
+/* CSS Styles */
 body{margin:0;font-family:Arial;background:#f4f6f8}
 header{background:#1e88e5;color:#fff;padding:12px;text-align:center;font-size:18px}
 .container{padding:15px}
@@ -39,7 +40,7 @@ hr{margin:15px 0}
     <div class="timer">Time: <span id="time">00:00</span></div>
 
     <div id="quiz">
-      <div class="question" id="question">Initializing Connection...</div>
+      <div class="question" id="question">Connecting to Server...</div>
       <div id="options"></div>
 
       <button class="btn prev" onclick="prevQuestion()">⬅ Previous</button>
@@ -49,16 +50,17 @@ hr{margin:15px 0}
     </div>
 
     <div id="result" style="display:none">
-      <h2>Result</h2>
+      <h2>Result Analysis</h2>
       <p id="scoreText"></p>
       <div id="review"></div>
       <button class="btn next" onclick="location.href='index.html'">Go Home</button>
+      <button class="btn prev" onclick="location.href='history.html'">View History</button>
     </div>
 </div>
 
 <script>
 /* ==============================================
-   STEP 1: YAHAN APNI FIREBASE DETAILS DALO
+   1. CONFIGURATION (Apni Key Yahan Dalein)
    ============================================== */
 const firebaseConfig = {
   apiKey: "AIzaSyBCuefZt2WuNsNiFme8M-HUHm_BZYKJAi4",
@@ -69,18 +71,24 @@ const firebaseConfig = {
   messagingSenderId: "267890746286",
   appId: "1:267890746286:web:2c38f0980119d01b145e3f"
 };
-
 // Initialize Firebase
-if (!firebase.apps.length) {
-    try {
-        firebase.initializeApp(firebaseConfig);
-        console.log("Firebase initialized");
-    } catch (e) {
-        showError("Firebase Init Error: " + e.message);
-    }
+if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+
+/* ==============================================
+   2. SECURITY CHECK (Premium Gatekeeper)
+   ============================================== */
+const isPremiumUser = localStorage.getItem("isPremium") === "true";
+const currentUrl = window.location.href;
+
+// Agar test URL mein "full_test" hai aur user Premium nahi hai
+if (currentUrl.includes("full_test") && !isPremiumUser) {
+    alert("🔒 Ye Content Locked hai!\nIs test ko dene ke liye Premium Plan upgrade karein.");
+    window.location.href = "premium.html";
 }
 
-/* ================= LOGIC STARTS ================= */
+/* ==============================================
+   3. TEST LOGIC
+   ============================================== */
 const params = new URLSearchParams(window.location.search);
 const exam = params.get("exam");
 const topic = params.get("topic");
@@ -89,55 +97,41 @@ let questions = [];
 let current = 0;
 let userAnswers = {};
 let score = 0;
-let time = 10 * 60;
+let time = 10 * 60; // 10 Minutes
 let timer;
 
-// Main Execution
+// -- Start Execution --
 if (!exam || !topic) {
-    showError("URL Error: '?exam=NAME&topic=NAME' is missing in the link.");
+    showError("URL Error: Exam or Topic missing.");
 } else {
-    // Logic: Agar user deep structure se aaya hai, to 'exam' variable mein hi pura path hoga
-// Example: exam = "first_grade/topic_wise/history", topic = "mughal_empire"
-const dbPath = `tests/${exam}/${topic}/questions`;
-    document.getElementById("question").innerHTML = `Connecting to Database...<br><small>Path: ${dbPath}</small>`;
+    // Path example: tests/first_grade/topic_wise/history/mughal_empire/questions
+    const dbPath = `tests/${exam}/${topic}/questions`;
+    document.getElementById("question").innerText = "Loading Questions...";
     
-    // 5 Second Timeout check
-    setTimeout(() => {
-        if(questions.length === 0 && document.getElementById("question").innerText.includes("Connecting")) {
-            showError("Timeout: Database connect nahi ho pa raha. <br>1. Check Internet<br>2. Check Database Rules (read: true)<br>3. Check Config keys");
-        }
-    }, 8000);
-
     firebase.database().ref(dbPath).once("value")
     .then(snapshot => {
         if (!snapshot.exists()) {
-            showError(`Data not found at path: ${dbPath}`);
+            showError("No questions found.");
             return;
         }
         let data = snapshot.val();
         questions = Array.isArray(data) ? data.filter(q=>q) : Object.values(data);
         
         if(!questions.length) {
-            showError("Folder is empty (No questions inside).");
+            showError("Folder is empty.");
             return;
         }
 
-        document.getElementById("testTitle").innerText = exam.toUpperCase() + " Test";
+        document.getElementById("testTitle").innerText = topic.replace(/_/g, " ").toUpperCase();
         loadQuestion();
         startTimer();
     })
     .catch(error => {
-        showError("Database Error: " + error.message + "<br>Check if Rules are set to public.");
+        showError("Error: " + error.message);
     });
 }
 
 /* ================= HELPER FUNCTIONS ================= */
-function showError(msg) {
-    const errBox = document.getElementById("error-box");
-    errBox.style.display = "block";
-    errBox.innerHTML = "<b>⚠️ Problem:</b> " + msg;
-    document.getElementById("question").innerText = "Loading Stopped.";
-}
 
 function loadQuestion(){
     const q = questions[current];
@@ -169,14 +163,35 @@ function finishTest(){
     document.getElementById("quiz").style.display = "none";
     document.getElementById("result").style.display = "block";
     
+    // Calculate Score
     questions.forEach((q, i) => {
         if(userAnswers[i] == q.answer) score++;
-        else if(userAnswers[i]) score -= 0.33;
+        else if(userAnswers[i]) score -= 0.33; // Negative marking
     });
     
     document.getElementById("scoreText").innerText = `Score: ${score.toFixed(2)} / ${questions.length}`;
     
+    // === SAVE HISTORY (NEW FEATURE) ===
+    const userUid = localStorage.getItem("userUid");
+    if(userUid) {
+        const historyRef = firebase.database().ref(`students/${userUid}/history`);
+        historyRef.push({
+            exam: exam,
+            topic: topic,
+            score: score.toFixed(2),
+            totalQ: questions.length,
+            date: new Date().toLocaleDateString(),
+            timestamp: firebase.database.ServerValue.TIMESTAMP
+        });
+    }
+    // ==================================
+
+    showReview();
+}
+
+function showReview(){
     const rev = document.getElementById("review");
+    rev.innerHTML = "";
     questions.forEach((q, i) => {
         let ansStatus = userAnswers[i] == q.answer ? "correct" : (userAnswers[i] ? "wrong" : "");
         let html = `<div><b>Q${i+1}. ${q.q}</b></div>`;
@@ -189,28 +204,7 @@ function finishTest(){
         html += `<div class="explanation">Logic: ${q.explanation || "N/A"}</div><hr>`;
         rev.innerHTML += html;
     });
-    // ... (Upar ka purana calculation code waisa hi rahega) ...
-
-    // === YAHAN SE NAYA CODE JODEIN ===
-    const userUid = localStorage.getItem("userUid");
-    
-    if(userUid) {
-        // Database mein save karein
-        const historyRef = firebase.database().ref(`students/${userUid}/history`);
-        const newEntry = historyRef.push(); // Naya ID generate karo
-        
-        newEntry.set({
-            exam: exam,   // URL se aaya exam name (e.g. first_grade)
-            topic: topic, // URL se aaya topic name
-            score: score.toFixed(2),
-            totalQ: questions.length,
-            date: new Date().toLocaleDateString(), // Aaj ki taareekh
-            timestamp: firebase.database.ServerValue.TIMESTAMP // Sorting ke liye
-        });
-        console.log("Result Saved!");
-    }
-    // === NAYA CODE KHATAM ===
-                                                
+}
 
 function startTimer(){
     timer = setInterval(() => {
@@ -219,7 +213,13 @@ function startTimer(){
         document.getElementById("time").innerText = `${m}:${s<10?"0":""}${s}`;
     }, 1000);
 }
+
+function showError(msg) {
+    document.getElementById("error-box").style.display = "block";
+    document.getElementById("error-box").innerText = msg;
+    document.getElementById("question").innerText = "Loading Failed.";
+}
 </script>
 
 </body>
-</html>      
+</html>
