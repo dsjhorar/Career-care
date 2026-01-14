@@ -1,32 +1,181 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>My Profile</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
 <style>
-body{font-family:Arial;background:#f4f6f8;margin:0}
-header{background:#1e88e5;color:#fff;padding:12px;text-align:center}
-.box{
-  background:white;
-  margin:15px;
-  padding:15px;
-  border-radius:6px;
-}
+  body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #f4f6f8; }
+  
+  /* Header */
+  header { background: #1e88e5; color: white; padding: 15px; display: flex; align-items: center; gap: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+  .back-btn { font-size: 24px; cursor: pointer; color: white; text-decoration: none; }
+  .title { font-size: 20px; font-weight: bold; }
+
+  .container { padding: 20px; max-width: 500px; margin: 0 auto; }
+
+  /* Profile Card */
+  .profile-card {
+    background: white;
+    padding: 30px 20px;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    margin-bottom: 20px;
+  }
+
+  .profile-pic {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid #e3f2fd;
+    margin-bottom: 15px;
+  }
+
+  .user-name { font-size: 22px; font-weight: bold; color: #333; margin: 5px 0; }
+  .user-email { font-size: 14px; color: #666; margin-bottom: 20px; }
+
+  /* Plan Status Badge */
+  .badge {
+    display: inline-block;
+    padding: 6px 15px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: bold;
+    text-transform: uppercase;
+  }
+  .badge-free { background: #eceff1; color: #546e7a; border: 1px solid #cfd8dc; }
+  .badge-premium { background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; }
+
+  /* Upgrade Section */
+  .upgrade-box {
+    background: linear-gradient(135deg, #1e88e5, #1565c0);
+    color: white;
+    padding: 20px;
+    border-radius: 10px;
+    margin-top: 20px;
+    display: none; /* By default hidden, JS will show if Free */
+  }
+  .upgrade-btn {
+    background: white;
+    color: #1565c0;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 10px;
+  }
+
+  /* Logout Button */
+  .logout-btn {
+    width: 100%;
+    background: #ffebee;
+    color: #c62828;
+    border: 1px solid #ffcdd2;
+    padding: 15px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 10px;
+  }
 </style>
 </head>
 <body>
 
-<header>My Profile</header>
+<header>
+  <a href="index.html" class="back-btn">&#8592;</a>
+  <div class="title">Profile</div>
+</header>
 
-<div class="box">
-  <p><b>Mobile:</b> <span id="mobile"></span></p>
-  <p><b>Status:</b> Free User</p>
+<div class="container">
+  
+  <div class="profile-card">
+    <img src="https://via.placeholder.com/100" id="p-photo" class="profile-pic" alt="User">
+    <div class="user-name" id="p-name">Loading...</div>
+    <div class="user-email" id="p-email">...</div>
+    
+    <div id="status-badge" class="badge badge-free">Loading Status...</div>
+  </div>
+
+  <div id="upgrade-section" class="upgrade-box">
+    <h3>⭐ Upgrade to Premium</h3>
+    <p>Unlock all Full Tests and get detailed analysis.</p>
+    <button class="upgrade-btn" onclick="window.location.href='premium.html'">Upgrade Now</button>
+  </div>
+
+  <button class="logout-btn" onclick="logout()">Log Out</button>
+
 </div>
 
 <script>
-document.getElementById("mobile").innerText =
-  localStorage.getItem("userMobile") || "N/A";
+/* ================= CONFIGURATION ================= */
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY", 
+  authDomain: "your-project.firebaseapp.com",
+  databaseURL: "https://your-project-default-rtdb.firebaseio.com",
+  projectId: "your-project",
+  appId: "..."
+};
+if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+
+/* ================= LOGIC ================= */
+const userUid = localStorage.getItem("userUid");
+
+if (!userUid) {
+    window.location.href = "login.html"; // Agar login nahi hai to bhaga do
+} else {
+    loadProfile();
+}
+
+function loadProfile() {
+    const userRef = firebase.database().ref("students/" + userUid);
+    
+    userRef.on('value', (snapshot) => {
+        const data = snapshot.val();
+        
+        if (data) {
+            // 1. Photo Set karo
+            document.getElementById("p-photo").src = data.photo || "https://via.placeholder.com/100";
+            
+            // 2. Naam aur Email
+            document.getElementById("p-name").innerText = data.name || "Student";
+            document.getElementById("p-email").innerText = data.email || "No Email";
+
+            // 3. Status Check (Free vs Premium)
+            const badge = document.getElementById("status-badge");
+            const upgradeBox = document.getElementById("upgrade-section");
+
+            if (data.isPremium) {
+                // PREMIUM USER
+                badge.innerText = "👑 Premium Member";
+                badge.className = "badge badge-premium";
+                upgradeBox.style.display = "none"; // Upgrade ad mat dikhao
+            } else {
+                // FREE USER
+                badge.innerText = "Free Plan";
+                badge.className = "badge badge-free";
+                upgradeBox.style.display = "block"; // Upgrade ad dikhao
+            }
+        }
+    });
+}
+
+function logout() {
+    if(confirm("Are you sure you want to logout?")) {
+        firebase.auth().signOut().then(() => {
+            localStorage.clear();
+            window.location.href = "login.html";
+        });
+    }
+}
 </script>
 
 </body>
