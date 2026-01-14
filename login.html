@@ -1,74 +1,124 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Career Care Login</title>
-<script src="firebase.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login - Career Care</title>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
 <style>
-body{font-family:Arial;background:#f4f6f8;padding:12px}
-input{padding:10px;margin:6px 0;border-radius:6px;width:200px}
-button{padding:10px 14px;margin:5px;border:none;border-radius:6px;cursor:pointer}
+  body{font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:#f4f6f8; display:flex; justify-content:center; align-items:center; height:100vh; margin:0;}
+  .card{background:white; padding:30px; border-radius:10px; box-shadow:0 4px 10px rgba(0,0,0,0.1); width:100%; max-width:350px; text-align:center;}
+  h2{color:#1e88e5; margin-bottom:20px;}
+  input{padding:12px; margin:10px 0; border:1px solid #ddd; border-radius:6px; width:90%; font-size:16px;}
+  button{padding:12px; margin-top:10px; border:none; border-radius:6px; cursor:pointer; width:100%; font-size:16px; font-weight:bold; color:white; background:#1e88e5;}
+  button:hover{background:#1565c0;}
+  #recaptcha-container{margin-top:10px;}
 </style>
 </head>
 <body>
 
-<h2>Login with OTP</h2>
+<div class="card">
+  <h2>Student Login</h2>
 
-<div id="loginDiv">
-  <input type="text" id="mobile" placeholder="Enter Mobile +91" maxlength="10"><br>
-  <div id="recaptcha-container"></div>
-  <button onclick="sendOTP()">Send OTP</button>
-</div>
+  <div id="loginDiv">
+    <input type="number" id="mobile" placeholder="Mobile Number (10 digits)" maxlength="10">
+    <div id="recaptcha-container"></div>
+    <button onclick="sendOTP()" id="sendBtn">Send OTP</button>
+  </div>
 
-<div id="otpDiv" style="display:none">
-  <input type="text" id="otp" placeholder="Enter OTP" maxlength="6"><br>
-  <button onclick="verifyOTP()">Verify OTP</button>
+  <div id="otpDiv" style="display:none">
+    <p>OTP sent to <span id="sentMobile"></span></p>
+    <input type="number" id="otp" placeholder="Enter 6-digit OTP">
+    <button onclick="verifyOTP()">Verify & Login</button>
+  </div>
 </div>
 
 <script>
+/* ================= CONFIGURATION ================= */
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",  // <--- APNI FIREBASE API KEY DALEIN
+  authDomain: "your-project.firebaseapp.com",
+  databaseURL: "https://your-project-default-rtdb.firebaseio.com",
+  projectId: "your-project",
+  storageBucket: "your-project.appspot.com",
+  messagingSenderId: "...",
+  appId: "..."
+};
+firebase.initializeApp(firebaseConfig);
+
 let confirmationResult;
 
 function sendOTP(){
   let mobile = document.getElementById("mobile").value;
-  console.log("Mobile entered:", mobile); // DEBUG
-  if(mobile.length != 10){ alert("Enter valid mobile"); return; }
+  if(mobile.length != 10){ alert("Please enter valid 10 digit number"); return; }
 
-  window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container',{
-    size: 'invisible',
-    callback: function(response){
-      console.log("Recaptcha solved", response);
-    }
-  });
+  // Button disable karein taaki user baar baar click na kare
+  document.getElementById("sendBtn").innerText = "Sending...";
+  document.getElementById("sendBtn").disabled = true;
+
+  if(!window.recaptchaVerifier){
+    window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
+      'size': 'invisible'
+    });
+  }
 
   firebase.auth().signInWithPhoneNumber("+91"+mobile, window.recaptchaVerifier)
   .then(function(result){
-    console.log("OTP sent result", result);
     confirmationResult = result;
-    alert("OTP sent!");
     document.getElementById("loginDiv").style.display="none";
     document.getElementById("otpDiv").style.display="block";
+    document.getElementById("sentMobile").innerText = "+91 " + mobile;
   }).catch(function(error){
-    console.log("OTP send error:", error);
-    alert(error.message);
+    console.error(error);
+    alert("Error: " + error.message);
+    document.getElementById("sendBtn").innerText = "Send OTP";
+    document.getElementById("sendBtn").disabled = false;
   });
 }
 
 function verifyOTP(){
   let code = document.getElementById("otp").value;
+  
   confirmationResult.confirm(code).then(function(result){
     let user = result.user;
-    alert("Login Successful");
-    
-    // Save user mobile & UID to Firebase
-    firebase.database().ref("students/"+user.phoneNumber.replace("+91","")).set({
-      uid: user.uid,
-      mobile: user.phoneNumber
+    let mobileKey = user.phoneNumber.replace("+91", ""); // remove +91 for database key
+
+    // Database Reference
+    const userRef = firebase.database().ref("students/" + mobileKey);
+
+    // Check karein: Kya user pehle se hai?
+    userRef.once('value').then(snapshot => {
+      if(snapshot.exists()){
+        // USER PURANA HAI:
+        // Sirf login karein, data overwrite na karein (taaki Premium status na hate)
+        let data = snapshot.val();
+        localStorage.setItem("userMobile", mobileKey);
+        localStorage.setItem("isPremium", data.isPremium); // Save status locally
+        alert(`Welcome back! You are a ${data.isPremium ? 'Premium' : 'Free'} user.`);
+        window.location = "index.html";
+      } else {
+        // USER NAYA HAI:
+        // Default 'isPremium: false' set karein
+        userRef.set({
+          uid: user.uid,
+          mobile: user.phoneNumber,
+          isPremium: false,   // <--- IMPORTANT: By default FREE
+          joinDate: new Date().toISOString()
+        }).then(() => {
+          localStorage.setItem("userMobile", mobileKey);
+          localStorage.setItem("isPremium", "false");
+          alert("Login Successful! Account Created.");
+          window.location = "index.html";
+        });
+      }
     });
 
-    // Redirect to home or test page
-    window.location = "index.html?mobile="+user.phoneNumber.replace("+91","");
   }).catch(function(error){
-    alert("Invalid OTP: "+error.message);
+    alert("Invalid OTP");
   });
 }
 </script>
