@@ -1,77 +1,98 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Career Care Premium</title>
-
-<script src="firebase.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Upgrade to Premium</title>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
 <style>
-body{
-  font-family:Arial;
-  background:#f4f6f8;
-  text-align:center;
-  padding:20px;
-}
-.card{
-  background:#fff;
-  padding:20px;
-  border-radius:10px;
-}
-button{
-  background:#0a7cff;
-  color:#fff;
-  border:none;
-  padding:12px 20px;
-  border-radius:8px;
-  font-size:16px;
-  cursor:pointer;
-}
+  body{font-family:Arial; background:#f4f6f8; text-align:center; padding:20px;}
+  .plan-card{background:white; padding:40px; border-radius:10px; max-width:400px; margin:0 auto; box-shadow:0 4px 15px rgba(0,0,0,0.1); border-top: 5px solid #fb8c00;}
+  h1{color:#333;}
+  .price{font-size:40px; color:#1e88e5; font-weight:bold; margin:10px 0;}
+  ul{text-align:left; color:#555; line-height:1.6;}
+  .pay-btn{background:#1e88e5; color:white; padding:15px; width:100%; border:none; border-radius:6px; font-size:18px; cursor:pointer; margin-top:20px;}
+  .pay-btn:hover{background:#1565c0;}
 </style>
 </head>
-
 <body>
 
-<div class="card">
-  <h2>Career Care Premium</h2>
-  <p>✔ All Premium Tests<br>
-     ✔ Unlimited Access<br>
-     ✔ Full Length Exams</p>
-
-  <h3>₹199 / Year</h3>
-
-  <button onclick="payNow()">Unlock Premium</button>
+<div class="plan-card">
+  <h1>Premium Test Series</h1>
+  <div class="price">₹499</div>
+  <ul>
+    <li>✅ Unlimited Topic Wise Tests</li>
+    <li>✅ Full Syllabus Mock Tests</li>
+    <li>✅ Detailed Solutions</li>
+    <li>✅ Performance Analysis</li>
+  </ul>
+  <button class="pay-btn" id="rzp-button1">Buy Now</button>
+  <br><br>
+  <a href="index.html" style="color:#666;">No thanks, go back</a>
 </div>
 
 <script>
-const params = new URLSearchParams(location.search);
-const mobile = params.get("mobile");
+// 1. Firebase Config (Same as login.html)
+const firebaseConfig = {
+  apiKey: "AIzaSyBCuefZt2WuNsNiFme8M-HUHm_BZYKJAi4", 
+  databaseURL: "https://career-care-afb64-default-rtdb.firebaseio.com",
+  projectId: "career-care-afb64",
+  appId: "1:267890746286:web:2c38f0980119d01b145e3f"
+};
+firebase.initializeApp(firebaseConfig);
 
-function payNow(){
+// 2. Check User Login
+const userMobile = localStorage.getItem("userMobile"); // Login ke time save kiya tha
+if(!userMobile){
+    alert("Please Login First");
+    window.location = "login.html";
+}
 
-  var options = {
-    "key": "rzp_test_xxxxxxxxxx",  // 👈 YOUR RAZORPAY KEY
-    "amount": 19900, // ₹199
+// 3. Razorpay Options
+var options = {
+    "key": "YOUR_RAZORPAY_KEY_ID", // <--- YAHAN APNI RAZORPAY KEY DALEIN (rzp_test_...)
+    "amount": "49900", // Amount in paise (49900 paise = ₹499)
     "currency": "INR",
-    "name": "Career Care",
-    "description": "Premium Test Series",
+    "name": "Career Care App",
+    "description": "Premium Subscription",
+    "image": "logo.png",
     "handler": function (response){
-
-      // PAYMENT SUCCESS
-      firebase.database().ref("students/"+mobile).update({
-        premium: true,
-        premiumDate: new Date().toLocaleDateString(),
-        razorpay_payment_id: response.razorpay_payment_id
-      });
-
-      alert("Premium Activated Successfully!");
-      window.location = "index.html?mobile="+mobile;
+        // PAYMENT SUCCESSFUL hone par ye code chalega
+        // alert("Payment ID: " + response.razorpay_payment_id);
+        
+        updateDatabase();
+    },
+    "prefill": {
+        "contact": userMobile // Login wala number auto-fill hoga
+    },
+    "theme": {
+        "color": "#1e88e5"
     }
-  };
+};
 
-  var rzp = new Razorpay(options);
-  rzp.open();
+var rzp1 = new Razorpay(options);
+
+document.getElementById('rzp-button1').onclick = function(e){
+    rzp1.open();
+    e.preventDefault();
+}
+
+function updateDatabase(){
+    // User ko Premium banana
+    firebase.database().ref("students/" + userMobile).update({
+        isPremium: true,
+        paymentDate: new Date().toISOString(),
+        amount: 499
+    }).then(() => {
+        localStorage.setItem("isPremium", "true"); // Local update
+        alert("🎉 Badhai ho! Aapka Premium Plan activate ho gaya hai.");
+        window.location = "index.html";
+    }).catch((error) => {
+        alert("Error activating plan: " + error.message);
+    });
 }
 </script>
 
