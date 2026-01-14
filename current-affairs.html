@@ -1,33 +1,176 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Daily Current Affairs</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Current Affairs</title>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
 <style>
-body{font-family:Arial;background:#f4f6f8;margin:0}
-header{background:#1e88e5;color:#fff;padding:12px;text-align:center}
-.btn{
-  background:white;
-  padding:14px;
-  margin:10px;
-  border-radius:6px;
-  border:1px solid #ddd;
-}
+  body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #f4f6f8; }
+  
+  /* Header */
+  header { background: #1e88e5; color: white; padding: 15px; display: flex; align-items: center; gap: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+  .back-btn { font-size: 24px; cursor: pointer; color: white; text-decoration: none; border:none; background:none;}
+  .title { font-size: 20px; font-weight: bold; }
+
+  .container { padding: 20px; max-width: 600px; margin: 0 auto; }
+
+  /* Today's Quiz Card */
+  .today-card {
+    background: linear-gradient(135deg, #43a047, #66bb6a); /* Green Theme */
+    color: white;
+    padding: 30px;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    margin-bottom: 30px;
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+  .today-card:active { transform: scale(0.98); }
+  .today-title { font-size: 24px; font-weight: bold; margin-bottom: 10px; }
+  .today-date { font-size: 16px; opacity: 0.9; }
+
+  /* Previous Section */
+  .section-title { font-size: 18px; color: #444; margin-bottom: 15px; border-left: 4px solid #1e88e5; padding-left: 10px; font-weight: bold;}
+  
+  .archive-list { display: flex; flex-direction: column; gap: 10px; }
+  
+  .archive-card {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    cursor: pointer;
+    border-left: 4px solid #ddd;
+  }
+  .archive-card:hover { border-left-color: #1e88e5; }
+  
+  .archive-date { font-size: 16px; font-weight: 600; color: #333; }
+  .arrow { color: #1e88e5; font-weight: bold; }
+
+  #loader { text-align: center; color: #666; display: none; margin-top: 20px;}
 </style>
 </head>
 <body>
 
-<header>Daily Current Affairs Quiz</header>
+<header>
+  <button class="back-btn" onclick="window.history.back()">&#8592;</button>
+  <div class="title">Daily Current Affairs</div>
+</header>
 
-<div class="btn" onclick="startCA()">📰 Today Quiz</div>
-<div class="btn">📅 Previous Quizzes (coming soon)</div>
+<div class="container">
+
+  <div class="today-card" onclick="startTodayQuiz()">
+    <div class="today-title">🚀 Start Today's Quiz</div>
+    <div class="today-date" id="display-date">Loading date...</div>
+  </div>
+
+  <div class="section-title">📅 Previous Quizzes</div>
+  <button onclick="loadPreviousQuizzes()" style="width:100%; padding:12px; margin-bottom:10px; background:#fff; border:1px solid #ccc; border-radius:6px;">
+    🔄 Refresh / Load Previous List
+  </button>
+  
+  <div id="loader">Fetching archives...</div>
+  <div id="archive-list" class="archive-list"></div>
+
+</div>
 
 <script>
-function startCA(){
-  localStorage.setItem("selectedExam","Current Affairs");
-  window.location.href="test.html";
+/* ================= CONFIGURATION ================= */
+const firebaseConfig = {
+  apiKey: "AIzaSyBCuefZt2WuNsNiFme8M-HUHm_BZYKJAi4",
+  authDomain: "career-care-afb64.firebaseapp.com",
+  databaseURL: "https://career-care-afb64-default-rtdb.firebaseio.com",
+  projectId: "career-care-afb64",
+  storageBucket: "career-care-afb64.firebasestorage.app",
+  messagingSenderId: "267890746286",
+  appId: "1:267890746286:web:2c38f0980119d01b145e3f"
+};
+if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+
+/* ================= LOGIC ================= */
+
+// 1. Get Today's Date in YYYY-MM-DD format
+const todayObj = new Date();
+const yyyy = todayObj.getFullYear();
+const mm = String(todayObj.getMonth() + 1).padStart(2, '0');
+const dd = String(todayObj.getDate()).padStart(2, '0');
+const todayString = `${yyyy}-${mm}-${dd}`; // e.g. "2024-01-14"
+
+// Display Date nicely on the card
+const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+document.getElementById("display-date").innerText = todayObj.toLocaleDateString('en-US', options);
+
+// FUNCTION: Start Today's Quiz
+function startTodayQuiz() {
+    // Check if quiz exists for today first (Optional, but good UX)
+    firebase.database().ref(`tests/current_affairs/${todayString}`).once('value')
+    .then(snapshot => {
+        if(snapshot.exists()){
+            // Bhejo Test Page par
+            window.location.href = `test.html?exam=current_affairs&topic=${todayString}`;
+        } else {
+            alert("⚠️ Aaj ka Quiz abhi upload nahi hua hai.\nKripya thodi der baad try karein.");
+        }
+    });
 }
+
+// FUNCTION: Load Previous Quizzes
+function loadPreviousQuizzes() {
+    const loader = document.getElementById("loader");
+    const listDiv = document.getElementById("archive-list");
+    
+    loader.style.display = "block";
+    listDiv.innerHTML = ""; // Clear list
+
+    firebase.database().ref(`tests/current_affairs`).orderByKey().limitToLast(30).once('value')
+    .then(snapshot => {
+        loader.style.display = "none";
+        if(!snapshot.exists()){
+            listDiv.innerHTML = "<p style='text-align:center'>No previous quizzes found.</p>";
+            return;
+        }
+
+        const data = snapshot.val();
+        // Convert Object keys (Dates) to Array and Reverse (Latest first)
+        let dates = Object.keys(data).sort().reverse();
+
+        dates.forEach(dateKey => {
+            // "Today" wale ko list mein mat dikhao, wo upar bada button hai
+            if(dateKey === todayString) return;
+
+            const div = document.createElement("div");
+            div.className = "archive-card";
+            div.innerHTML = `
+                <span class="archive-date">📅 ${formatDate(dateKey)}</span>
+                <span class="arrow">Play ▶</span>
+            `;
+            
+            div.onclick = () => {
+                window.location.href = `test.html?exam=current_affairs&topic=${dateKey}`;
+            };
+            
+            listDiv.appendChild(div);
+        });
+    });
+}
+
+// Helper: Make "2024-01-14" look like "14 Jan 2024"
+function formatDate(dateStr) {
+    const d = new Date(dateStr);
+    return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+// Page load hote hi list load kar lo
+loadPreviousQuizzes();
+
 </script>
 
 </body>
