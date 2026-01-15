@@ -88,6 +88,16 @@ if (!userUid) {
 } else {
     fetchHistory();
 }
+  // History item display logic
+data.forEach(item => {
+   card.innerHTML = `
+      <h3>${item.topic}</h3>
+      <p>Score: ${item.score}</p>
+      <button onclick="window.location.href='test.html?exam=${item.exam}&topic=${item.topic}'">
+         🔄 Retake Test
+      </button>
+   `;
+});
 
 function fetchHistory() {
     const historyRef = firebase.database().ref(`students/${userUid}/history`).orderByChild('timestamp');
