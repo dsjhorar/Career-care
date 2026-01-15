@@ -3,82 +3,32 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Exam News & Updates</title>
-
+<title>Exam News</title>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-
 <style>
-  body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #f4f6f8; padding-bottom: 70px; }
-
-  /* Header */
-  header { background: #1e88e5; color: white; padding: 15px; display: flex; align-items: center; gap: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; }
+  body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #f4f6f8; }
+  header { background: #fb8c00; color: white; padding: 15px; display: flex; align-items: center; gap: 15px; }
   .back-btn { font-size: 24px; cursor: pointer; color: white; text-decoration: none; border:none; background:none;}
-  .title { font-size: 20px; font-weight: bold; }
-
   .container { padding: 15px; max-width: 600px; margin: 0 auto; }
-
-  /* News Card */
-  .news-card {
-    background: white; padding: 20px; border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 15px;
-    position: relative; border-left: 5px solid #1e88e5;
-    transition: transform 0.2s;
-  }
-  .news-card:active { transform: scale(0.99); }
-
-  .news-date { font-size: 13px; color: #777; margin-bottom: 5px; display: flex; align-items: center; gap: 5px;}
-  .news-title { font-size: 18px; font-weight: bold; color: #333; margin-bottom: 8px; line-height: 1.4; }
-  .news-desc { font-size: 15px; color: #555; line-height: 1.5; margin-bottom: 15px; }
-
-  /* Buttons */
-  .action-btn {
-    background: #e3f2fd; color: #1565c0; text-decoration: none;
-    padding: 8px 15px; border-radius: 6px; font-size: 14px; font-weight: bold;
-    display: inline-block; border: 1px solid #bbdefb;
-  }
-  .action-btn:hover { background: #bbdefb; }
-
-  /* "NEW" Badge Animation */
-  .badge-new {
-    background: #ff5252; color: white; font-size: 10px; padding: 3px 8px;
-    border-radius: 20px; font-weight: bold; margin-left: 10px;
-    animation: blink 2s infinite; vertical-align: middle;
-  }
-  @keyframes blink { 0% {opacity: 1;} 50% {opacity: 0.5;} 100% {opacity: 1;} }
-
-  /* Ads */
-  .ad-banner { background: #eee; text-align: center; padding: 10px; font-size: 12px; color: #999; border: 1px dashed #ccc; margin-bottom: 15px; }
-  .ad-footer { position: fixed; bottom: 0; left: 0; width: 100%; background: white; border-top: 1px solid #ddd; padding: 10px 0; text-align: center; z-index: 99; }
-
-  #loader { text-align: center; margin-top: 50px; color: #666; }
-  .no-news { text-align: center; margin-top: 50px; color: #999; display: none; }
+  .news-card { background: white; padding: 20px; border-radius: 12px; margin-bottom: 15px; border-left: 5px solid #fb8c00; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+  .news-title { font-size: 18px; font-weight: bold; margin-bottom: 5px; }
+  .news-date { font-size: 12px; color: #666; margin-bottom: 10px; }
+  .loader { text-align: center; margin-top: 50px; color: #555; }
 </style>
 </head>
 <body>
 
 <header>
   <button class="back-btn" onclick="window.history.back()">&#8592;</button>
-  <div class="title">Latest Exam News</div>
+  <div style="font-size: 20px; font-weight: bold;">Exam News</div>
 </header>
 
-<div class="ad-banner">
-  📢 Google Ad Banner (Top)
-</div>
-
-<div class="container">
-  <div id="loader">🔄 Fetching updates...</div>
-  <div id="news-list"></div>
-  <div class="no-news" id="no-news">Abhi koi nayi khabar nahi hai.</div>
-</div>
-
-<div class="ad-footer">
-  📢 Google Ad Banner (Sticky Footer)
+<div class="container" id="news-container">
+  <div class="loader" id="loader">Fetching News...</div>
 </div>
 
 <script>
-/* ================= CONFIGURATION ================= */
-// Aapki wahi same API Key
 const firebaseConfig = {
   apiKey: "AIzaSyBCuefZt2WuNsNiFme8M-HUHm_BZYKJAi4",
   authDomain: "career-care-afb64.firebaseapp.com",
@@ -88,69 +38,27 @@ const firebaseConfig = {
 };
 if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 
-/* ================= LOGIC ================= */
+const container = document.getElementById("news-container");
 
-const newsList = document.getElementById("news-list");
-const loader = document.getElementById("loader");
-const noNews = document.getElementById("no-news");
-
-// Fetch News from 'exam_news' folder
-firebase.database().ref('exam_news').limitToLast(20).once('value')
-.then(snapshot => {
-    loader.style.display = "none";
-    
-    if(!snapshot.exists()){
-        noNews.style.display = "block";
+firebase.database().ref('exam_news').once('value').then(snap => {
+    document.getElementById("loader").style.display = "none";
+    if(!snap.exists()) {
+        container.innerHTML = "<p style='text-align:center'>No news updates available.</p>";
         return;
     }
-
-    const data = snapshot.val();
-    // Convert Object to Array & Reverse (Latest First)
-    let newsArray = Object.values(data).reverse();
-
-    newsArray.forEach(news => {
-        createNewsCard(news);
+    const data = snap.val();
+    Object.values(data).reverse().forEach(news => {
+        const div = document.createElement("div");
+        div.className = "news-card";
+        div.innerHTML = `
+            <div class="news-date">📅 ${news.date || "Just Now"}</div>
+            <div class="news-title">${news.title}</div>
+            <div>${news.description || ""}</div>
+            ${news.link ? `<br><a href="${news.link}" target="_blank" style="color:#fb8c00; font-weight:bold; text-decoration:none;">🔗 Read More</a>` : ""}
+        `;
+        container.appendChild(div);
     });
-})
-.catch(error => {
-    loader.style.display = "none";
-    noNews.innerText = "Error loading news.";
-    noNews.style.display = "block";
 });
-
-function createNewsCard(news) {
-    const card = document.createElement("div");
-    card.className = "news-card";
-
-    // Logic for "NEW" Badge (Agar khabar 3 din purani se kam hai)
-    const today = new Date();
-    const newsDate = new Date(news.date);
-    const diffTime = Math.abs(today - newsDate);
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
-    let badgeHtml = (diffDays <= 3) ? '<span class="badge-new">NEW</span>' : '';
-
-    // Check Link
-    let linkHtml = '';
-    if(news.link && news.link.length > 5) {
-        linkHtml = `<a href="${news.link}" target="_blank" class="action-btn">🔗 More Info / PDF</a>`;
-    }
-
-    card.innerHTML = `
-        <div class="news-date">📅 ${formatDate(news.date)} ${badgeHtml}</div>
-        <div class="news-title">${news.title}</div>
-        <div class="news-desc">${news.description}</div>
-        ${linkHtml}
-    `;
-
-    newsList.appendChild(card);
-}
-
-// Helper: Format Date
-function formatDate(dateStr) {
-    const options = { year: 'numeric', month: 'short', day: 'numeric' };
-    return new Date(dateStr).toLocaleDateString('en-GB', options);
-}
-
 </script>
 
 </body>
