@@ -135,6 +135,28 @@ function checkUserInDatabase(user) {
         }
     });
 }
+  function logout() {
+    if (confirm("Kya aap sach mein Logout karna chahte hain?")) {
+        
+        // Step 1: Firebase se session khatam karo
+        firebase.auth().signOut()
+        .then(() => {
+            console.log("Firebase Sign-out successful.");
+        })
+        .catch((error) => {
+            // Agar internet issue ya koi error aaye to bhi hume rukna nahi hai
+            console.error("Logout Error:", error);
+            alert("Warning: Firebase logout incomplete, but forcing local logout.");
+        })
+        .finally(() => {
+            // Step 2: Local Storage poora saaf karo (Sabse Zaroori)
+            localStorage.clear();
+            
+            // Step 3: Login Page par 'Replace' karo taaki Back button dabane par wapas na aaye
+            window.location.replace("login.html");
+        });
+    }
+  }
 
 function saveLocalAndRedirect(uid, isPremium) {
     localStorage.setItem("userUid", uid);
