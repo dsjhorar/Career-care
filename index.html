@@ -189,6 +189,19 @@
   </div>
 
 <script>
+  // Check for Notification on Home Load
+firebase.database().ref('notifications/latest').once('value').then(snap => {
+    if(snap.exists()){
+        let notif = snap.val();
+        let lastSeenId = localStorage.getItem("lastNotifId");
+        
+        // Agar ye notification user ne pehle nahi dekhi
+        if(lastSeenId != notif.id) {
+            alert("🔔 New Update: " + notif.message);
+            localStorage.setItem("lastNotifId", notif.id);
+        }
+    }
+});
   // Navigation Functions
   function openExam(examKey){
     // Ab user pehle Dashboard (exam.html) par jayega
