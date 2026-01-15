@@ -202,6 +202,37 @@ firebase.database().ref('notifications/latest').once('value').then(snap => {
         }
     }
 });
+  
+  // ... Firebase Config (Jo pehle tha wahi rakhein) ...
+  if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+
+  // 1. Login Function
+  function signInWithGoogle() {
+    var provider = new firebase.auth.GoogleAuthProvider();
+    
+    firebase.auth().signInWithPopup(provider)
+      .then((result) => {
+        // Success: User login ho gaya
+        console.log("User logged in:", result.user);
+        
+        // YAHAN CHANGE HAI: Agle page par bhejo
+        window.location.href = "test.html"; 
+      })
+      .catch((error) => {
+        // Error: Agar koi dikkat aayi
+        console.error("Login Error:", error.message);
+        alert("Login Failed: " + error.message);
+      });
+  }
+
+  // 2. Auto-Redirect (Agar pehle se login hai to wapas login page kyu dikhana?)
+  firebase.auth().onAuthStateChanged((user) => {
+    if (user) {
+      // Agar user pehle se login hai, to seedha andar bhejo
+      window.location.href = "current_affairs.html";
+    }
+  });
+
   // Navigation Functions
   function openExam(examKey){
     // Ab user pehle Dashboard (exam.html) par jayega
