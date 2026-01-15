@@ -3,92 +3,130 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Career Care Test</title>
+<title>Professional Quiz</title>
 
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
 <style>
-/* CSS Styles */
-body{margin:0;font-family:Arial;background:#f4f6f8}
-header{background:#1e88e5;color:#fff;padding:12px;text-align:center;font-size:18px}
-.container{padding:15px}
-.timer{background:#fb8c00;color:#fff;padding:8px;text-align:center;border-radius:6px;margin-bottom:10px;font-weight:bold}
-.question{font-size:17px;margin-bottom:12px; line-height: 1.5;}
-.option{background:#fff;border:1px solid #ddd;padding:12px;margin-bottom:8px;border-radius:6px;cursor:pointer}
-.option.selected{background:#e3f2fd;border-color:#1e88e5}
-.correct{background:#c8e6c9!important}
-.wrong{background:#ffcdd2!important}
-.btn{width:100%;padding:14px;margin-top:10px;border:none;border-radius:6px;color:#fff;font-size:16px;cursor:pointer}
-.prev{background:#5c6bc0}
-.skip{background:#fbc02d;color:#000}
-.next{background:#43a047}
-.submit{background:#d32f2f}
-.explanation{background:#fffde7;border:1px solid #fbc02d;padding:10px;margin-top:6px;border-radius:6px;font-size:14px}
-hr{margin:15px 0}
-#error-box { color: red; background: #ffebee; padding: 10px; border: 1px solid red; display: none; margin-bottom: 10px; }
+  body{margin:0;font-family:'Segoe UI', sans-serif;background:#f4f6f8; padding-bottom: 60px;} /* Padding for bottom Ad */
+  
+  /* HEADER & PROGRESS */
+  header{background:#1e88e5;color:#fff;padding:15px;text-align:center;font-weight:bold;font-size:18px; position: relative;}
+  .progress-bar { height: 5px; background: #90caf9; width: 100%; position: absolute; bottom: 0; left: 0; }
+  .progress-fill { height: 100%; background: #ffeb3b; width: 0%; transition: width 0.3s; }
+
+  .container{padding:15px; max-width: 800px; margin: 0 auto;}
+  
+  /* TIMER & INFO */
+  .info-bar { display: flex; justify-content: space-between; margin-bottom: 15px; font-weight: bold; color: #444; }
+  .timer-box { background: #fff3e0; color: #e65100; padding: 5px 10px; border-radius: 4px; border: 1px solid #ffb74d; }
+  
+  /* QUESTION CARD */
+  .question-card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+  .q-text { font-size: 18px; margin-bottom: 20px; color: #222; font-weight: 500; line-height: 1.5; }
+  
+  /* OPTIONS */
+  .option{background:#f8f9fa;border:2px solid #e9ecef;padding:15px;margin-bottom:10px;border-radius:8px;cursor:pointer; transition: all 0.2s;}
+  .option:hover { background: #e3f2fd; border-color: #90caf9; }
+  .option.selected{background:#e3f2fd;border-color:#1e88e5; font-weight: bold; color: #1565c0;}
+  
+  /* REVIEW COLORS */
+  .correct{background:#dcedc8!important; border-color: #8bc34a!important;}
+  .wrong{background:#ffcdd2!important; border-color: #e57373!important;}
+
+  /* BUTTONS */
+  .footer-btns { display: flex; gap: 10px; margin-top: 20px; }
+  .btn{flex:1; padding:12px; border:none; border-radius:6px; font-size:16px; cursor:pointer; font-weight: bold; color: white; transition: 0.2s opacity;}
+  .btn:active { opacity: 0.8; }
+  .prev{background:#78909c}
+  .next{background:#1e88e5}
+  .submit{background:#43a047; display: none;} /* Hidden initially */
+
+  /* ADS SECTIONS */
+  .ad-banner { width: 100%; background: #eee; text-align: center; padding: 10px; color: #999; font-size: 12px; margin: 10px 0; border: 1px dashed #ccc; }
+  .ad-bottom-fixed { position: fixed; bottom: 0; left: 0; width: 100%; height: 50px; background: #fff; border-top: 1px solid #ccc; z-index: 100; display: flex; justify-content: center; align-items: center;}
+
+  /* RESULT SECTION */
+  #result-screen { display: none; text-align: center; }
+  .rank-badge { background: #673ab7; color: white; padding: 5px 15px; border-radius: 20px; display: inline-block; margin-bottom: 10px; font-size: 14px;}
+  .score-circle { width: 120px; height: 120px; background: #1e88e5; color: white; font-size: 32px; line-height: 120px; border-radius: 50%; margin: 10px auto; font-weight: bold; }
+  
+  #loader { text-align: center; margin-top: 50px; }
 </style>
 </head>
-
 <body>
 
-<header id="testTitle">Test Loading...</header>
+<div class="ad-banner">
+  📢 Space for Top Banner Ad
+</div>
+
+<header>
+  <span id="exam-title">Test Loading...</span>
+  <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+</header>
 
 <div class="container">
-    <div id="error-box"></div>
-    <div class="timer">Time: <span id="time">00:00</span></div>
+  
+  <div id="loader">🔄 Fetching Questions...</div>
+  <div id="error-box" style="display:none; color:red; text-align:center;"></div>
 
-    <div id="quiz">
-      <div class="question" id="question">Connecting to Server...</div>
-      <div id="options"></div>
-
-      <button class="btn prev" onclick="prevQuestion()">⬅ Previous</button>
-      <button class="btn skip" onclick="skipQuestion()">⏭ Skip</button>
-      <button class="btn next" onclick="nextQuestion()">Next ➡</button>
-      <button class="btn submit" onclick="finishTest()">Submit Test</button>
+  <div id="quiz-interface" style="display:none;">
+    
+    <div class="info-bar">
+      <span>Q: <span id="q-num">1</span>/<span id="q-total">0</span></span>
+      <div class="timer-box">⏳ <span id="timer">00:00</span></div>
     </div>
 
-    <div id="result" style="display:none">
-      <h2>Result Analysis</h2>
-      <p id="scoreText"></p>
-      <div id="review"></div>
-      <button class="btn next" onclick="location.href='index.html'">Go Home</button>
-      <button class="btn prev" onclick="location.href='history.html'">View History</button>
+    <div class="question-card">
+      <div class="q-text" id="q-text"></div>
+      <div id="options-container"></div>
     </div>
+
+    <div class="ad-banner" style="margin-top:20px;">
+       📢 Space for Middle Ad
+    </div>
+
+    <div class="footer-btns">
+      <button class="btn prev" onclick="prevQ()">⬅ Prev</button>
+      <button class="btn next" id="btn-next" onclick="nextQ()">Next ➡</button>
+      <button class="btn submit" id="btn-submit" onclick="submitTest()">✅ Submit</button>
+    </div>
+  </div>
+
+  <div id="result-screen">
+    <h2>Result Analysis</h2>
+    <div class="rank-badge" id="rank-display">Calculating Rank...</div>
+    <div class="score-circle" id="final-score">0/0</div>
+    
+    <div style="margin-top:20px;">
+      <button class="btn next" onclick="window.location.reload()">🔄 Retake Test</button>
+      <button class="btn prev" onclick="window.location.href='index.html'">🏠 Home</button>
+    </div>
+
+    <h3 style="text-align:left; margin-top:30px;">📝 Solution Review</h3>
+    <div id="review-list" style="text-align:left;"></div>
+  </div>
+
+</div>
+
+<div class="ad-bottom-fixed">
+   📢 Space for Sticky Footer Ad
 </div>
 
 <script>
-/* ==============================================
-   1. CONFIGURATION (Apni Key Yahan Dalein)
-   ============================================== */
+/* ================= CONFIG ================= */
 const firebaseConfig = {
   apiKey: "AIzaSyBCuefZt2WuNsNiFme8M-HUHm_BZYKJAi4",
   authDomain: "career-care-afb64.firebaseapp.com",
   databaseURL: "https://career-care-afb64-default-rtdb.firebaseio.com",
   projectId: "career-care-afb64",
-  storageBucket: "career-care-afb64.firebasestorage.app",
-  messagingSenderId: "267890746286",
   appId: "1:267890746286:web:2c38f0980119d01b145e3f"
 };
-// Initialize Firebase
 if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 
-/* ==============================================
-   2. SECURITY CHECK (Premium Gatekeeper)
-   ============================================== */
-const isPremiumUser = localStorage.getItem("isPremium") === "true";
-const currentUrl = window.location.href;
-
-// Agar test URL mein "full_test" hai aur user Premium nahi hai
-if (currentUrl.includes("full_test") && !isPremiumUser) {
-    alert("🔒 Ye Content Locked hai!\nIs test ko dene ke liye Premium Plan upgrade karein.");
-    window.location.href = "premium.html";
-}
-
-/* ==============================================
-   3. TEST LOGIC
-   ============================================== */
+/* ================= LOGIC ================= */
 const params = new URLSearchParams(window.location.search);
 const exam = params.get("exam");
 const topic = params.get("topic");
@@ -96,128 +134,185 @@ const topic = params.get("topic");
 let questions = [];
 let current = 0;
 let userAnswers = {};
-let score = 0;
-let time = 10 * 60; // 10 Minutes
-let timer;
+let timeLeft = 0;
+let timerInterval;
 
-// -- Start Execution --
-if (!exam || !topic) {
-    showError("URL Error: Exam or Topic missing.");
+// Start
+if(exam && topic) {
+    loadData();
 } else {
-    // Path example: tests/first_grade/topic_wise/history/mughal_empire/questions
-    const dbPath = `tests/${exam}/${topic}/questions`;
-    document.getElementById("question").innerText = "Loading Questions...";
+    document.getElementById("loader").innerText = "⚠️ Invalid URL parameters.";
+}
+
+function loadData() {
+    // 1. Path Decision (Daily vs Standard)
+    let dbPath = (exam === 'current_affairs') ? `daily_quiz/${topic}/questions` : `tests/${exam}/${topic}/questions`;
     
-    firebase.database().ref(dbPath).once("value")
-    .then(snapshot => {
-        if (!snapshot.exists()) {
-            showError("No questions found.");
+    firebase.database().ref(dbPath).once('value').then(snap => {
+        document.getElementById("loader").style.display = "none";
+        if(!snap.exists()){
+            document.getElementById("error-box").innerText = "No questions found.";
+            document.getElementById("error-box").style.display="block";
             return;
         }
-        let data = snapshot.val();
-        questions = Array.isArray(data) ? data.filter(q=>q) : Object.values(data);
+
+        let data = snap.val();
+        questions = Array.isArray(data) ? data.filter(x=>x) : Object.values(data);
         
-        if(!questions.length) {
-            showError("Folder is empty.");
-            return;
-        }
+        // SETUP UI
+        document.getElementById("quiz-interface").style.display = "block";
+        document.getElementById("q-total").innerText = questions.length;
+        document.getElementById("exam-title").innerText = topic.replace(/_/g, " ").toUpperCase();
 
-        document.getElementById("testTitle").innerText = topic.replace(/_/g, " ").toUpperCase();
-        loadQuestion();
+        // 1. REQ: Timer = 45 sec per question
+        timeLeft = questions.length * 45; 
         startTimer();
-    })
-    .catch(error => {
-        showError("Error: " + error.message);
+
+        loadQuestion(0);
     });
 }
 
-/* ================= HELPER FUNCTIONS ================= */
-
-function loadQuestion(){
-    const q = questions[current];
-    document.getElementById("question").innerText = `Q${current+1}. ${q.q}`;
-    const optDiv = document.getElementById("options");
-    optDiv.innerHTML = "";
+function loadQuestion(index) {
+    current = index;
+    const q = questions[index];
     
-    Object.keys(q.options).forEach(key => {
+    // Progress Bar
+    let pct = ((index+1) / questions.length) * 100;
+    document.getElementById("progress-fill").style.width = `${pct}%`;
+
+    // Question Text (Handle 'q' vs 'question')
+    document.getElementById("q-text").innerText = `Q${index+1}. ` + (q.question || q.q);
+    document.getElementById("q-num").innerText = index + 1;
+
+    // Options
+    const div = document.getElementById("options-container");
+    div.innerHTML = "";
+    
+    let opts = q.options; // Can be Array or Object
+    let optsKeys = Array.isArray(opts) ? opts.map((_,i)=>i) : Object.keys(opts); // [0,1,2,3] or ["a","b"]
+
+    optsKeys.forEach(key => {
+        let val = Array.isArray(opts) ? opts[key] : opts[key]; // Text value
+        
         let btn = document.createElement("div");
-        btn.className = "option " + (userAnswers[current] === key ? "selected" : "");
-        btn.innerText = q.options[key];
-        btn.onclick = () => { userAnswers[current] = key; loadQuestion(); };
-        optDiv.appendChild(btn);
+        btn.className = "option";
+        if(userAnswers[index] == key) btn.classList.add("selected");
+        btn.innerText = val;
+        btn.onclick = () => {
+            userAnswers[index] = key;
+            loadQuestion(index); // Refresh to show selection
+        };
+        div.appendChild(btn);
     });
-}
 
-function nextQuestion(){
-    if(current < questions.length - 1) { current++; loadQuestion(); }
-}
-function prevQuestion(){
-    if(current > 0) { current--; loadQuestion(); }
-}
-function skipQuestion(){
-    nextQuestion();
-}
-
-function finishTest(){
-    clearInterval(timer);
-    document.getElementById("quiz").style.display = "none";
-    document.getElementById("result").style.display = "block";
-    
-    // Calculate Score
-    questions.forEach((q, i) => {
-        if(userAnswers[i] == q.answer) score++;
-        else if(userAnswers[i]) score -= 0.33; // Negative marking
-    });
-    
-    document.getElementById("scoreText").innerText = `Score: ${score.toFixed(2)} / ${questions.length}`;
-    
-    // === SAVE HISTORY (NEW FEATURE) ===
-    const userUid = localStorage.getItem("userUid");
-    if(userUid) {
-        const historyRef = firebase.database().ref(`students/${userUid}/history`);
-        historyRef.push({
-            exam: exam,
-            topic: topic,
-            score: score.toFixed(2),
-            totalQ: questions.length,
-            date: new Date().toLocaleDateString(),
-            timestamp: firebase.database.ServerValue.TIMESTAMP
-        });
+    // 2. REQ: Last Question Logic
+    if(index === questions.length - 1) {
+        document.getElementById("btn-next").style.display = "none";
+        document.getElementById("btn-submit").style.display = "block";
+    } else {
+        document.getElementById("btn-next").style.display = "block";
+        document.getElementById("btn-submit").style.display = "none";
     }
-    // ==================================
-
-    showReview();
 }
 
-function showReview(){
-    const rev = document.getElementById("review");
-    rev.innerHTML = "";
-    questions.forEach((q, i) => {
-        let ansStatus = userAnswers[i] == q.answer ? "correct" : (userAnswers[i] ? "wrong" : "");
-        let html = `<div><b>Q${i+1}. ${q.q}</b></div>`;
-        Object.keys(q.options).forEach(k => {
-            let cls = "";
-            if(k == q.answer) cls = "correct";
-            else if(userAnswers[i] == k) cls = "wrong";
-            html += `<div class="option ${cls}">${q.options[k]}</div>`;
-        });
-        html += `<div class="explanation">Logic: ${q.explanation || "N/A"}</div><hr>`;
-        rev.innerHTML += html;
-    });
-}
+function nextQ() { if(current < questions.length - 1) loadQuestion(current + 1); }
+function prevQ() { if(current > 0) loadQuestion(current - 1); }
 
-function startTimer(){
-    timer = setInterval(() => {
-        if(time-- <= 0) finishTest();
-        let m = Math.floor(time / 60), s = time % 60;
-        document.getElementById("time").innerText = `${m}:${s<10?"0":""}${s}`;
+function startTimer() {
+    timerInterval = setInterval(() => {
+        if(timeLeft <= 0) {
+            submitTest();
+        } else {
+            timeLeft--;
+            let m = Math.floor(timeLeft / 60);
+            let s = timeLeft % 60;
+            document.getElementById("timer").innerText = `${m}:${s<10?'0':''}${s}`;
+        }
     }, 1000);
 }
 
-function showError(msg) {
-    document.getElementById("error-box").style.display = "block";
-    document.getElementById("error-box").innerText = msg;
-    document.getElementById("question").innerText = "Loading Failed.";
+function submitTest() {
+    clearInterval(timerInterval);
+    document.getElementById("quiz-interface").style.display = "none";
+    document.getElementById("result-screen").style.display = "block";
+
+    let score = 0;
+    questions.forEach((q, i) => {
+        // Handle Answer Key (Index vs String)
+        let correct = q.correctAnswer !== undefined ? q.correctAnswer : q.answer;
+        if(userAnswers[i] == correct) score++;
+        else if(userAnswers[i] !== undefined) score -= 0.33; // Negative marking
+    });
+
+    score = score < 0 ? 0 : score; // No negative total
+    document.getElementById("final-score").innerText = `${score.toFixed(2)}/${questions.length}`;
+
+    // 3. REQ: Save History & Ranking
+    saveResult(score);
+    generateReview();
+}
+
+function saveResult(score) {
+    const userUid = localStorage.getItem("userUid") || "guest";
+    const userName = localStorage.getItem("userName") || "Student"; // Save name on login
+
+    // 1. Save to History (For "Forever History")
+    if(userUid !== "guest") {
+        firebase.database().ref(`students/${userUid}/history`).push({
+            exam: exam,
+            topic: topic,
+            score: score.toFixed(2),
+            date: new Date().toISOString()
+        });
+
+        // 2. Save to Leaderboard (For Ranking)
+        firebase.database().ref(`leaderboard/${exam}/${topic}/${userUid}`).set({
+            name: userName,
+            score: score
+        }).then(() => calculateRank(score));
+    } else {
+        document.getElementById("rank-display").innerText = "Login to see Rank";
+    }
+}
+
+function calculateRank(myScore) {
+    firebase.database().ref(`leaderboard/${exam}/${topic}`).orderByChild("score").once("value")
+    .then(snap => {
+        let scores = [];
+        snap.forEach(child => {
+            scores.push(child.val().score);
+        });
+        // Sort descending (High to Low)
+        scores.sort((a,b) => b - a);
+        
+        // Find my rank
+        let rank = scores.indexOf(myScore) + 1;
+        document.getElementById("rank-display").innerText = `🏆 Your Rank: ${rank} / ${scores.length}`;
+    });
+}
+
+function generateReview() {
+    const list = document.getElementById("review-list");
+    questions.forEach((q, i) => {
+        let correct = q.correctAnswer !== undefined ? q.correctAnswer : q.answer;
+        let uAns = userAnswers[i];
+        
+        let statusColor = (uAns == correct) ? "green" : "red";
+        
+        let div = document.createElement("div");
+        div.style = `background:white; padding:10px; margin-bottom:10px; border-left:4px solid ${statusColor}; box-shadow:0 2px 5px #eee;`;
+        div.innerHTML = `
+            <div style="font-weight:bold">Q${i+1}. ${q.question || q.q}</div>
+            <div style="font-size:14px; color:#555; margin-top:5px;">
+               Your Ans: <b>${uAns !== undefined ? uAns : "Skipped"}</b> | 
+               Correct: <b style="color:green">${correct}</b>
+            </div>
+            <div style="background:#fff9c4; font-size:13px; padding:5px; margin-top:5px;">
+               💡 ${q.explanation || "No explanation available."}
+            </div>
+        `;
+        list.appendChild(div);
+    });
 }
 </script>
 
