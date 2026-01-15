@@ -53,6 +53,9 @@
   }
   .google-btn:hover { background: #f8f9fa; border-color: #ccc; }
   .google-btn img { width: 20px; }
+
+  /* Loader Style */
+  #loader { display: none; color: #1e88e5; font-weight: bold; margin-top: 20px; }
 </style>
 </head>
 <body>
@@ -62,10 +65,12 @@
   <h2>Welcome Back</h2>
   <p>Start your exam preparation journey</p>
 
-  <button class="google-btn" onclick="googleLogin()">
+  <button class="google-btn" id="loginBtn" onclick="googleLogin()">
     <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="G">
     Sign in with Google
   </button>
+
+  <div id="loader">🔄 Checking Login...</div>
 </div>
 
 <script>
@@ -79,58 +84,70 @@ const firebaseConfig = {
   messagingSenderId: "267890746286",
   appId: "1:267890746286:web:2c38f0980119d01b145e3f"
 };
-// Initialize Firebase
 if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+
+/* ================= LOGIC ================= */
+
+// 1. Page Load hote hi check karo (Sabse Important Change)
+firebase.auth().onAuthStateChanged((user) => {
+    if (user) {
+        // Agar user login hai (ya redirect se wapas aaya hai)
+        showLoader(); // Button chupao, Loader dikhao
+        checkUserInDatabase(user);
+    } else {
+        // Agar koi login nahi hai
+        document.getElementById("loader").style.display = "none";
+        document.getElementById("loginBtn").style.display = "flex";
+    }
+});
 
 function googleLogin() {
     const provider = new firebase.auth.GoogleAuthProvider();
-    
-    // Mobile ke liye Redirect behtar hai (Popup ki jagah)
+    showLoader();
+    // Mobile ke liye Redirect best hai
     firebase.auth().signInWithRedirect(provider);
 }
 
-// Page load hone par check karein ki kya user Google se wapas aaya hai?
-firebase.auth().getRedirectResult()
-    .then((result) => {
-        if (result.user) {
-            // User login hokar wapas aa gaya
-            checkUserInDatabase(result.user);
-        }
-    }).catch((error) => {
-        console.error(error);
-        alert("Login Error: " + error.message);
-    });
-
 function checkUserInDatabase(user) {
-    // Ab hum User ID (UID) use karenge jo unique hoti hai
     const userRef = firebase.database().ref("students/" + user.uid);
     
     userRef.once('value').then(snapshot => {
         if (snapshot.exists()) {
             // --- OLD USER ---
             let data = snapshot.val();
-            saveLocalAndRedirect(user.uid, data.isPremium);
+            // Agar purana user hai, uska premium status uthao
+            saveLocalAndRedirect(user.uid, data.isPremium || false);
         } else {
             // --- NEW USER ---
-            // Naya data save karein (isPremium: false)
             userRef.set({
                 uid: user.uid,
                 name: user.displayName,
                 email: user.email,
                 photo: user.photoURL,
-                isPremium: false, // FREE USER
+                isPremium: false, 
                 joinDate: new Date().toISOString()
             }).then(() => {
                 saveLocalAndRedirect(user.uid, false);
+            }).catch(err => {
+                alert("Database Error: " + err.message);
+                document.getElementById("loader").style.display = "none";
             });
         }
     });
 }
 
 function saveLocalAndRedirect(uid, isPremium) {
-    localStorage.setItem("userUid", uid); // Phone ki jagah UID save kar rahe hain
+    localStorage.setItem("userUid", uid);
     localStorage.setItem("isPremium", isPremium);
+    
+    // Redirect to Dashboard
     window.location.href = "index.html";
+}
+
+// UI Helper
+function showLoader() {
+    document.getElementById("loginBtn").style.display = "none";
+    document.getElementById("loader").style.display = "block";
 }
 </script>
 
