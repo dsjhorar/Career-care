@@ -1,283 +1,88 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Career Care Home</title>
-  
-  <style>
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: #f4f6f8;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Career Care</title>
+    <style>
+        body { display: flex; justify-content: center; align-items: center; height: 100vh; background: #f0f2f5; font-family: sans-serif; flex-direction: column; }
+        .login-card { background: white; padding: 40px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); text-align: center; width: 300px; }
+        .btn-google { background: #db4437; color: white; padding: 12px; width: 100%; border: none; border-radius: 5px; font-size: 16px; cursor: pointer; margin-top: 20px; }
+        h2 { margin-bottom: 5px; color: #333; }
+        p { color: #666; font-size: 14px; }
+    </style>
 
-    /* --- Header Styles --- */
-    .main-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 15px;
-      background: #1e88e5;
-      color: white;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-      position: relative;
-    }
-
-    .header-left {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .header-left img {
-      height: 35px;
-      width: 35px;
-      object-fit: contain;
-      background: white; /* Logo ke piche safed background taaki wo blue par dikhe */
-      border-radius: 50%;
-      padding: 2px;
-    }
-
-    .app-name {
-      font-size: 22px;
-      font-weight: bold;
-    }
-
-    .menu-btn-icon {
-      font-size: 26px;
-      cursor: pointer;
-    }
-
-    /* --- Menu Dropdown Styles --- */
-    #menu {
-      display: none;
-      position: absolute;
-      top: 65px;
-      right: 10px;
-      background: white;
-      border-radius: 8px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-      z-index: 1000;
-      width: 200px;
-      overflow: hidden;
-    }
-
-    .menu-item {
-      padding: 14px;
-      cursor: pointer;
-      border-bottom: 1px solid #eee;
-      font-size: 15px;
-      color: #333;
-    }
-
-    .menu-item:hover {
-      background: #f5f5f5;
-    }
-
-    .logout {
-      color: red;
-      border-bottom: none;
-    }
-
-    /* --- Main Container Styles --- */
-    .container {
-      padding: 15px;
-      max-width: 600px;
-      margin: 0 auto;
-    }
-
-    /* --- Top Buttons (CA & News) --- */
-    .top-buttons button {
-      width: 100%;
-      padding: 15px;
-      margin-bottom: 12px;
-      font-size: 16px;
-      font-weight: 600;
-      border: none;
-      border-radius: 8px;
-      color: white;
-      cursor: pointer;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      transition: transform 0.1s;
-    }
-    .top-buttons button:active { transform: scale(0.98); }
-    
-    .ca-btn { background: #43a047; }
-    .news-btn { background: #fb8c00; }
-
-    h3 {
-      margin-top: 25px;
-      margin-bottom: 15px;
-      color: #444;
-      font-size: 18px;
-    }
-
-    /* --- Exam Grid & Buttons (COLOR CHANGED HERE) --- */
-    .exam-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
-    }
-
-    .exam-btn {
-      /* New Light Sky Blue Color */
-      background: #b3e5fc; 
-      color: #0277bd; /* Darker blue text for contrast */
-      font-weight: 600;
-      
-      border-radius: 10px;
-      padding: 20px 10px;
-      text-align: center;
-      font-size: 15px;
-      border: none; /* Border hata diya */
-      cursor: pointer;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-      transition: background 0.2s, transform 0.1s;
-    }
-
-    .exam-btn:hover {
-      background: #81d4fa; /* Thoda dark blue hover par */
-    }
-    .exam-btn:active {
-      transform: scale(0.98);
-    }
-
-  </style>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
 </head>
 <body>
 
-  <header class="main-header">
-    <div class="header-left">
-      <img src="logo.png" alt="Logo" onerror="this.style.display='none'"> 
-      <span class="app-name">Career Care</span>
+    <div class="login-card">
+        <h2>Welcome Back</h2>
+        <p>Login to continue your prep</p>
+        
+        <button class="btn-google" type="button" onclick="handleLogin()">
+            Sign in with Google
+        </button>
+        
+        <p id="status" style="margin-top:20px; color:blue; font-size:12px;">Waiting for action...</p>
     </div>
-    <span class="menu-btn-icon" onclick="toggleMenu()">⋮</span>
-  </header>
-
-  <div id="menu">
-    <div class="menu-item" onclick="openProfile()">👤 My Profile</div>
-    <div class="menu-item" onclick="openPremium()">⭐ Premium Test Series</div>
-    <div class="menu-item" onclick="window.location.href='history.html'" 
-     style="background:white; padding:15px; margin-bottom:10px; border-radius:8px; cursor:pointer; font-weight:bold; color:#333; box-shadow:0 2px 5px rgba(0,0,0,0.05);">
-     🕒 View Test History ➔
-    </div>
-    <div class="menu-item" onclick="shareApp()">📤 Share App</div>
-    <div class="menu-item logout" onclick="logout()">🚪 Logout</div>
-  </div>
-
-  <div class="container">
-
-    <div class="top-buttons">
-      <button class="ca-btn" onclick="goToCA()">📰 Daily Current Affairs Quiz</button>
-      <button class="news-btn" onclick="goToNews()">📢 Exam News</button>
-    </div>
-
-    <h3>Select Exam Category</h3>
-    <div class="exam-grid">
-      <div class="exam-btn" onclick="openExam('first_grade')">1st Grade</div>
-      <div class="exam-btn" onclick="openExam('second_grade')">2nd Grade</div>
-      <div class="exam-btn" onclick="openExam('reet')">REET</div>
-      <div class="exam-btn" onclick="openExam('forester')">Forester</div>
-      <div class="exam-btn" onclick="openExam('female_supervisor')">Female Supervisor</div>
-      <div class="exam-btn" onclick="openExam('agriculture_supervisor')">Agriculture Supervisor</div>
-      <div class="exam-btn" onclick="openExam('lab_assistant')">Lab Assistant</div>
-      <div class="exam-btn" onclick="openExam('rajasthan_si')">Rajasthan SI</div>
-      <div class="exam-btn" onclick="openExam('railway_group_d')">Railway Group D</div>
-    </div>
-
-  </div>
 
 <script>
-  // Check for Notification on Home Load
-firebase.database().ref('notifications/latest').once('value').then(snap => {
-    if(snap.exists()){
-        let notif = snap.val();
-        let lastSeenId = localStorage.getItem("lastNotifId");
-        
-        // Agar ye notification user ne pehle nahi dekhi
-        if(lastSeenId != notif.id) {
-            alert("🔔 New Update: " + notif.message);
-            localStorage.setItem("lastNotifId", notif.id);
+    // 1. CONFIGURATION
+    const firebaseConfig = {
+      apiKey: "AIzaSyBCuefZt2WuNsNiFme8M-HUHm_BZYKJAi4",
+      authDomain: "career-care-afb64.firebaseapp.com",
+      projectId: "career-care-afb64",
+      appId: "1:267890746286:web:2c38f0980119d01b145e3f"
+    };
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+
+    const statusText = document.getElementById("status");
+
+    // 2. CHECK IF ALREADY LOGGED IN (Auto-Redirect)
+    firebase.auth().onAuthStateChanged((user) => {
+        if (user) {
+            statusText.innerText = "User already found: " + user.email;
+            // Thoda ruk kar redirect karte hain taaki aap message padh sakein
+            setTimeout(() => {
+                goToApp();
+            }, 1000);
+        } else {
+            statusText.innerText = "No user logged in. Please click button.";
         }
-    }
-});
-  
-  // ... Firebase Config (Jo pehle tha wahi rakhein) ...
-  if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    });
 
-  // 1. Login Function
-  function signInWithGoogle() {
-    var provider = new firebase.auth.GoogleAuthProvider();
-    
-    firebase.auth().signInWithPopup(provider)
-      .then((result) => {
-        // Success: User login ho gaya
-        console.log("User logged in:", result.user);
+    // 3. LOGIN FUNCTION
+    function handleLogin() {
+        statusText.innerText = "Opening Google Popup...";
         
-        // YAHAN CHANGE HAI: Agle page par bhejo
-        window.location.href = "test.html"; 
-      })
-      .catch((error) => {
-        // Error: Agar koi dikkat aayi
-        console.error("Login Error:", error.message);
-        alert("Login Failed: " + error.message);
-      });
-  }
-
-  // 2. Auto-Redirect (Agar pehle se login hai to wapas login page kyu dikhana?)
-  firebase.auth().onAuthStateChanged((user) => {
-    if (user) {
-      // Agar user pehle se login hai, to seedha andar bhejo
-      window.location.href = "current_affairs.html";
+        var provider = new firebase.auth.GoogleAuthProvider();
+        
+        firebase.auth().signInWithPopup(provider)
+        .then((result) => {
+            // Success
+            statusText.innerText = "Login Success! Redirecting...";
+            alert("✅ Login Successful!\nEmail: " + result.user.email + "\nAb hum Current Affairs page par ja rahe hain.");
+            
+            // Redirect Function Call
+            goToApp();
+        })
+        .catch((error) => {
+            // Error Handling
+            console.error(error);
+            statusText.innerText = "Error: " + error.message;
+            alert("❌ ERROR AAYA HAI:\n" + error.message);
+        });
     }
-  });
 
-  // Navigation Functions
-  function openExam(examKey){
-    // Ab user pehle Dashboard (exam.html) par jayega
-    window.location.href = "exam.html?exam=" + examKey;
-  }
-
-  function goToCA(){ window.location.href = "current-affairs.html"; }
-  function goToNews(){ window.location.href = "exam-news.html"; }
-
-  // Menu Functions
-  function toggleMenu(){
-    const menu = document.getElementById("menu");
-    menu.style.display = menu.style.display === "block" ? "none" : "block";
-  }
-
-  function openProfile(){ window.location.href = "profile.html"; }
-  function openPremium(){ window.location.href = "premium.html"; }
-
-  function shareApp(){
-    if(navigator.share){
-      navigator.share({
-        title: 'Career Care App',
-        text: 'Download Career Care app for Govt exam preparation',
-        url: window.location.href
-      }).catch(err => console.log('Share failed:', err));
-    }else{
-      prompt("Copy this link to share:", window.location.href);
+    // 4. REDIRECT FUNCTION
+    function goToApp() {
+        // Yahan check karein ki aapki file ka naam 'current_affairs.html' hi hai na?
+        // Agar file kisi folder mein hai to path check karein.
+        window.location.href = "current_affairs.html";
     }
-  }
 
-  function logout(){
-    if(confirm("Are you sure you want to logout?")){
-        localStorage.clear();
-        window.location.href = "login.html";
-    }
-  }
-
-  // Close menu when clicking outside
-  document.addEventListener("click", function(e){
-    const menu = document.getElementById("menu");
-    const menuBtn = document.querySelector(".menu-btn-icon");
-    if(e.target !== menu && e.target !== menuBtn && !menu.contains(e.target)){
-      menu.style.display="none";
-    }
-  });
 </script>
 
 </body>
