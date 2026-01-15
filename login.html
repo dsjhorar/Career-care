@@ -10,167 +10,58 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
 <style>
-  body{
-    font-family: 'Segoe UI', sans-serif; 
-    background: #f0f2f5; 
-    display: flex; 
-    justify-content: center; 
-    align-items: center; 
-    height: 100vh; 
-    margin: 0;
-  }
-  .login-card {
-    background: white; 
-    padding: 40px; 
-    border-radius: 12px; 
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1); 
-    text-align: center; 
-    width: 90%; 
-    max-width: 350px;
-  }
-  .app-logo {
-    width: 80px; 
-    margin-bottom: 20px;
-  }
-  h2 { color: #333; margin-bottom: 5px; }
-  p { color: #666; margin-bottom: 30px; }
-  
-  .google-btn {
-    background: white;
-    color: #444;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    padding: 12px;
-    width: 100%;
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    transition: 0.2s;
-  }
-  .google-btn:hover { background: #f8f9fa; border-color: #ccc; }
-  .google-btn img { width: 20px; }
-
-  /* Loader Style */
-  #loader { display: none; color: #1e88e5; font-weight: bold; margin-top: 20px; }
+  body { font-family: sans-serif; background: #f0f2f5; display: flex; height: 100vh; justify-content: center; align-items: center; margin: 0; }
+  .login-card { background: white; padding: 40px; border-radius: 12px; text-align: center; width: 90%; max-width: 350px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+  .btn { background: white; border: 1px solid #ccc; padding: 12px; width: 100%; font-weight: bold; cursor: pointer; border-radius: 5px; margin-top: 20px; }
+  .btn:hover { background: #f9f9f9; }
+  #loader { display: none; color: #1e88e5; margin-top: 20px; font-weight: bold; }
 </style>
 </head>
 <body>
 
 <div class="login-card">
-  <img src="logo.png" alt="Logo" class="app-logo" onerror="this.src='https://via.placeholder.com/80?text=App'">
-  <h2>Welcome Back</h2>
-  <p>Start your exam preparation journey</p>
-
-  <button class="google-btn" id="loginBtn" onclick="googleLogin()">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="G">
-    Sign in with Google
+  <h2>Welcome</h2>
+  <p>Please login to continue</p>
+  
+  <button id="loginBtn" class="btn" onclick="googleLogin()">
+     Sign in with Google
   </button>
-
+  
   <div id="loader">🔄 Checking Login...</div>
 </div>
 
 <script>
-/* ================= CONFIGURATION ================= */
-const firebaseConfig = {
-  apiKey: "AIzaSyBCuefZt2WuNsNiFme8M-HUHm_BZYKJAi4",
-  authDomain: "career-care-afb64.firebaseapp.com",
-  databaseURL: "https://career-care-afb64-default-rtdb.firebaseio.com",
-  projectId: "career-care-afb64",
-  storageBucket: "career-care-afb64.firebasestorage.app",
-  messagingSenderId: "267890746286",
-  appId: "1:267890746286:web:2c38f0980119d01b145e3f"
-};
-if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+  const firebaseConfig = {
+    apiKey: "AIzaSyBCuefZt2WuNsNiFme8M-HUHm_BZYKJAi4",
+    authDomain: "career-care-afb64.firebaseapp.com",
+    databaseURL: "https://career-care-afb64-default-rtdb.firebaseio.com",
+    projectId: "career-care-afb64",
+    appId: "1:267890746286:web:2c38f0980119d01b145e3f"
+  };
+  if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 
-/* ================= LOGIC ================= */
-
-// 1. Page Load hote hi check karo (Sabse Important Change)
-firebase.auth().onAuthStateChanged((user) => {
+  // 🔄 AUTO REDIRECT LOGIC
+  firebase.auth().onAuthStateChanged((user) => {
     if (user) {
-        // Agar user login hai (ya redirect se wapas aaya hai)
-        showLoader(); // Button chupao, Loader dikhao
-        checkUserInDatabase(user);
-    } else {
-        // Agar koi login nahi hai
-        document.getElementById("loader").style.display = "none";
-        document.getElementById("loginBtn").style.display = "flex";
-    }
-});
-
-function googleLogin() {
-    const provider = new firebase.auth.GoogleAuthProvider();
-    showLoader();
-    // Mobile ke liye Redirect best hai
-    firebase.auth().signInWithRedirect(provider);
-}
-
-function checkUserInDatabase(user) {
-    const userRef = firebase.database().ref("students/" + user.uid);
-    
-    userRef.once('value').then(snapshot => {
-        if (snapshot.exists()) {
-            // --- OLD USER ---
-            let data = snapshot.val();
-            // Agar purana user hai, uska premium status uthao
-            saveLocalAndRedirect(user.uid, data.isPremium || false);
-        } else {
-            // --- NEW USER ---
-            userRef.set({
-                uid: user.uid,
-                name: user.displayName,
-                email: user.email,
-                photo: user.photoURL,
-                isPremium: false, 
-                joinDate: new Date().toISOString()
-            }).then(() => {
-                saveLocalAndRedirect(user.uid, false);
-            }).catch(err => {
-                alert("Database Error: " + err.message);
-                document.getElementById("loader").style.display = "none";
-            });
-        }
-    });
-}
-  function logout() {
-    if (confirm("Kya aap sach mein Logout karna chahte hain?")) {
+        // Agar user login hai, to button chupao aur Home par bhejo
+        document.getElementById("loginBtn").style.display = "none";
+        document.getElementById("loader").style.display = "block";
         
-        // Step 1: Firebase se session khatam karo
-        firebase.auth().signOut()
-        .then(() => {
-            console.log("Firebase Sign-out successful.");
-        })
-        .catch((error) => {
-            // Agar internet issue ya koi error aaye to bhi hume rukna nahi hai
-            console.error("Logout Error:", error);
-            alert("Warning: Firebase logout incomplete, but forcing local logout.");
-        })
-        .finally(() => {
-            // Step 2: Local Storage poora saaf karo (Sabse Zaroori)
-            localStorage.clear();
-            
-            // Step 3: Login Page par 'Replace' karo taaki Back button dabane par wapas na aaye
-            window.location.replace("login.html");
-        });
+        // Save user data & Redirect
+        localStorage.setItem("userUid", user.uid);
+        window.location.href = "index.html";
+    } else {
+        // User login nahi hai -> Button dikhao
+        document.getElementById("loader").style.display = "none";
+        document.getElementById("loginBtn").style.display = "block";
     }
+  });
+
+  function googleLogin() {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    // Redirect method use kar rahe hain taaki popup block na ho
+    firebase.auth().signInWithRedirect(provider);
   }
-
-function saveLocalAndRedirect(uid, isPremium) {
-    localStorage.setItem("userUid", uid);
-    localStorage.setItem("isPremium", isPremium);
-    
-    // Redirect to Dashboard
-    window.location.href = "index.html";
-}
-
-// UI Helper
-function showLoader() {
-    document.getElementById("loginBtn").style.display = "none";
-    document.getElementById("loader").style.display = "block";
-}
 </script>
 
 </body>
