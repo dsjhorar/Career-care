@@ -10,7 +10,7 @@
 
 <style>
   body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #f4f6f8; }
-  
+   
   /* Header */
   header { background: #1e88e5; color: white; padding: 15px; display: flex; align-items: center; gap: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
   .back-btn { font-size: 24px; cursor: pointer; color: white; text-decoration: none; border:none; background:none;}
@@ -36,9 +36,9 @@
 
   /* Previous Section */
   .section-title { font-size: 18px; color: #444; margin-bottom: 15px; border-left: 4px solid #1e88e5; padding-left: 10px; font-weight: bold;}
-  
+   
   .archive-list { display: flex; flex-direction: column; gap: 10px; }
-  
+   
   .archive-card {
     background: white;
     padding: 15px;
@@ -51,7 +51,7 @@
     border-left: 4px solid #ddd;
   }
   .archive-card:hover { border-left-color: #1e88e5; }
-  
+   
   .archive-date { font-size: 16px; font-weight: 600; color: #333; }
   .arrow { color: #1e88e5; font-weight: bold; }
 
@@ -76,7 +76,7 @@
   <button onclick="loadPreviousQuizzes()" style="width:100%; padding:12px; margin-bottom:10px; background:#fff; border:1px solid #ccc; border-radius:6px;">
     🔄 Refresh / Load Previous List
   </button>
-  
+   
   <div id="loader">Fetching archives...</div>
   <div id="archive-list" class="archive-list"></div>
 
@@ -110,11 +110,11 @@ document.getElementById("display-date").innerText = todayObj.toLocaleDateString(
 
 // FUNCTION: Start Today's Quiz
 function startTodayQuiz() {
-    // Check if quiz exists for today first (Optional, but good UX)
-    firebase.database().ref(`tests/current_affairs/${todayString}`).once('value')
+    // CHANGE: Ab ye 'daily_quiz' folder check karega
+    firebase.database().ref(`daily_quiz/${todayString}`).once('value')
     .then(snapshot => {
         if(snapshot.exists()){
-            // Bhejo Test Page par
+            // Bhejo Test Page par (exam=current_affairs rahega, test.html khud handle karega)
             window.location.href = `test.html?exam=current_affairs&topic=${todayString}`;
         } else {
             alert("⚠️ Aaj ka Quiz abhi upload nahi hua hai.\nKripya thodi der baad try karein.");
@@ -126,11 +126,12 @@ function startTodayQuiz() {
 function loadPreviousQuizzes() {
     const loader = document.getElementById("loader");
     const listDiv = document.getElementById("archive-list");
-    
+     
     loader.style.display = "block";
     listDiv.innerHTML = ""; // Clear list
 
-    firebase.database().ref(`tests/current_affairs`).orderByKey().limitToLast(30).once('value')
+    // CHANGE: List bhi 'daily_quiz' folder se aayegi
+    firebase.database().ref(`daily_quiz`).orderByKey().limitToLast(30).once('value')
     .then(snapshot => {
         loader.style.display = "none";
         if(!snapshot.exists()){
@@ -150,13 +151,13 @@ function loadPreviousQuizzes() {
             div.className = "archive-card";
             div.innerHTML = `
                 <span class="archive-date">📅 ${formatDate(dateKey)}</span>
-                <span class="arrow">Play ▶</span>
+                <span class="arrow">Play ▶️</span>
             `;
-            
+             
             div.onclick = () => {
                 window.location.href = `test.html?exam=current_affairs&topic=${dateKey}`;
             };
-            
+             
             listDiv.appendChild(div);
         });
     });
@@ -174,4 +175,3 @@ loadPreviousQuizzes();
 </script>
 
 </body>
-</html>
