@@ -4,28 +4,45 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Login - Career Care</title>
+
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
 <style>
-  body { font-family: sans-serif; background: #f0f2f5; display: flex; height: 100vh; justify-content: center; align-items: center; margin: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; display: flex; height: 100vh; justify-content: center; align-items: center; margin: 0; }
   .login-card { background: white; padding: 40px; border-radius: 12px; text-align: center; width: 90%; max-width: 350px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-  .btn { background: white; border: 1px solid #ccc; padding: 12px; width: 100%; font-weight: bold; cursor: pointer; border-radius: 5px; margin-top: 20px; display:flex; align-items:center; justify-content:center; gap:10px; }
-  #loader { display: none; color: #1e88e5; margin-top: 20px; font-weight: bold; }
+  .app-logo { width: 80px; margin-bottom: 20px; }
+  
+  .btn { 
+    background: white; border: 1px solid #ccc; padding: 12px; width: 100%; 
+    font-weight: bold; cursor: pointer; border-radius: 5px; margin-top: 20px; 
+    display:flex; align-items:center; justify-content:center; gap:10px; transition: 0.2s;
+  }
+  .btn:active { background: #e0e0e0; transform: scale(0.98); }
+  
+  #status-msg { margin-top: 20px; font-size: 14px; color: #555; }
+  #error-box { display:none; color: red; background: #ffebee; padding: 10px; margin-top: 15px; border-radius: 5px; font-size: 12px; border: 1px solid #ffcdd2;}
 </style>
 </head>
 <body>
 
 <div class="login-card">
-  <img src="logo.png" style="width:80px; margin-bottom:15px;" onerror="this.src='https://via.placeholder.com/80'">
-  <h2>Career Care</h2>
+  <img src="logo.png" class="app-logo" onerror="this.src='https://via.placeholder.com/80?text=App'">
+  <h2>Welcome Back</h2>
+  <p>Please sign in to continue</p>
+  
   <button id="loginBtn" class="btn" onclick="googleLogin()">
-     <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20"> Sign in with Google
+     <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20">
+     Sign in with Google
   </button>
-  <div id="loader">🔄 Logging in...</div>
+  
+  <div id="status-msg"></div>
+  <div id="error-box"></div>
 </div>
 
 <script>
+  /* CONFIGURATION */
   const firebaseConfig = {
     apiKey: "AIzaSyBCuefZt2WuNsNiFme8M-HUHm_BZYKJAi4",
     authDomain: "career-care-afb64.firebaseapp.com",
@@ -35,30 +52,69 @@
   };
   if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 
+  const statusDiv = document.getElementById("status-msg");
+  const errorBox = document.getElementById("error-box");
+  const btn = document.getElementById("loginBtn");
+
+  /* 1. AUTO-CHECK (Agar pehle se login hai) */
   firebase.auth().onAuthStateChanged((user) => {
     if (user) {
-        document.getElementById("loginBtn").style.display = "none";
-        document.getElementById("loader").style.display = "block";
+        statusDiv.innerText = "✅ Login Verified! Redirecting...";
+        statusDiv.style.color = "green";
+        btn.style.display = "none";
         
-        // Save Data & Redirect
-        localStorage.setItem("userName", user.displayName);
-        localStorage.setItem("userEmail", user.email);
-        if(user.photoURL) localStorage.setItem("userPhoto", user.photoURL);
-
-        firebase.database().ref("students/" + user.uid).update({
-            name: user.displayName,
-            email: user.email,
-            last_login: new Date().toISOString()
-        }).then(() => {
-            window.location.replace("index.html");
-        });
+        // Save & Redirect
+        saveDataAndGo(user);
     }
   });
 
+  /* 2. LOGIN FUNCTION (POPUP MODE - NO REDIRECT LOOP) */
   function googleLogin() {
-    const provider = new firebase.auth.GoogleAuthProvider();
-    firebase.auth().signInWithRedirect(provider);
+    statusDiv.innerText = "Opening Google Popup...";
+    errorBox.style.display = "none";
+    
+    var provider = new firebase.auth.GoogleAuthProvider();
+    
+    // Popup use kar rahe hain taaki page reload na ho
+    firebase.auth().signInWithPopup(provider)
+    .then((result) => {
+        statusDiv.innerText = "Success! Saving data...";
+        // onAuthStateChanged will handle the rest
+    })
+    .catch((error) => {
+        console.error(error);
+        statusDiv.innerText = "Login Failed.";
+        errorBox.style.display = "block";
+        
+        // Error Message Analysis
+        if(error.code === "auth/unauthorized-domain") {
+            errorBox.innerHTML = "<b>⚠️ Domain Error:</b><br>Firebase Console me 'Authorized Domains' me <b>dsjhorar.github.io</b> add karein.";
+        } else if(error.code === "auth/popup-closed-by-user") {
+            errorBox.innerText = "Aapne popup band kar diya. Dubara try karein.";
+        } else {
+            errorBox.innerText = "Error: " + error.message;
+        }
+    });
+  }
+
+  function saveDataAndGo(user) {
+      // Local Storage
+      localStorage.setItem("userUid", user.uid);
+      localStorage.setItem("userName", user.displayName);
+      localStorage.setItem("userEmail", user.email);
+      if(user.photoURL) localStorage.setItem("userPhoto", user.photoURL);
+
+      // Database Update
+      firebase.database().ref("students/" + user.uid).update({
+          name: user.displayName,
+          email: user.email,
+          last_login: new Date().toISOString()
+      }).then(() => {
+          // Redirect to Home
+          window.location.href = "index.html";
+      });
   }
 </script>
+
 </body>
 </html>
