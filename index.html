@@ -1,35 +1,107 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Career Care Home</title>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Career Care</title>
+  
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
-<style>
-  body { font-family: sans-serif; text-align: center; margin-top: 50px; }
-  #loading { font-size: 20px; color: blue; }
-  #content { display: none; }
-</style>
+  <style>
+    body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #f4f6f8; }
+    
+    /* 🛑 SMART LOADER (Loop Rokne ke liye) */
+    #smart-loader {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: white; z-index: 9999; display: flex; flex-direction: column;
+      justify-content: center; align-items: center; text-align: center;
+    }
+    .loader-spinner {
+      border: 4px solid #f3f3f3; border-top: 4px solid #1e88e5; border-radius: 50%;
+      width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 10px;
+    }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+    /* Main Content (Chupa hua) */
+    #dashboard-content { display: none; }
+
+    /* Header */
+    .main-header { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: #1e88e5; color: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    .header-left { display: flex; align-items: center; gap: 10px; }
+    .app-logo { height: 35px; width: 35px; background: white; border-radius: 50%; padding: 2px; object-fit: contain; }
+    .app-name { font-size: 20px; font-weight: bold; }
+    .menu-btn-icon { font-size: 26px; cursor: pointer; }
+
+    /* Menu */
+    #menu { display: none; position: absolute; top: 60px; right: 10px; background: white; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); width: 200px; z-index: 1000; overflow: hidden; }
+    .menu-item { padding: 14px; border-bottom: 1px solid #eee; cursor: pointer; color: #333; font-size: 15px; }
+    .menu-item:hover { background: #f5f5f5; }
+    .logout { color: red; font-weight: bold; }
+
+    .container { padding: 15px; max-width: 600px; margin: 0 auto; }
+    
+    /* Buttons */
+    .top-buttons button { width: 100%; padding: 15px; margin-bottom: 12px; border: none; border-radius: 8px; color: white; font-size: 16px; font-weight: 600; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .ca-btn { background: #43a047; }
+    .news-btn { background: #fb8c00; }
+
+    /* Dynamic Grid */
+    h3 { color: #444; margin-top: 20px; }
+    .exam-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    
+    /* Loading Skeleton for buttons */
+    .exam-loading { text-align: center; color: #777; grid-column: span 2; padding: 20px; }
+
+    .exam-btn { 
+      background: #b3e5fc; color: #0277bd; font-weight: 600; 
+      border-radius: 10px; padding: 20px 10px; text-align: center; 
+      cursor: pointer; transition: 0.2s; box-shadow: 0 2px 3px rgba(0,0,0,0.05);
+    }
+    .exam-btn:active { transform: scale(0.98); }
+  </style>
 </head>
 <body>
 
-  <div id="loading">
-      🔄 Checking your login status...<br>
-      <small>(Please wait 2-3 seconds)</small>
+  <div id="smart-loader">
+    <div class="loader-spinner"></div>
+    <div style="color: #555; font-size: 14px;">Loading App...</div>
   </div>
 
-  <div id="content">
-      <h1>🏠 Welcome to Dashboard!</h1>
-      <p>Login successfully verified.</p>
+  <div id="dashboard-content">
+    <header class="main-header">
+      <div class="header-left">
+        <img src="logo.png" class="app-logo" onerror="this.src='https://via.placeholder.com/40'"> 
+        <span class="app-name">Career Care</span>
+      </div>
+      <span class="menu-btn-icon" onclick="toggleMenu()">⋮</span>
+    </header>
+
+    <div id="menu">
+      <div class="menu-item" onclick="window.location.href='profile.html'">👤 My Profile</div>
+      <div class="menu-item" onclick="window.location.href='premium.html'">⭐ Premium Test</div>
+      <div class="menu-item" onclick="window.location.href='history.html'">🕒 History</div>
+      <div class="menu-item" onclick="shareApp()">📤 Share App</div>
+      <div class="menu-item logout" onclick="logout()">🚪 Logout</div>
+    </div>
+
+    <div class="container">
+      <div class="top-buttons">
+        <button class="ca-btn" onclick="window.location.href='current_affairs.html'">📰 Daily Current Affairs</button>
+        <button class="news-btn" onclick="window.location.href='exam-news.html'">📢 Exam News</button>
+      </div>
+
+      <h3>Select Exam Category</h3>
       
-      <button onclick="window.location.href='current_affairs.html'" style="padding:10px 20px; background:orange; color:white; border:none;">Current Affairs</button>
-      <br><br>
-      <button onclick="logout()" style="color:red;">Logout</button>
+      <div class="exam-grid" id="exam-container">
+        <div class="exam-loading">🔄 Loading Exams...</div>
+      </div>
+    </div>
   </div>
 
 <script>
+  /* CONFIGURATION */
   const firebaseConfig = {
     apiKey: "AIzaSyBCuefZt2WuNsNiFme8M-HUHm_BZYKJAi4",
     authDomain: "career-care-afb64.firebaseapp.com",
@@ -39,27 +111,85 @@
   };
   if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 
+  /* 🛑 AUTH LOGIC (Safe Mode) */
   firebase.auth().onAuthStateChanged((user) => {
     if (user) {
-        // LOGIN CONFIRMED
-        document.getElementById("loading").style.display = "none";
-        document.getElementById("content").style.display = "block";
+      // ✅ Login Successful
+      document.getElementById("smart-loader").style.display = "none";
+      document.getElementById("dashboard-content").style.display = "block";
+      
+      // Load Exams from Database
+      loadExamsFromDB();
+      
     } else {
-        // NOT LOGGED IN - Thoda ruk kar bhejo taaki loop na bane
-        document.getElementById("loading").innerHTML = "❌ Not Logged In.<br>Redirecting to Login Page...";
-        
-        setTimeout(() => {
-            window.location.href = "login.html";
-        }, 2000); // 2 second ka delay
+      // ❌ Not Logged In -> Redirect to Login
+      console.log("No user, redirecting to login...");
+      window.location.href = "login.html";
     }
   });
 
-  function logout() {
-      firebase.auth().signOut().then(() => {
-          localStorage.clear();
-          window.location.href = "login.html";
-      });
+  /* 📥 LOAD DYNAMIC BUTTONS */
+  function loadExamsFromDB() {
+    const grid = document.getElementById("exam-container");
+    
+    // Database 'exam_categories' folder se data layega
+    firebase.database().ref('exam_categories').once('value').then(snap => {
+      if(snap.exists()){
+        grid.innerHTML = ""; // Loading text hatao
+        const data = snap.val();
+        
+        // Loop through exams
+        Object.keys(data).forEach(key => {
+          const examName = data[key]; // e.g., "1st Grade"
+          
+          // Create Button HTML
+          const btn = document.createElement("div");
+          btn.className = "exam-btn";
+          btn.innerText = examName;
+          btn.onclick = () => openExam(key);
+          
+          grid.appendChild(btn);
+        });
+      } else {
+        grid.innerHTML = "<p style='grid-column:span 2; text-align:center;'>No exams found in database.</p>";
+      }
+    });
   }
+
+  function logout() {
+    if (confirm("Aap Logout karna chahte hain ?")) {
+        localStorage.clear();
+        firebase.auth().signOut().then(() => {
+            window.location.replace("login.html");
+        });
+    }
+  }
+
+  function toggleMenu(){
+    const menu = document.getElementById("menu");
+    menu.style.display = menu.style.display === "block" ? "none" : "block";
+  }
+
+  function shareApp(){
+    if(navigator.share){
+      navigator.share({ title: 'Career Care', text: 'Best Govt Exam Preparation App', url: window.location.href });
+    } else {
+      prompt("Copy Link:", window.location.href);
+    }
+  }
+
+  function openExam(key) {
+    window.location.href = "exam.html?exam=" + key;
+  }
+  
+  // Close menu on outside click
+  document.addEventListener("click", function(e){
+    const menu = document.getElementById("menu");
+    const menuBtn = document.querySelector(".menu-btn-icon");
+    if(e.target !== menu && e.target !== menuBtn && !menu.contains(e.target)){
+      menu.style.display="none";
+    }
+  });
 </script>
 
 </body>
