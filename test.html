@@ -98,6 +98,7 @@
   <div id="result-screen">
     <h2>Result Analysis</h2>
     <div class="rank-badge" id="rank-display">Calculating Rank...</div>
+    
     <div class="score-circle" id="final-score">0/0</div>
     
     <div style="margin-top:20px;">
@@ -241,80 +242,4 @@ function submitTest() {
         // Handle Answer Key (Index vs String)
         let correct = q.correctAnswer !== undefined ? q.correctAnswer : q.answer;
         if(userAnswers[i] == correct) score++;
-        else if(userAnswers[i] !== undefined) score -= 0.33; // Negative marking
-    });
-
-    score = score < 0 ? 0 : score; // No negative total
-    document.getElementById("final-score").innerText = `${score.toFixed(2)}/${questions.length}`;
-
-    // 3. REQ: Save History & Ranking
-    saveResult(score);
-    generateReview();
-}
-
-function saveResult(score) {
-    const userUid = localStorage.getItem("userUid") || "guest";
-    const userName = localStorage.getItem("userName") || "Student"; // Save name on login
-
-    // 1. Save to History (For "Forever History")
-    if(userUid !== "guest") {
-        firebase.database().ref(`students/${userUid}/history`).push({
-            exam: exam,
-            topic: topic,
-            score: score.toFixed(2),
-            date: new Date().toISOString()
-        });
-
-        // 2. Save to Leaderboard (For Ranking)
-        firebase.database().ref(`leaderboard/${exam}/${topic}/${userUid}`).set({
-            name: userName,
-            score: score
-        }).then(() => calculateRank(score));
-    } else {
-        document.getElementById("rank-display").innerText = "Login to see Rank";
-    }
-}
-
-function calculateRank(myScore) {
-    firebase.database().ref(`leaderboard/${exam}/${topic}`).orderByChild("score").once("value")
-    .then(snap => {
-        let scores = [];
-        snap.forEach(child => {
-            scores.push(child.val().score);
-        });
-        // Sort descending (High to Low)
-        scores.sort((a,b) => b - a);
-        
-        // Find my rank
-        let rank = scores.indexOf(myScore) + 1;
-        document.getElementById("rank-display").innerText = `🏆 Your Rank: ${rank} / ${scores.length}`;
-    });
-}
-
-function generateReview() {
-    const list = document.getElementById("review-list");
-    questions.forEach((q, i) => {
-        let correct = q.correctAnswer !== undefined ? q.correctAnswer : q.answer;
-        let uAns = userAnswers[i];
-        
-        let statusColor = (uAns == correct) ? "green" : "red";
-        
-        let div = document.createElement("div");
-        div.style = `background:white; padding:10px; margin-bottom:10px; border-left:4px solid ${statusColor}; box-shadow:0 2px 5px #eee;`;
-        div.innerHTML = `
-            <div style="font-weight:bold">Q${i+1}. ${q.question || q.q}</div>
-            <div style="font-size:14px; color:#555; margin-top:5px;">
-               Your Ans: <b>${uAns !== undefined ? uAns : "Skipped"}</b> | 
-               Correct: <b style="color:green">${correct}</b>
-            </div>
-            <div style="background:#fff9c4; font-size:13px; padding:5px; margin-top:5px;">
-               💡 ${q.explanation || "No explanation available."}
-            </div>
-        `;
-        list.appendChild(div);
-    });
-}
-</script>
-
-</body>
-</html>
+        else if(userAnswers[i] !== undefined) score
