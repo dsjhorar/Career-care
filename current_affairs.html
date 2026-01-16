@@ -63,9 +63,9 @@
   }
   .option-btn.selected { border-color: #1e88e5; background: #e3f2fd; color: #1565c0; font-weight: 600; }
 
-  /* --- NAVIGATION BUTTONS (Updated Location) --- */
+  /* BUTTONS ROW (Just below Question Box) */
   .button-row { 
-      margin-top: 20px; /* Space from Question Box */
+      margin-top: 20px;
       display: flex; justify-content: space-between; align-items: center; 
       gap: 10px;
   }
@@ -84,8 +84,12 @@
       background: white; padding: 30px; border-radius: 15px; text-align: center; margin-bottom: 20px; 
       box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
   }
-  .score-big { font-size: 40px; font-weight: bold; color: #1e88e5; display: block; }
-  
+  .score-big { font-size: 40px; font-weight: bold; color: #1e88e5; display: block; margin-bottom: 5px; }
+  .rank-box { 
+      background: #fff8e1; color: #f57f17; font-weight: bold; padding: 8px 15px; 
+      border-radius: 20px; display: inline-block; margin-bottom: 15px; border: 1px solid #ffca28;
+  }
+
   .analysis-item { background: white; padding: 15px; border-radius: 10px; margin-bottom: 15px; border: 1px solid #eee; }
   .ans-status { font-size: 12px; font-weight: bold; padding: 3px 8px; border-radius: 4px; margin-bottom: 5px; display: inline-block; }
   .status-correct { background: #e8f5e9; color: #2e7d32; }
@@ -142,8 +146,11 @@
   <div id="result-view">
       <div class="score-card">
           <h2>Test Submitted!</h2>
+          
           <span class="score-big" id="final-score">0/0</span>
-          <p id="time-taken">Time Taken: 00:00</p>
+          <div id="rank-display" class="rank-box">🏆 Calculating Rank...</div>
+          
+          <p id="time-taken" style="color:#666; font-size:14px;">Time Taken: 00:00</p>
           <button class="nav-btn btn-next" onclick="handleBack()">Go Home</button>
       </div>
       <div class="section-label">📝 Detailed Analysis</div>
@@ -167,7 +174,7 @@
   let allDates = [];
   let currentQuestions = [];
   let currentQIndex = 0;
-  let userAnswers = {}; // { 0: 2, 1: null, 2: 0 } (Index: OptionIndex)
+  let userAnswers = {}; 
   let timerInterval;
   let timeRemaining = 0;
   let totalTime = 0;
@@ -213,7 +220,7 @@
       if(allDates.length > 0) loadQuiz(allDates[0]);
   }
 
-  /* 3. LOAD QUIZ & START TEST */
+  /* 3. LOAD QUIZ */
   function loadQuiz(dateKey) {
       document.getElementById("main-loader").style.display = "block";
       document.getElementById("home-view").style.display = "none";
@@ -242,7 +249,7 @@
       });
   }
 
-  /* 4. RENDER SINGLE QUESTION */
+  /* 4. RENDER QUESTION */
   function renderQuestion() {
       const q = currentQuestions[currentQIndex];
       
@@ -309,7 +316,7 @@
       nextQuestion();
   }
 
-  /* 6. TIMER LOGIC */
+  /* 6. TIMER */
   function startTimer() {
       const timerBadge = document.getElementById("timer-display");
       timerBadge.style.display = "block";
@@ -335,7 +342,7 @@
       document.getElementById("timer-display").innerText = `${m}:${s < 10 ? '0'+s : s}`;
   }
 
-  /* 7. FINISH & RESULTS */
+  /* 7. FINISH & SIMULATED RANK LOGIC */
   function finishQuiz() {
       clearInterval(timerInterval);
       document.getElementById("quiz-view").style.display = "none";
@@ -374,7 +381,31 @@
           analysisDiv.appendChild(card);
       });
 
-      document.getElementById("final-score").innerText = `${score}/${currentQuestions.length}`;
+      // Update Score
+      const totalQ = currentQuestions.length;
+      document.getElementById("final-score").innerText = `${score}/${totalQ}`;
+      
+      // --- FAKE RANK MAGIC (Algorithm) ---
+      // Step 1: Ek Fake Total Students ka number socho (e.g. 1500 se 3000 ke beech)
+      const fakeTotalStudents = Math.floor(Math.random() * (3000 - 1500 + 1)) + 1500;
+      
+      // Step 2: Percentage nikalo
+      const percentage = (score / totalQ); // 0.0 to 1.0
+      
+      // Step 3: Rank calculate karo (Jitna zyada score, utni kam rank number)
+      // Agar 100% hai, to Rank 1 se 50 ke beech kuch bhi
+      // Agar 0% hai, to Rank almost last
+      
+      let estimatedRank = Math.floor(fakeTotalStudents * (1 - percentage));
+      
+      // Thoda randomness add karo taaki har baar same na lage
+      if(estimatedRank < 1) estimatedRank = Math.floor(Math.random() * 10) + 1; // Top 10
+      if(estimatedRank > fakeTotalStudents) estimatedRank = fakeTotalStudents;
+      
+      // Display Rank
+      document.getElementById("rank-display").innerText = `🏆 Rank: ${estimatedRank} / ${fakeTotalStudents}`;
+      
+      // Time Taken
       const timeTaken = totalTime - timeRemaining;
       const tm = Math.floor(timeTaken / 60);
       const ts = timeTaken % 60;
