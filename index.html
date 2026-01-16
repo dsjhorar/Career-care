@@ -12,14 +12,14 @@
   <style>
     body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #f4f6f8; }
     
-    /* 1. LOADER SCREEN */
+    /* 1. LOADER */
     #page-loader { 
       position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
       background: white; z-index: 9999; display: flex; 
       justify-content: center; align-items: center; font-size: 18px; color: #1e88e5; font-weight: bold;
     }
 
-    /* 2. LOGIN REQUIRED SCREEN (Loop Breaker) */
+    /* 2. LOGIN GATE (Loop Breaker Screen) */
     #login-gate {
       display: none; height: 100vh; flex-direction: column; justify-content: center; align-items: center; text-align: center;
     }
@@ -28,39 +28,30 @@
       font-size: 18px; border: none; border-radius: 8px; cursor: pointer; margin-top: 20px;
     }
 
-    /* 3. MAIN DASHBOARD (Initially Hidden) */
+    /* 3. DASHBOARD */
     #main-content { display: none; }
 
-    /* Header (Simple: No Profile) */
+    /* Header & Design */
     .main-header { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: #1e88e5; color: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
     .header-left { display: flex; align-items: center; gap: 10px; }
     .app-logo { height: 35px; width: 35px; background: white; border-radius: 50%; padding: 2px; object-fit: contain; }
     .app-name { font-size: 20px; font-weight: bold; }
     .menu-btn-icon { font-size: 26px; cursor: pointer; }
 
-    /* Menu Dropdown */
     #menu { display: none; position: absolute; top: 60px; right: 10px; background: white; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); width: 200px; z-index: 1000; overflow: hidden; }
     .menu-item { padding: 14px; border-bottom: 1px solid #eee; cursor: pointer; color: #333; font-size: 15px; }
     .menu-item:hover { background: #f5f5f5; }
     .logout { color: red; font-weight: bold; }
 
-    /* Container & Buttons */
     .container { padding: 15px; max-width: 600px; margin: 0 auto; }
     .top-buttons button { width: 100%; padding: 15px; margin-bottom: 12px; border: none; border-radius: 8px; color: white; font-size: 16px; font-weight: 600; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
     .ca-btn { background: #43a047; }
     .news-btn { background: #fb8c00; }
 
-    /* Dynamic Grid */
     h3 { color: #444; margin-top: 20px; }
     .exam-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-    
-    .exam-btn { 
-      background: #b3e5fc; color: #0277bd; font-weight: 600; 
-      border-radius: 10px; padding: 20px 10px; text-align: center; 
-      cursor: pointer; transition: 0.2s; 
-    }
+    .exam-btn { background: #b3e5fc; color: #0277bd; font-weight: 600; border-radius: 10px; padding: 20px 10px; text-align: center; cursor: pointer; transition: 0.2s; }
     .exam-btn:active { transform: scale(0.98); }
-    
     .loading-text { grid-column: span 2; text-align: center; color: #777; padding: 20px; }
   </style>
 </head>
@@ -70,9 +61,9 @@
 
   <div id="login-gate">
     <img src="logo.png" style="width:80px; margin-bottom:20px;" onerror="this.style.display='none'">
-    <h2>Welcome Back</h2>
-    <p>Please login to verify access.</p>
-    <button class="login-btn-big" onclick="window.location.href='login.html'">Login Page</button>
+    <h2>Welcome</h2>
+    <p>Please login to continue.</p>
+    <button class="login-btn-big" onclick="window.location.href='login.html'">Go to Login</button>
   </div>
 
   <div id="main-content">
@@ -101,7 +92,7 @@
       <h3>Select Exam Category</h3>
       
       <div class="exam-grid" id="exam-container">
-        <div class="loading-text">🔄 Loading Exams ...</div>
+        <div class="loading-text">🔄 Loading Exams from Database...</div>
       </div>
     </div>
   </div>
@@ -118,44 +109,36 @@
 
   /* 🛑 ANTI-LOOP LOGIC */
   firebase.auth().onAuthStateChanged((user) => {
-    // Loader Hatao
     document.getElementById("page-loader").style.display = "none";
 
     if (user) {
       // ✅ Login Hai -> Dashboard Dikhao
       document.getElementById("main-content").style.display = "block";
       document.getElementById("login-gate").style.display = "none";
-      loadExams(); // Load unlimited buttons
+      loadExams(); // Unlimited buttons load karo
     } else {
-      // ❌ Login Nahi Hai -> Login Gate Dikhao (Redirect Mat Karo)
+      // ❌ Login Nahi Hai -> Login Button Dikhao (Redirect Mat Karo)
       document.getElementById("main-content").style.display = "none";
       document.getElementById("login-gate").style.display = "flex";
     }
   });
 
-  /* 📥 UNLIMITED BUTTONS LOADER */
+  /* 📥 UNLIMITED BUTTONS FUNCTION */
   function loadExams() {
     const grid = document.getElementById("exam-container");
-    
-    // Database 'exam_categories' folder padho
     firebase.database().ref('exam_categories').once('value').then(snap => {
       if(snap.exists()){
-        grid.innerHTML = ""; // Clear loader text
+        grid.innerHTML = ""; 
         const data = snap.val();
-        
-        // Jitne exams database mein hain, utne buttons banao
         Object.keys(data).forEach(key => {
-          const examName = data[key]; // Value: "1st Grade"
-          
           const btn = document.createElement("div");
           btn.className = "exam-btn";
-          btn.innerText = examName;
+          btn.innerText = data[key];
           btn.onclick = () => { window.location.href = "exam.html?exam=" + key; };
-          
           grid.appendChild(btn);
         });
       } else {
-        grid.innerHTML = "<div class='loading-text'>No exams found in Database.<br>Please add 'exam_categories' in Firebase.</div>";
+        grid.innerHTML = "<div class='loading-text'>No exams found.<br>Add 'exam_categories' in Firebase.</div>";
       }
     });
   }
@@ -170,11 +153,8 @@
   }
 
   function shareApp(){
-    if(navigator.share){
-      navigator.share({ title: 'Career Care', text: 'Prep App', url: window.location.href });
-    } else {
-      prompt("Copy Link:", window.location.href);
-    }
+    if(navigator.share){ navigator.share({ title: 'Career Care', url: window.location.href }); } 
+    else { prompt("Copy Link:", window.location.href); }
   }
 
   function toggleMenu(){
@@ -190,6 +170,5 @@
     }
   });
 </script>
-
 </body>
 </html>
