@@ -242,4 +242,80 @@ function submitTest() {
         // Handle Answer Key (Index vs String)
         let correct = q.correctAnswer !== undefined ? q.correctAnswer : q.answer;
         if(userAnswers[i] == correct) score++;
-        else if(userAnswers[i] !== undefined) score
+        else if(userAnswers[i] !== undefined) score -= 0.33; // Negative marking
+    });
+
+    // Ensure score is not negative for display
+    let displayScore = score < 0 ? 0 : score;
+    document.getElementById("final-score").innerText = `${displayScore.toFixed(2)}/${questions.length}`;
+
+    // 3. Save History (Real) & Show Rank (Simulated)
+    saveResult(displayScore);
+    
+    // Yahan hum SIMULATED rank call kar rahe hain
+    calculateSimulatedRank(displayScore, questions.length);
+
+    generateReview();
+}
+
+function saveResult(score) {
+    const userUid = localStorage.getItem("userUid") || "guest";
+    
+    // Only Save History (Rank ab fake dikha rahe hain, to leaderboard save zaroori nahi for display)
+    if(userUid !== "guest") {
+        firebase.database().ref(`students/${userUid}/history`).push({
+            exam: exam,
+            topic: topic,
+            score: score.toFixed(2),
+            date: new Date().toISOString()
+        });
+    }
+}
+
+// === NEW: SIMULATED RANK LOGIC (Fake User System) ===
+function calculateSimulatedRank(score, totalQuestions) {
+    // 1. Fake Total Students (e.g. 1500 se 3500 ke beech random)
+    const fakeTotalStudents = Math.floor(Math.random() * (7500 - 1500 + 1)) + 1500;
+    
+    // 2. Percentage Nikalo
+    let safeScore = score < 0 ? 0 : score;
+    const percentage = safeScore / totalQuestions;
+
+    // 3. Rank Calculate karo (High score = Low Rank Number)
+    let estimatedRank = Math.floor(fakeTotalStudents * (1 - percentage));
+    
+    // 4. Thoda Logic: Agar full marks hain to Rank 1-10 mein ho
+    if (estimatedRank < 1) estimatedRank = Math.floor(Math.random() * 10) + 1;
+    if (estimatedRank > fakeTotalStudents) estimatedRank = fakeTotalStudents;
+
+    // 5. Display
+    document.getElementById("rank-display").innerText = `🏆 Rank: ${estimatedRank} / ${fakeTotalStudents}`;
+}
+
+function generateReview() {
+    const list = document.getElementById("review-list");
+    questions.forEach((q, i) => {
+        let correct = q.correctAnswer !== undefined ? q.correctAnswer : q.answer;
+        let uAns = userAnswers[i];
+        
+        let statusColor = (uAns == correct) ? "green" : "red";
+        
+        let div = document.createElement("div");
+        div.style = `background:white; padding:10px; margin-bottom:10px; border-left:4px solid ${statusColor}; box-shadow:0 2px 5px #eee;`;
+        div.innerHTML = `
+            <div style="font-weight:bold">Q${i+1}. ${q.question || q.q}</div>
+            <div style="font-size:14px; color:#555; margin-top:5px;">
+               Your Ans: <b>${uAns !== undefined ? uAns : "Skipped"}</b> | 
+               Correct: <b style="color:green">${correct}</b>
+            </div>
+            <div style="background:#fff9c4; font-size:13px; padding:5px; margin-top:5px;">
+               💡 ${q.explanation || "No explanation available."}
+            </div>
+        `;
+        list.appendChild(div);
+    });
+}
+</script>
+
+</body>
+</html>
