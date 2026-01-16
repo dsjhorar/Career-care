@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Login - Career Care</title>
+<title>Login Check</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
@@ -10,27 +10,30 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
 <style>
-  body { font-family: sans-serif; background: #f0f2f5; display: flex; height: 100vh; justify-content: center; align-items: center; margin: 0; }
-  .login-card { background: white; padding: 30px; border-radius: 12px; text-align: center; width: 90%; max-width: 350px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-  .btn { background: white; border: 1px solid #ccc; padding: 12px; width: 100%; font-weight: bold; cursor: pointer; border-radius: 5px; margin-top: 20px; display: flex; justify-content: center; align-items: center; gap: 10px; }
-  .btn:hover { background: #f9f9f9; }
-  #status { margin-top: 15px; font-size: 14px; color: #666; }
-  #error-msg { color: red; font-size: 13px; margin-top: 10px; display: none; background: #ffebee; padding: 5px; border-radius: 4px; }
+  body { font-family: sans-serif; background: #eee; display: flex; height: 100vh; justify-content: center; align-items: center; text-align: center; }
+  .card { background: white; padding: 30px; border-radius: 10px; width: 90%; max-width: 350px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+  button { padding: 12px 20px; font-size: 16px; cursor: pointer; background: #1e88e5; color: white; border: none; border-radius: 5px; margin-top: 10px; width: 100%; }
+  .success-box { background: #e8f5e9; color: #2e7d32; padding: 15px; border-radius: 5px; margin-top: 15px; display: none; }
+  #user-details { font-weight: bold; margin-bottom: 10px; display: block; }
 </style>
 </head>
 <body>
 
-<div class="login-card">
-  <h2>Welcome</h2>
-  <p>Please login to continue</p>
+<div class="card">
+  <h2>Career Care Login</h2>
   
-  <button id="loginBtn" class="btn" onclick="startLogin()">
-     <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20"> 
-     Sign in with Google
-  </button>
-  
-  <div id="status">Wait...</div>
-  <div id="error-msg"></div>
+  <div id="login-section">
+      <p>Click below to sign in:</p>
+      <button onclick="startLogin()">🔵 Sign in with Google</button>
+  </div>
+
+  <div id="success-section" class="success-box">
+      <h3>✅ Login Successful!</h3>
+      <span id="user-details"></span>
+      <button style="background: green;" onclick="goToDashboard()">🚀 Go to Dashboard</button>
+  </div>
+
+  <p id="status" style="margin-top:20px; color:#555; font-size:12px;">Waiting for action...</p>
 </div>
 
 <script>
@@ -43,53 +46,49 @@
   };
   if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 
-  const statusDiv = document.getElementById("status");
-  const loginBtn = document.getElementById("loginBtn");
-  const errorDiv = document.getElementById("error-msg");
+  const statusTxt = document.getElementById("status");
+  const loginSec = document.getElementById("login-section");
+  const successSec = document.getElementById("success-section");
 
-  // 1. Check Login Status on Load
+  // 1. Check agar banda pehle se login hai
   firebase.auth().onAuthStateChanged((user) => {
     if (user) {
-        statusDiv.innerText = "Login Found! Redirecting...";
-        loginBtn.style.display = "none";
-        
-        // Save UID and Go to Home
-        localStorage.setItem("userUid", user.uid);
-        window.location.href = "index.html";
+        showSuccess(user);
     } else {
-        statusDiv.innerText = "Please click the button to login.";
-        loginBtn.style.display = "flex";
+        statusTxt.innerText = "Please log in.";
     }
   });
 
-  // 2. Login Function (POPUP wala)
   function startLogin() {
-    statusDiv.innerText = "Opening Google Popup...";
-    errorDiv.style.display = "none";
-
+    statusTxt.innerText = "Opening Google Popup...";
     var provider = new firebase.auth.GoogleAuthProvider();
     
-    // Popup use kar rahe hain taaki error dikh sake
+    // Popup use kar rahe hain taaki result yahin dikhe
     firebase.auth().signInWithPopup(provider)
     .then((result) => {
-        statusDiv.innerText = "Success! Entering App...";
-        // onAuthStateChanged apne aap redirect handle karega
+        statusTxt.innerText = "Google Auth Complete.";
+        // onAuthStateChanged will handle the rest
     })
     .catch((error) => {
-        console.error("Login Failed:", error);
-        statusDiv.innerText = "Login Failed.";
-        
-        // Error screen par dikhao
-        errorDiv.style.display = "block";
-        errorDiv.innerText = "Error: " + error.message;
-        
-        // Agar Domain ka error hai to saaf batao
-        if(error.code === "auth/unauthorized-domain") {
-            alert("⚠️ Domain Error!\nAapne Firebase Console mein 'dsjhorar.github.io' add nahi kiya hai.");
-        } else {
-            alert("❌ Error: " + error.message);
-        }
+        alert("Error: " + error.message);
+        statusTxt.innerText = "Error: " + error.message;
     });
+  }
+
+  function showSuccess(user) {
+    loginSec.style.display = "none";
+    successSec.style.display = "block";
+    
+    document.getElementById("user-details").innerText = "Welcome, " + user.displayName;
+    statusTxt.innerText = "You are logged in.";
+    
+    // Save Local Data
+    localStorage.setItem("userUid", user.uid);
+  }
+
+  function goToDashboard() {
+    // Ab user button dabakar jayega, to loop nahi banega
+    window.location.href = "index.html";
   }
 </script>
 
