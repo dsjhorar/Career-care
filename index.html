@@ -1,91 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Career Care Home</title>
-  
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+<meta charset="UTF-8">
+<title>Career Care Home</title>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
-  <style>
-    body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #f4f6f8; }
-    
-    /* Loading Screen */
-    #page-loader { 
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-      background: white; z-index: 9999; display: flex; 
-      justify-content: center; align-items: center; font-size: 18px; color: #1e88e5; 
-    }
-
-    /* Main Content (Initially Hidden) */
-    #main-content { display: none; }
-
-    /* Header & Menu */
-    .main-header { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: #1e88e5; color: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-    .header-left { display: flex; align-items: center; gap: 10px; }
-    .header-left img { height: 35px; width: 35px; background: white; border-radius: 50%; padding: 2px; }
-    .app-name { font-size: 20px; font-weight: bold; }
-    .menu-btn-icon { font-size: 26px; cursor: pointer; }
-
-    /* Menu Dropdown */
-    #menu { display: none; position: absolute; top: 60px; right: 10px; background: white; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); width: 200px; z-index: 1000; }
-    .menu-item { padding: 14px; border-bottom: 1px solid #eee; cursor: pointer; color: #333; }
-    .menu-item:hover { background: #f5f5f5; }
-    .logout { color: red; font-weight: bold; }
-
-    /* Buttons */
-    .container { padding: 15px; max-width: 600px; margin: 0 auto; }
-    .top-buttons button { width: 100%; padding: 15px; margin-bottom: 10px; border: none; border-radius: 8px; color: white; font-size: 16px; cursor: pointer; }
-    .ca-btn { background: #43a047; }
-    .news-btn { background: #fb8c00; }
-
-    /* Exam Grid */
-    .exam-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 20px; }
-    .exam-btn { background: #b3e5fc; color: #0277bd; font-weight: 600; border-radius: 10px; padding: 20px 10px; text-align: center; cursor: pointer; }
-  </style>
+<style>
+  body { font-family: sans-serif; text-align: center; margin-top: 50px; }
+  #loading { font-size: 20px; color: blue; }
+  #content { display: none; }
+</style>
 </head>
 <body>
 
-  <div id="page-loader">Checking Login...</div>
+  <div id="loading">
+      🔄 Checking your login status...<br>
+      <small>(Please wait 2-3 seconds)</small>
+  </div>
 
-  <div id="main-content">
-    <header class="main-header">
-      <div class="header-left">
-        <img src="logo.png" alt="Logo" onerror="this.style.display='none'"> 
-        <span class="app-name">Career Care</span>
-      </div>
-      <span class="menu-btn-icon" onclick="toggleMenu()">⋮</span>
-    </header>
-
-    <div id="menu">
-      <div class="menu-item" onclick="window.location.href='profile.html'">👤 My Profile</div>
-      <div class="menu-item" onclick="window.location.href='premium.html'">⭐ Premium Test</div>
-      <div class="menu-item" onclick="window.location.href='history.html'">🕒 History</div>
-      <div class="menu-item logout" onclick="logout()">🚪 Logout</div>
-    </div>
-
-    <div class="container">
-      <div class="top-buttons">
-        <button class="ca-btn" onclick="window.location.href='current_affairs.html'">📰 Daily Current Affairs</button>
-        <button class="news-btn" onclick="window.location.href='exam-news.html'">📢 Exam News</button>
-      </div>
-
-      <h3 style="color:#444;">Select Exam Category</h3>
-      <div class="exam-grid">
-        <div class="exam-btn" onclick="openExam('first_grade')">1st Grade</div>
-        <div class="exam-btn" onclick="openExam('second_grade')">2nd Grade</div>
-        <div class="exam-btn" onclick="openExam('reet')">REET</div>
-        <div class="exam-btn" onclick="openExam('rajasthan_si')">Rajasthan SI</div>
-        <div class="exam-btn" onclick="openExam('patwar')">Patwar</div>
-        <div class="exam-btn" onclick="openExam('vanpal')">Vanpal</div>
-      </div>
-    </div>
+  <div id="content">
+      <h1>🏠 Welcome to Dashboard!</h1>
+      <p>Login successfully verified.</p>
+      
+      <button onclick="window.location.href='current_affairs.html'" style="padding:10px 20px; background:orange; color:white; border:none;">Current Affairs</button>
+      <br><br>
+      <button onclick="logout()" style="color:red;">Logout</button>
   </div>
 
 <script>
-  /* CONFIGURATION */
   const firebaseConfig = {
     apiKey: "AIzaSyBCuefZt2WuNsNiFme8M-HUHm_BZYKJAi4",
     authDomain: "career-care-afb64.firebaseapp.com",
@@ -95,44 +39,26 @@
   };
   if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 
-  /* 🛑 LOOP FIX LOGIC */
   firebase.auth().onAuthStateChanged((user) => {
     if (user) {
-      // User MIL GAYA -> Loader hatao, App dikhao
-      document.getElementById("page-loader").style.display = "none";
-      document.getElementById("main-content").style.display = "block";
+        // LOGIN CONFIRMED
+        document.getElementById("loading").style.display = "none";
+        document.getElementById("content").style.display = "block";
     } else {
-      // User NAHI mila -> Ab Login page par bhejo
-      window.location.href = "login.html";
+        // NOT LOGGED IN - Thoda ruk kar bhejo taaki loop na bane
+        document.getElementById("loading").innerHTML = "❌ Not Logged In.<br>Redirecting to Login Page...";
+        
+        setTimeout(() => {
+            window.location.href = "login.html";
+        }, 2000); // 2 second ka delay
     }
   });
 
-  /* 🚪 LOGOUT FUNCTION (Fixed) */
   function logout() {
-    if (confirm("Logout karna chahte hain?")) {
-        // Local storage saaf karo
-        localStorage.clear();
-        
-        // Firebase se signout karo
-        firebase.auth().signOut()
-        .then(() => {
-            window.location.href = "login.html";
-        })
-        .catch((error) => {
-            console.error(error);
-            // Agar error aaye to bhi zabardasti bhej do
-            window.location.href = "login.html";
-        });
-    }
-  }
-
-  function toggleMenu(){
-    const menu = document.getElementById("menu");
-    menu.style.display = menu.style.display === "block" ? "none" : "block";
-  }
-
-  function openExam(key) {
-    window.location.href = "exam.html?exam=" + key;
+      firebase.auth().signOut().then(() => {
+          localStorage.clear();
+          window.location.href = "login.html";
+      });
   }
 </script>
 
