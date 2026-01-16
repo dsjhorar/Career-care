@@ -1,1 +1,35 @@
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Profile</title>
+<style>
+  body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #f4f6f8; }
+  header { background: #1e88e5; color: white; padding: 15px; display: flex; align-items: center; gap: 15px; }
+  .back-btn { font-size: 24px; cursor: pointer; color: white; border: none; background: none; }
+  .profile-card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-width: 400px; margin: 30px auto; text-align: center; }
+  .user-img { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 4px solid #1e88e5; margin-bottom: 15px; }
+  .user-name { font-size: 22px; font-weight: bold; color: #333; margin-bottom: 5px; }
+  .user-email { font-size: 14px; color: #666; }
+</style>
+</head>
+<body>
+<header>
+  <button class="back-btn" onclick="window.history.back()">&#8592;</button>
+  <div style="font-size:20px; font-weight:bold;">My Profile</div>
+</header>
+<div class="profile-card">
+  <img id="p-img" src="https://via.placeholder.com/100" class="user-img">
+  <div id="p-name" class="user-name">Loading...</div>
+  <div id="p-email" class="user-email">...</div>
+</div>
+<script>
+  // Local Storage se data uthao (Fastest)
+  document.getElementById("p-name").innerText = localStorage.getItem("userName") || "Guest User";
+  document.getElementById("p-email").innerText = localStorage.getItem("userEmail") || "";
+  const pic = localStorage.getItem("userPhoto");
+  if(pic) document.getElementById("p-img").src = pic;
+</script>
+</body>
+</html>
