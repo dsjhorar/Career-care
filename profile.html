@@ -11,178 +11,106 @@
 
 <style>
   body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #f4f6f8; }
-  
-  /* Header */
-  header { background: #1e88e5; color: white; padding: 15px; display: flex; align-items: center; gap: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-  .back-btn { font-size: 24px; cursor: pointer; color: white; text-decoration: none; }
+
+  header { background: #1e88e5; color: white; padding: 15px; display: flex; align-items: center; gap: 15px; }
+  .back-btn { font-size: 24px; cursor: pointer; color: white; border: none; background: none; }
   .title { font-size: 20px; font-weight: bold; }
 
-  .container { padding: 20px; max-width: 500px; margin: 0 auto; }
-
-  /* Profile Card */
+  .profile-container { padding: 30px 20px; text-align: center; }
+  
   .profile-card {
-    background: white;
-    padding: 30px 20px;
-    border-radius: 12px;
-    text-align: center;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-    margin-bottom: 20px;
+    background: white; padding: 30px; border-radius: 15px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-width: 400px; margin: 0 auto;
   }
-
-  .profile-pic {
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 4px solid #e3f2fd;
-    margin-bottom: 15px;
+  
+  .user-img {
+    width: 100px; height: 100px; border-radius: 50%; object-fit: cover;
+    border: 4px solid #1e88e5; margin-bottom: 15px;
   }
-
-  .user-name { font-size: 22px; font-weight: bold; color: #333; margin: 5px 0; }
+  
+  .user-name { font-size: 22px; font-weight: bold; color: #333; margin-bottom: 5px; }
   .user-email { font-size: 14px; color: #666; margin-bottom: 20px; }
-
-  /* Plan Status Badge */
+  
   .badge {
-    display: inline-block;
-    padding: 6px 15px;
-    border-radius: 20px;
-    font-size: 14px;
-    font-weight: bold;
-    text-transform: uppercase;
+    background: #e3f2fd; color: #1565c0; padding: 8px 15px;
+    border-radius: 20px; font-size: 14px; font-weight: bold; display: inline-block;
   }
-  .badge-free { background: #eceff1; color: #546e7a; border: 1px solid #cfd8dc; }
-  .badge-premium { background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; }
-
-  /* Upgrade Section */
-  .upgrade-box {
-    background: linear-gradient(135deg, #1e88e5, #1565c0);
-    color: white;
-    padding: 20px;
-    border-radius: 10px;
-    margin-top: 20px;
-    display: none; /* By default hidden, JS will show if Free */
-  }
-  .upgrade-btn {
-    background: white;
-    color: #1565c0;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 5px;
-    font-weight: bold;
-    cursor: pointer;
-    margin-top: 10px;
-  }
-
-  /* Logout Button */
-  .logout-btn {
-    width: 100%;
-    background: #ffebee;
-    color: #c62828;
-    border: 1px solid #ffcdd2;
-    padding: 15px;
-    border-radius: 8px;
-    font-size: 16px;
-    font-weight: bold;
-    cursor: pointer;
-    margin-top: 10px;
+  
+  .premium-badge {
+    background: #fff8e1; color: #fbc02d; border: 1px solid #fbc02d;
   }
 </style>
 </head>
 <body>
 
 <header>
-  <a href="index.html" class="back-btn">&#8592;</a>
-  <div class="title">Profile</div>
+  <button class="back-btn" onclick="window.history.back()">&#8592;</button>
+  <div class="title">My Profile</div>
 </header>
 
-<div class="container">
-  
+<div class="profile-container">
   <div class="profile-card">
-    <img src="https://via.placeholder.com/100" id="p-photo" class="profile-pic" alt="User">
-    <div class="user-name" id="p-name">Loading...</div>
-    <div class="user-email" id="p-email">...</div>
+    <img id="p-img" src="https://via.placeholder.com/100?text=User" class="user-img">
     
-    <div id="status-badge" class="badge badge-free">Loading Status...</div>
+    <div id="p-name" class="user-name">Loading Name...</div>
+    <div id="p-email" class="user-email">Loading Email...</div>
+    
+    <div id="p-status" class="badge">Free User</div>
   </div>
-
-  <div id="upgrade-section" class="upgrade-box">
-    <h3>⭐ Upgrade to Premium</h3>
-    <p>Unlock all Full Tests and get detailed analysis.</p>
-    <button class="upgrade-btn" onclick="window.location.href='premium.html'">Upgrade Now</button>
-  </div>
-  <div class="menu-item" onclick="window.location.href='history.html'" 
-     style="background:white; padding:15px; margin-bottom:10px; border-radius:8px; cursor:pointer; font-weight:bold; color:#333; box-shadow:0 2px 5px rgba(0,0,0,0.05);">
-     🕒 View Test History ➔
-  </div>
-
-  <button class="logout-btn" onclick="logout()">Log Out</button>
-
 </div>
 
 <script>
-/* ================= CONFIGURATION ================= */
-const firebaseConfig = {
-  apiKey: "AIzaSyBCuefZt2WuNsNiFme8M-HUHm_BZYKJAi4",
-  authDomain: "career-care-afb64.firebaseapp.com",
-  databaseURL: "https://career-care-afb64-default-rtdb.firebaseio.com",
-  projectId: "career-care-afb64",
-  storageBucket: "career-care-afb64.firebasestorage.app",
-  messagingSenderId: "267890746286",
-  appId: "1:267890746286:web:2c38f0980119d01b145e3f"
-};
-if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+  const firebaseConfig = {
+    apiKey: "AIzaSyBCuefZt2WuNsNiFme8M-HUHm_BZYKJAi4",
+    authDomain: "career-care-afb64.firebaseapp.com",
+    databaseURL: "https://career-care-afb64-default-rtdb.firebaseio.com",
+    projectId: "career-care-afb64",
+    appId: "1:267890746286:web:2c38f0980119d01b145e3f"
+  };
+  if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 
-/* ================= LOGIC ================= */
-const userUid = localStorage.getItem("userUid");
+  // 1. Pehle Local Storage se Data uthao (Fast Display ke liye)
+  const localName = localStorage.getItem("userName");
+  const localPic = localStorage.getItem("userPhoto");
+  const localEmail = localStorage.getItem("userEmail");
+  const isPremium = localStorage.getItem("isPremium");
 
-if (!userUid) {
-    window.location.href = "login.html"; // Agar login nahi hai to bhaga do
-} else {
-    loadProfile();
-}
+  if(localName) document.getElementById("p-name").innerText = localName;
+  if(localEmail) document.getElementById("p-email").innerText = localEmail;
+  if(localPic) document.getElementById("p-img").src = localPic;
+  
+  if(isPremium === "true") {
+      const badge = document.getElementById("p-status");
+      badge.innerText = "⭐ Premium Member";
+      badge.classList.add("premium-badge");
+  }
 
-function loadProfile() {
-    const userRef = firebase.database().ref("students/" + userUid);
-    
-    userRef.on('value', (snapshot) => {
-        const data = snapshot.val();
-        
-        if (data) {
-            // 1. Photo Set karo
-            document.getElementById("p-photo").src = data.photo || "https://via.placeholder.com/100";
-            
-            // 2. Naam aur Email
-            document.getElementById("p-name").innerText = data.name || "Student";
-            document.getElementById("p-email").innerText = data.email || "No Email";
+  // 2. Firebase se Confirm karo (Agar update hua ho)
+  firebase.auth().onAuthStateChanged((user) => {
+    if (user) {
+        // Data Update
+        document.getElementById("p-name").innerText = user.displayName;
+        document.getElementById("p-email").innerText = user.email;
+        if(user.photoURL) document.getElementById("p-img").src = user.photoURL;
 
-            // 3. Status Check (Free vs Premium)
-            const badge = document.getElementById("status-badge");
-            const upgradeBox = document.getElementById("upgrade-section");
-
-            if (data.isPremium) {
-                // PREMIUM USER
-                badge.innerText = "👑 Premium Member";
-                badge.className = "badge badge-premium";
-                upgradeBox.style.display = "none"; // Upgrade ad mat dikhao
-            } else {
-                // FREE USER
-                badge.innerText = "Free Plan";
-                badge.className = "badge badge-free";
-                upgradeBox.style.display = "block"; // Upgrade ad dikhao
+        // Check Premium from Database
+        firebase.database().ref("students/" + user.uid).once("value").then(snap => {
+            if(snap.exists()){
+                const data = snap.val();
+                if(data.isPremium){
+                   const badge = document.getElementById("p-status");
+                   badge.innerText = "⭐ Premium Member";
+                   badge.classList.add("premium-badge");
+                }
             }
-        }
-    });
-}
-
-function logout() {
-    if(confirm("Are you sure you want to logout?")) {
-        firebase.auth().signOut().then(() => {
-            localStorage.clear();
-            window.location.href = "login.html";
         });
+    } else {
+        // Agar login nahi hai, to login page bhejo
+        window.location.href = "login.html";
     }
-}
+  });
 </script>
 
 </body>
 </html>
+  
