@@ -3,175 +3,261 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Current Affairs</title>
+<title>Daily Current Affairs</title>
 
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
 <style>
   body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #f4f6f8; }
-   
-  /* Header */
-  header { background: #1e88e5; color: white; padding: 15px; display: flex; align-items: center; gap: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-  .back-btn { font-size: 24px; cursor: pointer; color: white; text-decoration: none; border:none; background:none;}
-  .title { font-size: 20px; font-weight: bold; }
 
-  .container { padding: 20px; max-width: 600px; margin: 0 auto; }
+  /* HEADER */
+  header { background: #1e88e5; color: white; padding: 15px; display: flex; align-items: center; gap: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; }
+  .back-btn { font-size: 24px; cursor: pointer; color: white; border: none; background: none; }
+  .title { font-size: 18px; font-weight: bold; }
 
-  /* Today's Quiz Card */
-  .today-card {
-    background: linear-gradient(135deg, #43a047, #66bb6a); /* Green Theme */
-    color: white;
-    padding: 30px;
-    border-radius: 12px;
-    text-align: center;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-    margin-bottom: 30px;
-    cursor: pointer;
-    transition: transform 0.2s;
+  .container { padding: 15px; max-width: 600px; margin: 0 auto; padding-bottom: 50px; }
+
+  /* --- SECTION 1: HOME VIEW (List) --- */
+  #home-view { display: block; }
+
+  /* Hero Card (Today's Quiz) */
+  .hero-card {
+      background: linear-gradient(135deg, #66bb6a, #43a047);
+      color: white; padding: 25px; border-radius: 15px;
+      text-align: center; cursor: pointer;
+      box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+      margin-bottom: 25px; transition: transform 0.2s;
   }
-  .today-card:active { transform: scale(0.98); }
-  .today-title { font-size: 24px; font-weight: bold; margin-bottom: 10px; }
-  .today-date { font-size: 16px; opacity: 0.9; }
+  .hero-card:active { transform: scale(0.98); }
+  .hero-title { font-size: 22px; font-weight: bold; margin-bottom: 5px; display: flex; align-items: center; justify-content: center; gap: 10px; }
+  .hero-date { font-size: 14px; opacity: 0.9; }
 
-  /* Previous Section */
-  .section-title { font-size: 18px; color: #444; margin-bottom: 15px; border-left: 4px solid #1e88e5; padding-left: 10px; font-weight: bold;}
-   
-  .archive-list { display: flex; flex-direction: column; gap: 10px; }
-   
-  .archive-card {
-    background: white;
-    padding: 15px;
-    border-radius: 8px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-    cursor: pointer;
-    border-left: 4px solid #ddd;
+  /* Section Header */
+  .section-label { 
+      font-size: 16px; font-weight: bold; color: #555; margin-bottom: 10px; 
+      border-left: 4px solid #1e88e5; padding-left: 10px; 
   }
-  .archive-card:hover { border-left-color: #1e88e5; }
-   
-  .archive-date { font-size: 16px; font-weight: 600; color: #333; }
-  .arrow { color: #1e88e5; font-weight: bold; }
 
-  #loader { text-align: center; color: #666; display: none; margin-top: 20px;}
+  /* List Items */
+  .quiz-list-item {
+      background: white; padding: 15px; border-radius: 10px;
+      margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05); cursor: pointer; border: 1px solid #eee;
+  }
+  .quiz-list-item:hover { border-color: #bbdefb; background: #f1f8e9; }
+  
+  .list-date { font-weight: 600; color: #333; display: flex; align-items: center; gap: 8px; }
+  .play-btn-small { color: #1e88e5; font-weight: bold; font-size: 14px; }
+
+  /* --- SECTION 2: QUIZ VIEW (Questions) --- */
+  #quiz-view { display: none; }
+  
+  /* Question Card */
+  .q-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom: 20px; }
+  .q-text { font-size: 17px; font-weight: 600; color: #333; margin-bottom: 15px; line-height: 1.4; }
+  
+  .option { padding: 12px 15px; border: 2px solid #eee; border-radius: 8px; margin-bottom: 10px; cursor: pointer; background: #fafafa; }
+  .correct { background: #dcedc8 !important; border-color: #7cb342 !important; }
+  .wrong { background: #ffcdd2 !important; border-color: #e57373 !important; }
+  .hidden-explanation { display: none; margin-top: 10px; padding: 10px; background: #fffde7; border-left: 4px solid #fbc02d; font-size: 14px; }
+
+  /* Loaders */
+  #main-loader { text-align: center; margin-top: 50px; font-weight: bold; color: #666; }
 </style>
 </head>
 <body>
 
 <header>
-  <button class="back-btn" onclick="window.history.back()">&#8592;</button>
-  <div class="title">Daily Current Affairs</div>
+  <button class="back-btn" onclick="handleBack()">&#8592;</button>
+  <div class="title">Current Affairs</div>
 </header>
 
 <div class="container">
 
-  <div class="today-card" onclick="startTodayQuiz()">
-    <div class="today-title">🚀 Start Today's Quiz</div>
-    <div class="today-date" id="display-date">Loading date...</div>
+  <div id="main-loader">🔄 Loading Quizzes...</div>
+
+  <div id="home-view" style="display:none;">
+      
+      <div id="hero-section" style="display:none;">
+          <div class="hero-card" onclick="startLatestQuiz()">
+              <div class="hero-title">🚀 Start Today's Quiz</div>
+              <div class="hero-date" id="hero-date-text">Loading...</div>
+          </div>
+      </div>
+
+      <div class="section-label">📅 Previous Quizzes</div>
+      <div id="history-list">
+          </div>
   </div>
 
-  <div class="section-title">📅 Previous Quizzes</div>
-  <button onclick="loadPreviousQuizzes()" style="width:100%; padding:12px; margin-bottom:10px; background:#fff; border:1px solid #ccc; border-radius:6px;">
-    🔄 Refresh / Load Previous List
-  </button>
-   
-  <div id="loader">Fetching archives...</div>
-  <div id="archive-list" class="archive-list"></div>
+  <div id="quiz-view">
+      <h3 id="quiz-title-date" style="text-align:center; color:#444; margin-top:0;">Date</h3>
+      <div id="questions-container"></div>
+  </div>
 
 </div>
 
 <script>
-/* ================= CONFIGURATION ================= */
-const firebaseConfig = {
-  apiKey: "AIzaSyBCuefZt2WuNsNiFme8M-HUHm_BZYKJAi4",
-  authDomain: "career-care-afb64.firebaseapp.com",
-  databaseURL: "https://career-care-afb64-default-rtdb.firebaseio.com",
-  projectId: "career-care-afb64",
-  storageBucket: "career-care-afb64.firebasestorage.app",
-  messagingSenderId: "267890746286",
-  appId: "1:267890746286:web:2c38f0980119d01b145e3f"
-};
-if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+  /* CONFIG */
+  const firebaseConfig = {
+    apiKey: "AIzaSyBCuefZt2WuNsNiFme8M-HUHm_BZYKJAi4",
+    authDomain: "career-care-afb64.firebaseapp.com",
+    databaseURL: "https://career-care-afb64-default-rtdb.firebaseio.com",
+    projectId: "career-care-afb64",
+    appId: "1:267890746286:web:2c38f0980119d01b145e3f"
+  };
+  if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 
-/* ================= LOGIC ================= */
+  let allDates = []; // Store dates
 
-// 1. Get Today's Date in YYYY-MM-DD format
-const todayObj = new Date();
-const yyyy = todayObj.getFullYear();
-const mm = String(todayObj.getMonth() + 1).padStart(2, '0');
-const dd = String(todayObj.getDate()).padStart(2, '0');
-const todayString = `${yyyy}-${mm}-${dd}`; // e.g. "2024-01-14"
+  /* 1. INITIALIZE: Fetch Dates */
+  function init() {
+      const dbRef = firebase.database().ref('daily_quiz');
+      
+      // Pichle 30 dino ka data uthao
+      dbRef.orderByKey().limitToLast(30).once('value').then(snapshot => {
+          document.getElementById("main-loader").style.display = "none";
+          document.getElementById("home-view").style.display = "block";
 
-// Display Date nicely on the card
-const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-document.getElementById("display-date").innerText = todayObj.toLocaleDateString('en-US', options);
+          if(snapshot.exists()){
+              const data = snapshot.val();
+              // Dates ko sort karo (Latest sabse upar)
+              allDates = Object.keys(data).sort().reverse(); 
+              
+              setupUI(allDates);
+          } else {
+              document.getElementById("history-list").innerHTML = "<p style='text-align:center'>No quizzes found.</p>";
+          }
+      });
+  }
 
-// FUNCTION: Start Today's Quiz
-function startTodayQuiz() {
-    // CHANGE: Ab ye 'daily_quiz' folder check karega
-    firebase.database().ref(`daily_quiz/${todayString}`).once('value')
-    .then(snapshot => {
-        if(snapshot.exists()){
-            // Bhejo Test Page par (exam=current_affairs rahega, test.html khud handle karega)
-            window.location.href = `test.html?exam=current_affairs&topic=${todayString}`;
-        } else {
-            alert("⚠️ Aaj ka Quiz abhi upload nahi hua hai.\nKripya thodi der baad try karein.");
-        }
-    });
-}
+  /* 2. SETUP UI (Hero + List) */
+  function setupUI(dates) {
+      if(dates.length > 0) {
+          // --- A. SETUP HERO BUTTON (Latest Date) ---
+          const latestDate = dates[0];
+          document.getElementById("hero-section").style.display = "block";
+          document.getElementById("hero-date-text").innerText = formatDateFull(latestDate);
+          
+          // --- B. SETUP LIST (Remaining Dates) ---
+          const listDiv = document.getElementById("history-list");
+          listDiv.innerHTML = ""; // Clear
 
-// FUNCTION: Load Previous Quizzes
-function loadPreviousQuizzes() {
-    const loader = document.getElementById("loader");
-    const listDiv = document.getElementById("archive-list");
-     
-    loader.style.display = "block";
-    listDiv.innerHTML = ""; // Clear list
+          // Loop through remaining dates (skipping the first one if you want, or show all)
+          // Yahan hum second date se shuru karenge taki duplication na ho, ya sab dikha sakte hain.
+          // User ke image me "Previous" alag hai, to hum index 1 se start karte hain.
+          
+          const previousDates = dates.slice(1); 
+          
+          if(previousDates.length === 0) {
+              listDiv.innerHTML = "<p style='text-align:center; color:#999; font-size:14px;'>No previous history.</p>";
+          }
 
-    // CHANGE: List bhi 'daily_quiz' folder se aayegi
-    firebase.database().ref(`daily_quiz`).orderByKey().limitToLast(30).once('value')
-    .then(snapshot => {
-        loader.style.display = "none";
-        if(!snapshot.exists()){
-            listDiv.innerHTML = "<p style='text-align:center'>No previous quizzes found.</p>";
-            return;
-        }
+          previousDates.forEach(date => {
+              const item = document.createElement("div");
+              item.className = "quiz-list-item";
+              item.innerHTML = `
+                  <div class="list-date">📅 ${formatDateShort(date)}</div>
+                  <div class="play-btn-small">Play ▶</div>
+              `;
+              item.onclick = () => loadQuiz(date);
+              listDiv.appendChild(item);
+          });
+      }
+  }
 
-        const data = snapshot.val();
-        // Convert Object keys (Dates) to Array and Reverse (Latest first)
-        let dates = Object.keys(data).sort().reverse();
+  /* 3. START QUIZ FUNCTIONS */
+  function startLatestQuiz() {
+      if(allDates.length > 0) loadQuiz(allDates[0]);
+  }
 
-        dates.forEach(dateKey => {
-            // "Today" wale ko list mein mat dikhao, wo upar bada button hai
-            if(dateKey === todayString) return;
+  function loadQuiz(dateKey) {
+      // UI Switch
+      document.getElementById("home-view").style.display = "none";
+      document.getElementById("quiz-view").style.display = "block";
+      document.getElementById("quiz-title-date").innerText = formatDateFull(dateKey);
+      document.getElementById("questions-container").innerHTML = "<p style='text-align:center'>Loading Questions...</p>";
 
-            const div = document.createElement("div");
-            div.className = "archive-card";
-            div.innerHTML = `
-                <span class="archive-date">📅 ${formatDate(dateKey)}</span>
-                <span class="arrow">Play ▶️</span>
-            `;
-             
-            div.onclick = () => {
-                window.location.href = `test.html?exam=current_affairs&topic=${dateKey}`;
-            };
-             
-            listDiv.appendChild(div);
-        });
-    });
-}
+      // Fetch Questions
+      firebase.database().ref(`daily_quiz/${dateKey}`).once('value').then(snap => {
+          const qContainer = document.getElementById("questions-container");
+          qContainer.innerHTML = ""; // Clear loader
 
-// Helper: Make "2024-01-14" look like "14 Jan 2024"
-function formatDate(dateStr) {
-    const d = new Date(dateStr);
-    return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-}
+          if(snap.exists() && snap.val().questions) {
+              renderQuestions(snap.val().questions, qContainer);
+          } else {
+              qContainer.innerHTML = "<p>No questions found for this date.</p>";
+          }
+      });
+  }
 
-// Page load hote hi list load kar lo
-loadPreviousQuizzes();
+  /* 4. RENDER QUESTIONS (Standard Logic) */
+  function renderQuestions(questions, container) {
+      const qArray = Array.isArray(questions) ? questions : Object.values(questions);
+      
+      qArray.forEach((q, index) => {
+          const card = document.createElement("div");
+          card.className = "q-card";
+          
+          let html = `<div class="q-text">Q${index+1}. ${q.question}</div>`;
+          if(q.options) {
+              q.options.forEach((opt, i) => {
+                  html += `<div class="option" onclick="check(this, ${i}, ${q.correctAnswer}, 'expl-${index}')">${opt}</div>`;
+              });
+          }
+          html += `<div id="expl-${index}" class="hidden-explanation"><b>💡 Logic:</b> ${q.explanation || "N/A"}</div>`;
+          card.innerHTML = html;
+          container.appendChild(card);
+      });
+  }
+
+  window.check = function(btn, selected, correct, explId) {
+      if(btn.parentElement.classList.contains("answered")) return;
+      const parent = btn.parentElement;
+      parent.classList.add("answered");
+      const opts = parent.querySelectorAll(".option");
+
+      if(selected == correct) {
+          btn.classList.add("correct");
+          btn.innerHTML += " ✅";
+      } else {
+          btn.classList.add("wrong");
+          btn.innerHTML += " ❌";
+          opts[correct].classList.add("correct");
+          opts[correct].innerHTML += " ✅";
+      }
+      document.getElementById(explId).style.display = "block";
+  };
+
+  /* 5. NAVIGATION & FORMATTING */
+  function handleBack() {
+      const quizView = document.getElementById("quiz-view");
+      if(quizView.style.display === "block") {
+          // Agar Quiz khula hai, to List par wapas jao
+          quizView.style.display = "none";
+          document.getElementById("home-view").style.display = "block";
+      } else {
+          // Agar List par hain, to Home (Index) par jao
+          window.location.href = "index.html";
+      }
+  }
+
+  function formatDateFull(dateStr) {
+      const d = new Date(dateStr);
+      return d.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  }
+
+  function formatDateShort(dateStr) {
+      const d = new Date(dateStr);
+      return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+
+  // Run
+  init();
 
 </script>
 
 </body>
+</html>
