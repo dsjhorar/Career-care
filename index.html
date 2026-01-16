@@ -3,99 +3,112 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Career Care Home</title>
+  <title>Career Care</title>
   
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
   <style>
-    body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #f4f6f8; padding-bottom: 100px; }
+    body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #f4f6f8; }
     
-    /* HEADER (Old Blue Design) */
+    /* 1. LOADER */
+    #page-loader { 
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+      background: white; z-index: 9999; display: flex; 
+      justify-content: center; align-items: center; font-size: 18px; color: #1e88e5; font-weight: bold;
+    }
+
+    /* 2. WELCOME SCREEN (Login Gate) */
+    #login-gate {
+      display: none; height: 100vh; flex-direction: column; justify-content: center; align-items: center; text-align: center;
+      background: linear-gradient(135deg, #e3f2fd, #ffffff);
+    }
+    .welcome-card {
+      background: white; padding: 40px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 90%; max-width: 350px;
+    }
+    .login-btn-big {
+      background: #1e88e5; color: white; padding: 12px 30px; 
+      font-size: 16px; border: none; border-radius: 25px; cursor: pointer; margin-top: 20px; font-weight: bold; box-shadow: 0 4px 10px rgba(30, 136, 229, 0.3);
+    }
+
+    /* 3. DASHBOARD */
+    #main-content { display: none; }
+
+    /* Header */
     .main-header { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: #1e88e5; color: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
     .header-left { display: flex; align-items: center; gap: 10px; }
     .app-logo { height: 35px; width: 35px; background: white; border-radius: 50%; padding: 2px; object-fit: contain; }
     .app-name { font-size: 20px; font-weight: bold; }
     .menu-btn-icon { font-size: 26px; cursor: pointer; }
 
-    /* MENU */
+    /* Menu */
     #menu { display: none; position: absolute; top: 60px; right: 10px; background: white; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); width: 200px; z-index: 1000; overflow: hidden; }
     .menu-item { padding: 14px; border-bottom: 1px solid #eee; cursor: pointer; color: #333; font-size: 15px; }
     .menu-item:hover { background: #f5f5f5; }
 
-    /* BUTTONS & GRID */
+    /* Content */
     .container { padding: 15px; max-width: 600px; margin: 0 auto; }
-    .top-buttons button { width: 100%; padding: 15px; margin-bottom: 12px; border: none; border-radius: 8px; color: white; font-size: 16px; font-weight: 600; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .top-buttons button { width: 100%; padding: 15px; margin-bottom: 12px; border: none; border-radius: 10px; color: white; font-size: 16px; font-weight: 600; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
     .ca-btn { background: #43a047; }
     .news-btn { background: #fb8c00; }
 
-    h3 { color: #444; margin-top: 20px; }
-    .exam-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    h3 { color: #444; margin-top: 25px; margin-bottom: 15px; }
+    .exam-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
     
     .exam-btn { 
-      background: #b3e5fc; color: #0277bd; font-weight: 600; 
-      border-radius: 10px; padding: 20px 10px; text-align: center; 
-      cursor: pointer; transition: 0.2s; 
+      background: #e1f5fe; color: #0277bd; font-weight: 600; 
+      border-radius: 12px; padding: 25px 10px; text-align: center; 
+      cursor: pointer; transition: 0.2s; border: 1px solid #b3e5fc;
     }
-    
-    /* DEBUG BOX (Ye error batayega) */
-    #debug-box {
-        position: fixed; bottom: 0; left: 0; width: 100%; 
-        background: #000; color: #0f0; padding: 10px; 
-        font-family: monospace; font-size: 12px; 
-        max-height: 150px; overflow-y: scroll; z-index: 9999;
-        border-top: 2px solid #0f0;
-    }
+    .exam-btn:active { transform: scale(0.98); background: #b3e5fc; }
   </style>
 </head>
 <body>
 
-  <header class="main-header">
-    <div class="header-left">
-      <img src="logo.png" class="app-logo" onerror="this.src='https://via.placeholder.com/40'"> 
-      <span class="app-name">Career Care</span>
-    </div>
-    <span class="menu-btn-icon" onclick="toggleMenu()">⋮</span>
-  </header>
+  <div id="page-loader">Checking...</div>
 
-  <div id="menu">
-    <div class="menu-item" onclick="window.location.href='profile.html'">👤 My Profile</div>
-    <div class="menu-item" onclick="window.location.href='premium.html'">⭐ Premium Test</div>
-    <div class="menu-item" onclick="window.location.href='history.html'">🕒 History</div>
-    <div class="menu-item" onclick="shareApp()">📤 Share App</div>
-    <div class="menu-item" style="color:red; font-weight:bold;" onclick="logout()">🚪 Logout</div>
+  <div id="login-gate">
+    <div class="welcome-card">
+      <img src="logo.png" style="width:80px; margin-bottom:15px;" onerror="this.style.display='none'">
+      <h2 style="color:#333; margin:0;">Career Care</h2>
+      <p style="color:#666;">Apni Taiyari Shuru Karein</p>
+      <button class="login-btn-big" onclick="window.location.href='login.html'">Login Now</button>
+    </div>
   </div>
 
-  <div class="container">
-    <div id="login-warning" style="display:none; background:#ffcdd2; color:#c62828; padding:10px; border-radius:5px; text-align:center; margin-bottom:10px;">
-        ⚠️ You are NOT Logged In. <button onclick="window.location.href='login.html'">Login Now</button>
+  <div id="main-content">
+    <header class="main-header">
+      <div class="header-left">
+        <img src="logo.png" class="app-logo" onerror="this.src='https://via.placeholder.com/40'"> 
+        <span class="app-name">Career Care</span>
+      </div>
+      <span class="menu-btn-icon" onclick="toggleMenu()">⋮</span>
+    </header>
+
+    <div id="menu">
+      <div class="menu-item" onclick="window.location.href='profile.html'">👤 My Profile</div>
+      <div class="menu-item" onclick="window.location.href='premium.html'">⭐ Premium Test</div>
+      <div class="menu-item" onclick="window.location.href='history.html'">🕒 History</div>
+      <div class="menu-item" onclick="shareApp()">📤 Share App</div>
+      <div class="menu-item" style="color:red;" onclick="logout()">🚪 Logout</div>
     </div>
 
-    <div class="top-buttons">
-      <button class="ca-btn" onclick="window.location.href='current_affairs.html'">📰 Daily Current Affairs</button>
-      <button class="news-btn" onclick="window.location.href='exam-news.html'">📢 Exam News</button>
-    </div>
+    <div class="container">
+      <div class="top-buttons">
+        <button class="ca-btn" onclick="window.location.href='current_affairs.html'">📰 Daily Current Affairs</button>
+        <button class="news-btn" onclick="window.location.href='exam-news.html'">📢 Exam News</button>
+      </div>
 
-    <h3>Select Exam Category</h3>
-    
-    <div class="exam-grid" id="exam-container">
-      <div style="grid-column:span 2; text-align:center; padding:20px; color:#666;">
-        🔄 Connecting to Database...
+      <h3>Select Exam Category</h3>
+      
+      <div class="exam-grid" id="exam-container">
+        <div style="grid-column:span 2; text-align:center; padding:20px; color:#777;">Loading Exams...</div>
       </div>
     </div>
   </div>
 
-  <div id="debug-box">Console Log Started...<br></div>
-
 <script>
-  function log(msg) {
-      const box = document.getElementById("debug-box");
-      box.innerHTML += `> ${msg}<br>`;
-      box.scrollTop = box.scrollHeight;
-      console.log(msg);
-  }
-
   const firebaseConfig = {
     apiKey: "AIzaSyBCuefZt2WuNsNiFme8M-HUHm_BZYKJAi4",
     authDomain: "career-care-afb64.firebaseapp.com",
@@ -103,76 +116,67 @@
     projectId: "career-care-afb64",
     appId: "1:267890746286:web:2c38f0980119d01b145e3f"
   };
-  
-  try {
-      if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-      log("Firebase Initialized.");
-  } catch (e) {
-      log("🔥 Firebase Init Error: " + e.message);
-  }
+  if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 
-  // 1. AUTH CHECK
+  // AUTH STATE
   firebase.auth().onAuthStateChanged((user) => {
+    document.getElementById("page-loader").style.display = "none";
     if (user) {
-      log("✅ User Found: " + user.email);
-      document.getElementById("login-warning").style.display = "none";
-      
-      // Load Data
+      document.getElementById("main-content").style.display = "block";
+      document.getElementById("login-gate").style.display = "none";
       loadExams();
     } else {
-      log("❌ No User Logged In.");
-      document.getElementById("login-warning").style.display = "block";
-      document.getElementById("exam-container").innerHTML = "<p>Please Login to see exams.</p>";
+      document.getElementById("main-content").style.display = "none";
+      document.getElementById("login-gate").style.display = "flex";
     }
   });
 
-  // 2. LOAD EXAMS
+  // LOAD EXAMS
   function loadExams() {
-      log("Attempting to read 'exam_categories'...");
-      const dbRef = firebase.database().ref('exam_categories');
-      
-      dbRef.once('value')
-      .then((snapshot) => {
-          if (snapshot.exists()) {
-              log("📦 Data Received from DB!");
-              const data = snapshot.val();
-              const grid = document.getElementById("exam-container");
-              grid.innerHTML = ""; // Clear loader
-              
-              Object.keys(data).forEach(key => {
-                  log("Found Exam: " + data[key]);
-                  const btn = document.createElement("div");
-                  btn.className = "exam-btn";
-                  btn.innerText = data[key];
-                  btn.onclick = () => { window.location.href = "exam.html?exam=" + key; };
-                  grid.appendChild(btn);
-              });
-          } else {
-              log("⚠️ Database connected but 'exam_categories' folder is EMPTY or Missing.");
-              document.getElementById("exam-container").innerHTML = "<p>No Exams Found in DB.</p>";
-          }
-      })
-      .catch((error) => {
-          log("🔥 DB Read Error: " + error.message);
-          alert("Database Error: " + error.message + "\nPlease check FIREBASE RULES.");
-      });
+    const grid = document.getElementById("exam-container");
+    firebase.database().ref('exam_categories').once('value').then(snap => {
+      if(snap.exists()){
+        grid.innerHTML = "";
+        const data = snap.val();
+        Object.keys(data).forEach(key => {
+          const btn = document.createElement("div");
+          btn.className = "exam-btn";
+          btn.innerText = data[key];
+          btn.onclick = () => { window.location.href = "exam.html?exam=" + key; };
+          grid.appendChild(btn);
+        });
+      } else {
+        grid.innerHTML = "<p style='text-align:center; width:100%'>No exams found.</p>";
+      }
+    });
   }
 
   function logout() {
-    if(confirm("Logout?")){
-        firebase.auth().signOut().then(() => window.location.href = "login.html");
+    if (confirm("Logout karna chahte hain?")) {
+        localStorage.clear();
+        firebase.auth().signOut().then(() => {
+            window.location.href = "login.html";
+        });
     }
   }
-  
+
+  function shareApp(){
+    if(navigator.share){ navigator.share({ title: 'Career Care', url: window.location.href }); } 
+    else { prompt("Copy Link:", window.location.href); }
+  }
+
   function toggleMenu(){
     const menu = document.getElementById("menu");
     menu.style.display = menu.style.display === "block" ? "none" : "block";
   }
   
-  function shareApp(){
-    if(navigator.share){ navigator.share({ title: 'Career Care', url: window.location.href }); } 
-    else { prompt("Copy Link:", window.location.href); }
-  }
+  document.addEventListener("click", function(e){
+    const menu = document.getElementById("menu");
+    const menuBtn = document.querySelector(".menu-btn-icon");
+    if(e.target !== menu && e.target !== menuBtn && !menu.contains(e.target)){
+      menu.style.display="none";
+    }
+  });
 </script>
 </body>
 </html>
