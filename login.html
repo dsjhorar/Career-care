@@ -12,7 +12,8 @@
 <style>
   body { font-family: sans-serif; background: #f0f2f5; display: flex; height: 100vh; justify-content: center; align-items: center; margin: 0; }
   .login-card { background: white; padding: 40px; border-radius: 12px; text-align: center; width: 90%; max-width: 350px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-  .btn { background: white; border: 1px solid #ccc; padding: 12px; width: 100%; font-weight: bold; cursor: pointer; border-radius: 5px; margin-top: 20px; display:flex; align-items:center; justify-content:center; gap:10px;}
+  .app-logo { width: 80px; margin-bottom: 20px; }
+  .btn { background: white; border: 1px solid #ccc; padding: 12px; width: 100%; font-weight: bold; cursor: pointer; border-radius: 5px; margin-top: 20px; display:flex; align-items:center; justify-content:center; gap:10px; }
   .btn:hover { background: #f9f9f9; }
   #loader { display: none; color: #1e88e5; margin-top: 20px; font-weight: bold; }
 </style>
@@ -20,16 +21,16 @@
 <body>
 
 <div class="login-card">
-  <img src="logo.png" alt="App Logo" style="width:80px; margin-bottom:15px;" onerror="this.style.display='none'">
+  <img src="logo.png" class="app-logo" onerror="this.src='https://via.placeholder.com/80?text=App'">
   <h2>Welcome</h2>
-  <p>Start your preparation journey</p>
+  <p>Start your exam preparation</p>
   
   <button id="loginBtn" class="btn" onclick="googleLogin()">
      <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20">
      Sign in with Google
   </button>
   
-  <div id="loader">🔄 Setting up Account...</div>
+  <div id="loader">🔄 Checking Status...</div>
 </div>
 
 <script>
@@ -45,12 +46,12 @@
   // 1. AUTO REDIRECT CHECK
   firebase.auth().onAuthStateChanged((user) => {
     if (user) {
-        // User Login hai -> Data Save karo aur aage badho
+        // User mila -> Seedha Dashboard par jao (REPLACE use kiya loop rokne ko)
         document.getElementById("loginBtn").style.display = "none";
         document.getElementById("loader").style.display = "block";
-        saveUserToDB(user);
+        saveDataAndRedirect(user);
     } else {
-        // Login nahi hai -> Button dikhao
+        // Koi nahi mila -> Login Button dikhao
         document.getElementById("loader").style.display = "none";
         document.getElementById("loginBtn").style.display = "flex";
     }
@@ -58,36 +59,30 @@
 
   function googleLogin() {
     const provider = new firebase.auth.GoogleAuthProvider();
-    // Redirect method use kar rahe hain
+    document.getElementById("loginBtn").style.display = "none";
+    document.getElementById("loader").style.display = "block";
     firebase.auth().signInWithRedirect(provider);
   }
 
-  // 2. DATA SAVING LOGIC (Ye missing tha pichle code mein)
-  function saveUserToDB(user) {
+  function saveDataAndRedirect(user) {
+      // Database mein user save karo (Background mein)
       const userRef = firebase.database().ref("students/" + user.uid);
-      
-      userRef.once('value').then(snapshot => {
-          // Agar naya user hai, to DB mein save karo
-          if (!snapshot.exists()) {
-              userRef.set({
-                  uid: user.uid,
-                  name: user.displayName,
-                  email: user.email,
-                  photo: user.photoURL,
-                  joinDate: new Date().toISOString(),
-                  isPremium: false
-              });
-          }
-          
-          // Local Storage Update (Profile page ke liye zaroori)
-          localStorage.setItem("userUid", user.uid);
-          localStorage.setItem("userName", user.displayName);
-          localStorage.setItem("userPhoto", user.photoURL);
-          localStorage.setItem("userEmail", user.email);
-          
-          // Redirect to Home
-          window.location.href = "index.html";
+      userRef.update({
+          uid: user.uid,
+          name: user.displayName,
+          email: user.email,
+          photo: user.photoURL,
+          lastLogin: new Date().toISOString()
       });
+
+      // Local Storage for Profile Page
+      localStorage.setItem("userUid", user.uid);
+      localStorage.setItem("userName", user.displayName);
+      localStorage.setItem("userPhoto", user.photoURL);
+      localStorage.setItem("userEmail", user.email);
+      
+      // Redirect
+      window.location.replace("index.html");
   }
 </script>
 
