@@ -1,8 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1044688892570297"
-     crossorigin="anonymous"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1044688892570297" crossorigin="anonymous"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Career Care</title>
@@ -40,9 +39,20 @@
     /* Header */
     .main-header { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: #1e88e5; color: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
     .header-left { display: flex; align-items: center; gap: 10px; }
+    .header-right { display: flex; align-items: center; gap: 20px; } /* Added for Notif + Menu */
     .app-logo { height: 35px; width: 35px; background: white; border-radius: 50%; padding: 2px; object-fit: contain; }
     .app-name { font-size: 20px; font-weight: bold; }
     .menu-btn-icon { font-size: 26px; cursor: pointer; }
+
+    /* Notification Styles */
+    .notif-wrapper { position: relative; cursor: pointer; }
+    .notif-icon { font-size: 24px; }
+    .notif-badge { 
+      position: absolute; top: -5px; right: -5px; 
+      background: red; color: white; font-size: 10px; 
+      width: 15px; height: 15px; border-radius: 50%; 
+      display: none; justify-content: center; align-items: center; border: 2px solid #1e88e5;
+    }
 
     /* Menu */
     #menu { display: none; position: absolute; top: 60px; right: 10px; background: white; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); width: 200px; z-index: 1000; overflow: hidden; }
@@ -51,9 +61,18 @@
 
     /* Content */
     .container { padding: 15px; max-width: 600px; margin: 0 auto; }
-    .top-buttons button { width: 100%; padding: 15px; margin-bottom: 12px; border: none; border-radius: 10px; color: white; font-size: 16px; font-weight: 600; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    
+    /* Updated Buttons Layout */
+    .top-buttons { display: flex; flex-direction: column; gap: 12px; margin-bottom: 12px; }
+    .btn-full { width: 100%; padding: 15px; border: none; border-radius: 10px; color: white; font-size: 16px; font-weight: 600; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    
+    .split-row { display: flex; gap: 10px; }
+    .btn-half { flex: 1; padding: 15px; border: none; border-radius: 10px; color: white; font-size: 15px; font-weight: 600; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+
     .ca-btn { background: #43a047; }
     .news-btn { background: #fb8c00; }
+    .premium-btn { background: #6a1b9a; position: relative; } /* Purple for Premium */
+    .lock-icon { font-size: 12px; margin-left: 5px; }
 
     h3 { color: #444; margin-top: 25px; margin-bottom: 15px; }
     .exam-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
@@ -64,11 +83,26 @@
       cursor: pointer; transition: 0.2s; border: 1px solid #b3e5fc;
     }
     .exam-btn:active { transform: scale(0.98); background: #b3e5fc; }
+
+    /* Modal for Notification */
+    .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; justify-content: center; align-items: center; }
+    .modal-box { background: white; padding: 20px; width: 80%; max-width: 400px; border-radius: 10px; text-align: center; }
+    .modal-title { font-weight: bold; font-size: 18px; margin-bottom: 10px; color: #333; }
+    .modal-msg { color: #555; margin-bottom: 20px; font-size: 15px; }
+    .modal-close { background: #1e88e5; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; }
   </style>
 </head>
 <body>
 
   <div id="page-loader">Checking...</div>
+
+  <div id="notif-modal" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-title">🔔 New Update</div>
+      <div id="modal-msg-text" class="modal-msg">Loading...</div>
+      <button class="modal-close" onclick="closeModal()">OK</button>
+    </div>
+  </div>
 
   <div id="login-gate">
     <div class="welcome-card">
@@ -85,12 +119,18 @@
         <img src="logo.png" class="app-logo" onerror="this.src='https://via.placeholder.com/40'"> 
         <span class="app-name">Career Care</span>
       </div>
-      <span class="menu-btn-icon" onclick="toggleMenu()">⋮</span>
+      
+      <div class="header-right">
+        <div class="notif-wrapper" onclick="showLatestNotif()">
+            <span class="notif-icon">🔔</span>
+            <span id="notif-dot" class="notif-badge">!</span>
+        </div>
+        <span class="menu-btn-icon" onclick="toggleMenu()">⋮</span>
+      </div>
     </header>
 
     <div id="menu">
       <div class="menu-item" onclick="window.location.href='profile.html'">👤 My Profile</div>
-      <div class="menu-item" onclick="window.location.href='premium.html'">⭐ Premium Test</div>
       <div class="menu-item" onclick="window.location.href='history.html'">🕒 History</div>
       <div class="menu-item" onclick="shareApp()">📤 Share App</div>
       <div class="menu-item" style="color:red;" onclick="logout()">🚪 Logout</div>
@@ -98,8 +138,12 @@
 
     <div class="container">
       <div class="top-buttons">
-        <button class="ca-btn" onclick="window.location.href='current_affairs.html'">📰 Daily Current Affairs</button>
-        <button class="news-btn" onclick="window.location.href='exam-news.html'">📢 Exam News</button>
+        <button class="btn-full ca-btn" onclick="window.location.href='current_affairs.html'">📰 Daily Current Affairs</button>
+        
+        <div class="split-row">
+            <button class="btn-half news-btn" onclick="window.location.href='exam-news.html'">📢 Exam News</button>
+            <button class="btn-half premium-btn" onclick="checkPremiumAndOpen()">⭐ Premium <span class="lock-icon">🔒</span></button>
+        </div>
       </div>
 
       <h3>Select Exam Category</h3>
@@ -120,20 +164,100 @@
   };
   if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 
+  let currentUserUid = null;
+  let currentNotificationMsg = "";
+
   // AUTH STATE
   firebase.auth().onAuthStateChanged((user) => {
     document.getElementById("page-loader").style.display = "none";
     if (user) {
+      currentUserUid = user.uid;
       document.getElementById("main-content").style.display = "block";
       document.getElementById("login-gate").style.display = "none";
       loadExams();
+      listenForNotifications(); // Start checking notifications
     } else {
       document.getElementById("main-content").style.display = "none";
       document.getElementById("login-gate").style.display = "flex";
     }
   });
 
-  // LOAD EXAMS
+  // --- 1. NOTIFICATION LOGIC ---
+  function listenForNotifications() {
+    // Database path: notification (aap isse change kr skte h)
+    const notifRef = firebase.database().ref('notification');
+    
+    notifRef.on('value', (snapshot) => {
+      const data = snapshot.val();
+      if (data && data.message) {
+        currentNotificationMsg = data.message;
+        const savedMsg = localStorage.getItem('last_notification');
+
+        // Agar database wali msg purani saved msg se alag hai, to new hai
+        if (savedMsg !== data.message) {
+          document.getElementById('notif-dot').style.display = 'flex'; // Show Red Dot
+          openModal(data.message); // Show Popup automatically
+          localStorage.setItem('last_notification', data.message); // Save as read
+        } else {
+           // Agar already read hai, to red dot hta do
+           document.getElementById('notif-dot').style.display = 'none';
+        }
+      }
+    });
+  }
+
+  function showLatestNotif() {
+     if(currentNotificationMsg) {
+         openModal(currentNotificationMsg);
+         document.getElementById('notif-dot').style.display = 'none'; // Click kiya to read ho gya
+     } else {
+         alert("No new notifications");
+     }
+  }
+
+  function openModal(msg) {
+    document.getElementById('modal-msg-text').innerText = msg;
+    document.getElementById('notif-modal').style.display = 'flex';
+  }
+  function closeModal() {
+    document.getElementById('notif-modal').style.display = 'none';
+  }
+
+  // --- 2. PREMIUM CHECK LOGIC ---
+  function checkPremiumAndOpen() {
+    if(!currentUserUid) return;
+
+    // Button pr loading effect (optional)
+    const btn = document.querySelector('.premium-btn');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = "Checking...";
+
+    // User ke database mein check kro 'isPremium' true hai ya nahi
+    firebase.database().ref('users/' + currentUserUid).once('value')
+      .then((snapshot) => {
+        const userData = snapshot.val();
+        
+        // Check if user exists and has isPremium = true
+        if (userData && userData.isPremium === true) {
+            // Paid User -> Go to Subject Selection Page
+            // Note: Aapko 'premium_subjects.html' page banana pdega
+            window.location.href = 'premium_subjects.html'; 
+        } else {
+            // Free User -> Show Alert
+            alert("🔒 This is a Premium Feature.\nPlease upgrade your plan to access Premium Tests.");
+            // Yahan payment page par bhi bhej sakte hain
+            // window.location.href = 'payment.html'; 
+        }
+        btn.innerHTML = originalText;
+      })
+      .catch((error) => {
+        console.error(error);
+        alert("Error checking status. Please try again.");
+        btn.innerHTML = originalText;
+      });
+  }
+
+  // LOAD EXAMS (Existing)
   function loadExams() {
     const grid = document.getElementById("exam-container");
     firebase.database().ref('exam_categories').once('value').then(snap => {
@@ -181,4 +305,4 @@
   });
 </script>
 </body>
-</html>
+  </html>
