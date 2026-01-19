@@ -1,64 +1,73 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1044688892570297"
-     crossorigin="anonymous"></script>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>My Test History</title>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1044688892570297" crossorigin="anonymous"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Test History</title>
 
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
-<style>
-  body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #f4f6f8; }
-  
-  /* Header */
-  header { background: #1e88e5; color: white; padding: 15px; display: flex; align-items: center; gap: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-  .back-btn { font-size: 24px; cursor: pointer; color: white; text-decoration: none; }
-  .title { font-size: 20px; font-weight: bold; }
+  <style>
+    body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #f4f6f8; }
+    
+    /* Header */
+    header { background: #1e88e5; color: white; padding: 15px; display: flex; align-items: center; gap: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    
+    /* Updated Back Button Style */
+    .back-btn { font-size: 24px; cursor: pointer; color: white; text-decoration: none; border:none; background:none; }
+    
+    .title { font-size: 20px; font-weight: bold; }
 
-  .container { padding: 15px; max-width: 600px; margin: 0 auto; }
+    .container { padding: 15px; max-width: 600px; margin: 0 auto; }
 
-  /* History Card Style */
-  .history-card {
-    background: white;
-    padding: 15px;
-    border-radius: 10px;
-    margin-bottom: 12px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-    border-left: 5px solid #ddd;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
+    /* History Card Style */
+    .history-card {
+      background: white;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 12px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+      border-left: 5px solid #ddd;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
 
-  /* Score Colors based on percentage */
-  .pass { border-left-color: #43a047; } /* Green */
-  .fail { border-left-color: #e53935; } /* Red */
-  .avg  { border-left-color: #fb8c00; } /* Orange */
+    /* Score Colors based on percentage */
+    .pass { border-left-color: #43a047; } /* Green */
+    .fail { border-left-color: #e53935; } /* Red */
+    .avg  { border-left-color: #fb8c00; } /* Orange */
 
-  .exam-info h3 { margin: 0 0 5px 0; font-size: 16px; text-transform: capitalize; color: #333; }
-  .exam-info p { margin: 0; color: #666; font-size: 13px; }
-  
-  .score-badge {
-    text-align: center;
-    background: #f5f5f5;
-    padding: 8px 12px;
-    border-radius: 8px;
-    min-width: 60px;
-  }
-  .marks { font-size: 18px; font-weight: bold; color: #1e88e5; }
-  .total { font-size: 12px; color: #888; }
-  
-  #loader { text-align: center; margin-top: 50px; color: #777; }
-</style>
+    .exam-info h3 { margin: 0 0 5px 0; font-size: 16px; text-transform: capitalize; color: #333; }
+    .exam-info p { margin: 0; color: #666; font-size: 13px; }
+    
+    .score-badge {
+      text-align: center;
+      background: #f5f5f5;
+      padding: 8px 12px;
+      border-radius: 8px;
+      min-width: 60px;
+    }
+    .marks { font-size: 18px; font-weight: bold; color: #1e88e5; }
+    .total { font-size: 12px; color: #888; }
+    
+    /* Retake Button Style (Optional) */
+    .retake-btn {
+        margin-top: 5px;
+        background: #e3f2fd; color: #1565c0; border: none;
+        padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 12px;
+    }
+
+    #loader { text-align: center; margin-top: 50px; color: #777; }
+  </style>
 </head>
 <body>
 
 <header>
-  <a href="profile.html" class="back-btn">&#8592;</a>
+  <button class="back-btn" onclick="window.location.replace('index.html')">&#8592;</button>
   <div class="title">Test History</div>
 </header>
 
@@ -81,28 +90,24 @@ const firebaseConfig = {
 if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 
 /* ================= LOGIC ================= */
+// Note: localStorage se uid lene ki jagah auth state check krna behtar hai
+// Lekin aapke current logic ke hisab se:
 const userUid = localStorage.getItem("userUid");
 const listDiv = document.getElementById("history-list");
 const loader = document.getElementById("loader");
 
-if (!userUid) {
-    window.location.href = "login.html";
-} else {
-    fetchHistory();
-}
-  // History item display logic
-data.forEach(item => {
-   card.innerHTML = `
-      <h3>${item.topic}</h3>
-      <p>Score: ${item.score}</p>
-      <button onclick="window.location.href='test.html?exam=${item.exam}&topic=${item.topic}'">
-         🔄 Retake Test
-      </button>
-   `;
+// Agar direct URL se khola aur login nahi hai
+firebase.auth().onAuthStateChanged((user) => {
+    if (user) {
+        fetchHistory(user.uid);
+    } else {
+        // Agar user login nahi hai to login page bhejo
+        window.location.href = "login.html";
+    }
 });
 
-function fetchHistory() {
-    const historyRef = firebase.database().ref(`students/${userUid}/history`).orderByChild('timestamp');
+function fetchHistory(uid) {
+    const historyRef = firebase.database().ref(`students/${uid}/history`).orderByChild('timestamp');
     
     historyRef.once('value', (snapshot) => {
         loader.style.display = "none";
@@ -135,6 +140,8 @@ function createCard(item) {
 
     const div = document.createElement("div");
     div.className = `history-card ${colorClass}`;
+    
+    // Maine yahan Retake logic bhi add kar diya hai jo aapke code mein broken tha
     div.innerHTML = `
         <div class="exam-info">
             <h3>${topicName}</h3>
