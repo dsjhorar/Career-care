@@ -152,7 +152,7 @@ function loadData() {
     } else {
         let dbPath = (exam === 'current_affairs') ? `daily_quiz/${topic}/questions` : `tests/${exam}/${topic}/questions`;
         
-        firebase.database().ref(dbPath).limitToFirst(20).once('value').then(snap => {
+        firebase.database().ref(dbPath).once('value').then(snap => {
             if(!snap.exists()){
                 showError("No questions found.");
                 return;
