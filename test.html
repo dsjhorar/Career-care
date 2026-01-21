@@ -5,62 +5,56 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Professional Quiz</title>
 
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js" defer></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js" defer></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js" defer></script>
 
 <style>
-  body{margin:0;font-family:'Segoe UI', sans-serif;background:#f4f6f8; padding-bottom: 60px;} /* Padding for bottom Ad */
+  body{margin:0;font-family:'Segoe UI', sans-serif;background:#f4f6f8; padding-bottom: 60px;}
   
-  /* HEADER & PROGRESS */
   header{background:#1e88e5;color:#fff;padding:15px;text-align:center;font-weight:bold;font-size:18px; position: relative;}
   .progress-bar { height: 5px; background: #90caf9; width: 100%; position: absolute; bottom: 0; left: 0; }
-  .progress-fill { height: 100%; background: #ffeb3b; width: 0%; transition: width 0.3s; }
+  .progress-fill { height: 100%; background: #ffeb3b; width: 0%; transition: width 0.3s ease-out; }
 
   .container{padding:15px; max-width: 800px; margin: 0 auto;}
   
-  /* TIMER & INFO */
   .info-bar { display: flex; justify-content: space-between; margin-bottom: 15px; font-weight: bold; color: #444; }
   .timer-box { background: #fff3e0; color: #e65100; padding: 5px 10px; border-radius: 4px; border: 1px solid #ffb74d; }
   
-  /* QUESTION CARD */
-  .question-card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+  .question-card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); contain: content; }
   .q-text { font-size: 18px; margin-bottom: 20px; color: #222; font-weight: 500; line-height: 1.5; }
   
-  /* OPTIONS */
-  .option{background:#f8f9fa;border:2px solid #e9ecef;padding:15px;margin-bottom:10px;border-radius:8px;cursor:pointer; transition: all 0.2s;}
-  .option:hover { background: #e3f2fd; border-color: #90caf9; }
+  .option{background:#f8f9fa;border:2px solid #e9ecef;padding:15px;margin-bottom:10px;border-radius:8px;cursor:pointer; transition: transform 0.1s, background 0.2s;}
+  .option:active { transform: scale(0.98); }
   .option.selected{background:#e3f2fd;border-color:#1e88e5; font-weight: bold; color: #1565c0;}
   
-  /* REVIEW COLORS */
-  .correct{background:#dcedc8!important; border-color: #8bc34a!important;}
-  .wrong{background:#ffcdd2!important; border-color: #e57373!important;}
-
-  /* BUTTONS */
   .footer-btns { display: flex; gap: 10px; margin-top: 20px; }
-  .btn{flex:1; padding:12px; border:none; border-radius:6px; font-size:16px; cursor:pointer; font-weight: bold; color: white; transition: 0.2s opacity;}
+  .btn{flex:1; padding:12px; border:none; border-radius:6px; font-size:16px; cursor:pointer; font-weight: bold; color: white; transition: opacity 0.2s;}
   .btn:active { opacity: 0.8; }
   .prev{background:#78909c}
   .next{background:#1e88e5}
-  .submit{background:#43a047; display: none;} /* Hidden initially */
+  .submit{background:#43a047; display: none;}
 
-  /* ADS SECTIONS */
   .ad-banner { width: 100%; background: #eee; text-align: center; padding: 10px; color: #999; font-size: 12px; margin: 10px 0; border: 1px dashed #ccc; }
   .ad-bottom-fixed { position: fixed; bottom: 0; left: 0; width: 100%; height: 50px; background: #fff; border-top: 1px solid #ccc; z-index: 100; display: flex; justify-content: center; align-items: center;}
 
-  /* RESULT SECTION */
   #result-screen { display: none; text-align: center; }
   .rank-badge { background: #673ab7; color: white; padding: 5px 15px; border-radius: 20px; display: inline-block; margin-bottom: 10px; font-size: 14px;}
-  .score-circle { width: 180px; height: 120px; background: #1e88e5; color: white; font-size: 32px; line-height: 120px; border-radius: 50%; margin: 10px auto; font-weight: bold; }
+  .score-circle { width: 120px; height: 120px; background: #1e88e5; color: white; font-size: 32px; line-height: 120px; border-radius: 50%; margin: 10px auto; font-weight: bold; }
   
-  #loader { text-align: center; margin-top: 50px; }
+  /* --- NEW CSS FOR STATS --- */
+  .stats-grid { display: flex; justify-content: center; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
+  .stat-box { padding: 10px 15px; border-radius: 8px; font-weight: bold; color: white; font-size: 14px; min-width: 80px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+  .stat-box.right { background: #43a047; } /* Green */
+  .stat-box.wrong { background: #e53935; } /* Red */
+  .stat-box.skip { background: #fb8c00; }  /* Orange */
+  
+  #loader { text-align: center; margin-top: 50px; font-size: 18px; color: #555; }
 </style>
 </head>
 <body>
 
-<div class="ad-banner">
-  📢 Space for Top Banner Ad
-</div>
+<div class="ad-banner">📢 Space for Top Banner Ad</div>
 
 <header>
   <span id="exam-title">Test Loading...</span>
@@ -68,12 +62,10 @@
 </header>
 
 <div class="container">
-  
-  <div id="loader">🔄 Fetching Questions...</div>
+  <div id="loader">🔄 Initializing...</div>
   <div id="error-box" style="display:none; color:red; text-align:center;"></div>
 
   <div id="quiz-interface" style="display:none;">
-    
     <div class="info-bar">
       <span>Q: <span id="q-num">1</span>/<span id="q-total">0</span></span>
       <div class="timer-box">⏳ <span id="timer">00:00</span></div>
@@ -84,9 +76,7 @@
       <div id="options-container"></div>
     </div>
 
-    <div class="ad-banner" style="margin-top:20px;">
-       📢 Space for Middle Ad
-    </div>
+    <div class="ad-banner" style="margin-top:20px;">📢 Space for Middle Ad</div>
 
     <div class="footer-btns">
       <button class="btn prev" onclick="prevQ()">⬅ Prev</button>
@@ -98,23 +88,25 @@
   <div id="result-screen">
     <h2>Result Analysis</h2>
     <div class="rank-badge" id="rank-display">Calculating Rank...</div>
-    
     <div class="score-circle" id="final-score">0/0</div>
     
+    <div class="stats-grid">
+        <div class="stat-box right">✅ Right: <span id="right-count">0</span></div>
+        <div class="stat-box wrong">❌ Wrong: <span id="wrong-count">0</span></div>
+        <div class="stat-box skip">⏭ Skipped: <span id="skip-count">0</span></div>
+    </div>
+
     <div style="margin-top:20px;">
-      <button class="btn next" onclick="window.location.reload()">🔄 Retake Test</button>
+      <button class="btn next" onclick="clearCacheAndReload()">🔄 Retake Test</button>
       <button class="btn prev" onclick="window.location.href='index.html'">🏠 Home</button>
     </div>
 
     <h3 style="text-align:left; margin-top:30px;">📝 Solution Review</h3>
     <div id="review-list" style="text-align:left;"></div>
   </div>
-
 </div>
 
-<div class="ad-bottom-fixed">
-   📢 Space for Sticky Footer Ad
-</div>
+<div class="ad-bottom-fixed">📢 Space for Sticky Footer Ad</div>
 
 <script>
 /* ================= CONFIG ================= */
@@ -125,9 +117,13 @@ const firebaseConfig = {
   projectId: "career-care-afb64",
   appId: "1:267890746286:web:2c38f0980119d01b145e3f"
 };
-if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 
 /* ================= LOGIC ================= */
+document.addEventListener("DOMContentLoaded", () => {
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    initApp();
+});
+
 const params = new URLSearchParams(window.location.search);
 const exam = params.get("exam");
 const topic = params.get("topic");
@@ -138,88 +134,97 @@ let userAnswers = {};
 let timeLeft = 0;
 let timerInterval;
 
-// Start
-if(exam && topic) {
-    loadData();
-} else {
-    document.getElementById("loader").innerText = "⚠️ Invalid URL parameters.";
+function initApp() {
+    if(exam && topic) {
+        loadData();
+    } else {
+        document.getElementById("loader").innerText = "⚠️ Invalid URL parameters.";
+    }
 }
 
 function loadData() {
-    // 1. Path Decision (Daily vs Standard)
-    let dbPath = (exam === 'current_affairs') ? `daily_quiz/${topic}/questions` : `tests/${exam}/${topic}/questions`;
-    
-    firebase.database().ref(dbPath).once('value').then(snap => {
-        document.getElementById("loader").style.display = "none";
-        if(!snap.exists()){
-            document.getElementById("error-box").innerText = "No questions found.";
-            document.getElementById("error-box").style.display="block";
-            return;
-        }
+    // Caching Logic
+    const cacheKey = `quiz_data_${exam}_${topic}`;
+    const cachedData = sessionStorage.getItem(cacheKey);
 
-        let data = snap.val();
-        questions = Array.isArray(data) ? data.filter(x=>x) : Object.values(data);
+    if (cachedData) {
+        processData(JSON.parse(cachedData));
+    } else {
+        let dbPath = (exam === 'current_affairs') ? `daily_quiz/${topic}/questions` : `tests/${exam}/${topic}/questions`;
         
-        // SETUP UI
-        document.getElementById("quiz-interface").style.display = "block";
-        document.getElementById("q-total").innerText = questions.length;
-        document.getElementById("exam-title").innerText = topic.replace(/_/g, " ").toUpperCase();
+        firebase.database().ref(dbPath).limitToFirst(20).once('value').then(snap => {
+            if(!snap.exists()){
+                showError("No questions found.");
+                return;
+            }
+            let data = snap.val();
+            sessionStorage.setItem(cacheKey, JSON.stringify(data));
+            processData(data);
+        }).catch(err => {
+            showError("Network Error.");
+        });
+    }
+}
 
-        // 1. REQ: Timer = 45 sec per question
-        timeLeft = questions.length * 45; 
-        startTimer();
+function processData(data) {
+    document.getElementById("loader").style.display = "none";
+    questions = Array.isArray(data) ? data.filter(x=>x) : Object.values(data);
+    
+    document.getElementById("quiz-interface").style.display = "block";
+    document.getElementById("q-total").innerText = questions.length;
+    document.getElementById("exam-title").innerText = topic.replace(/_/g, " ").toUpperCase();
 
-        loadQuestion(0);
-    });
+    timeLeft = questions.length * 45; 
+    startTimer();
+    loadQuestion(0);
+}
+
+function showError(msg) {
+    document.getElementById("loader").style.display = "none";
+    document.getElementById("error-box").innerText = msg;
+    document.getElementById("error-box").style.display="block";
 }
 
 function loadQuestion(index) {
     current = index;
     const q = questions[index];
     
-    // Progress Bar
-    let pct = ((index+1) / questions.length) * 100;
-    document.getElementById("progress-fill").style.width = `${pct}%`;
-
-    // Question Text (Handle 'q' vs 'question')
+    document.getElementById("progress-fill").style.width = `${((index+1) / questions.length) * 100}%`;
     document.getElementById("q-text").innerText = `Q${index+1}. ` + (q.question || q.q);
     document.getElementById("q-num").innerText = index + 1;
 
-    // Options
     const div = document.getElementById("options-container");
-    div.innerHTML = "";
+    div.innerHTML = ""; 
+    const fragment = document.createDocumentFragment();
     
-    let opts = q.options; // Can be Array or Object
-    let optsKeys = Array.isArray(opts) ? opts.map((_,i)=>i) : Object.keys(opts); // [0,1,2,3] or ["a","b"]
+    let opts = q.options; 
+    let optsKeys = Array.isArray(opts) ? opts.map((_,i)=>i) : Object.keys(opts);
 
     optsKeys.forEach(key => {
-        let val = Array.isArray(opts) ? opts[key] : opts[key]; // Text value
-        
+        let val = Array.isArray(opts) ? opts[key] : opts[key];
         let btn = document.createElement("div");
         btn.className = "option";
         if(userAnswers[index] == key) btn.classList.add("selected");
         btn.innerText = val;
         btn.onclick = () => {
             userAnswers[index] = key;
-            loadQuestion(index); // Refresh to show selection
+            Array.from(div.children).forEach(child => child.classList.remove("selected"));
+            btn.classList.add("selected");
         };
-        div.appendChild(btn);
+        fragment.appendChild(btn);
     });
+    
+    div.appendChild(fragment);
 
-    // 2. REQ: Last Question Logic
-    if(index === questions.length - 1) {
-        document.getElementById("btn-next").style.display = "none";
-        document.getElementById("btn-submit").style.display = "block";
-    } else {
-        document.getElementById("btn-next").style.display = "block";
-        document.getElementById("btn-submit").style.display = "none";
-    }
+    document.getElementById("btn-next").style.display = (index === questions.length - 1) ? "none" : "block";
+    document.getElementById("btn-submit").style.display = (index === questions.length - 1) ? "block" : "none";
 }
 
 function nextQ() { if(current < questions.length - 1) loadQuestion(current + 1); }
 function prevQ() { if(current > 0) loadQuestion(current - 1); }
 
 function startTimer() {
+    const timerEl = document.getElementById("timer");
     timerInterval = setInterval(() => {
         if(timeLeft <= 0) {
             submitTest();
@@ -227,41 +232,56 @@ function startTimer() {
             timeLeft--;
             let m = Math.floor(timeLeft / 60);
             let s = timeLeft % 60;
-            document.getElementById("timer").innerText = `${m}:${s<10?'0':''}${s}`;
+            timerEl.innerText = `${m}:${s<10?'0':''}${s}`;
         }
     }, 1000);
 }
 
+// === MAIN CHANGE: Updated submitTest Logic ===
 function submitTest() {
     clearInterval(timerInterval);
     document.getElementById("quiz-interface").style.display = "none";
     document.getElementById("result-screen").style.display = "block";
 
     let score = 0;
+    
+    // NEW: Counters for Stats
+    let rightCount = 0;
+    let wrongCount = 0;
+    let skipCount = 0;
+
     questions.forEach((q, i) => {
-        // Handle Answer Key (Index vs String)
         let correct = q.correctAnswer !== undefined ? q.correctAnswer : q.answer;
-        if(userAnswers[i] == correct) score++;
-        else if(userAnswers[i] !== undefined) score -= 0.33; // Negative marking
+        
+        if(userAnswers[i] == correct) {
+            score++;
+            rightCount++; // Increase Right Count
+        } 
+        else if(userAnswers[i] !== undefined) {
+            score -= 0.33; 
+            wrongCount++; // Increase Wrong Count
+        } 
+        else {
+            skipCount++;  // Increase Skip Count
+        }
     });
 
-    // Ensure score is not negative for display
+    // Update UI with Stats
     let displayScore = score < 0 ? 0 : score;
     document.getElementById("final-score").innerText = `${displayScore.toFixed(2)}/${questions.length}`;
-
-    // 3. Save History (Real) & Show Rank (Simulated)
-    saveResult(displayScore);
     
-    // Yahan hum SIMULATED rank call kar rahe hain
-    calculateSimulatedRank(displayScore, questions.length);
+    document.getElementById("right-count").innerText = rightCount;
+    document.getElementById("wrong-count").innerText = wrongCount;
+    document.getElementById("skip-count").innerText = skipCount;
 
-    generateReview();
+    saveResult(displayScore);
+    calculateSimulatedRank(displayScore, questions.length);
+    
+    setTimeout(generateReview, 100);
 }
 
 function saveResult(score) {
     const userUid = localStorage.getItem("userUid") || "guest";
-    
-    // Only Save History (Rank ab fake dikha rahe hain, to leaderboard save zaroori nahi for display)
     if(userUid !== "guest") {
         firebase.database().ref(`students/${userUid}/history`).push({
             exam: exam,
@@ -272,48 +292,46 @@ function saveResult(score) {
     }
 }
 
-// === NEW: SIMULATED RANK LOGIC (Fake User System) ===
 function calculateSimulatedRank(score, totalQuestions) {
-    // 1. Fake Total Students (e.g. 1500 se 3500 ke beech random)
     const fakeTotalStudents = Math.floor(Math.random() * (7500 - 1500 + 1)) + 1500;
-    
-    // 2. Percentage Nikalo
     let safeScore = score < 0 ? 0 : score;
     const percentage = safeScore / totalQuestions;
-
-    // 3. Rank Calculate karo (High score = Low Rank Number)
     let estimatedRank = Math.floor(fakeTotalStudents * (1 - percentage));
-    
-    // 4. Thoda Logic: Agar full marks hain to Rank 1-10 mein ho
     if (estimatedRank < 1) estimatedRank = Math.floor(Math.random() * 10) + 1;
-    if (estimatedRank > fakeTotalStudents) estimatedRank = fakeTotalStudents;
-
-    // 5. Display
+    
     document.getElementById("rank-display").innerText = `🏆 Rank: ${estimatedRank} / ${fakeTotalStudents}`;
 }
 
 function generateReview() {
     const list = document.getElementById("review-list");
+    const fragment = document.createDocumentFragment();
+
     questions.forEach((q, i) => {
         let correct = q.correctAnswer !== undefined ? q.correctAnswer : q.answer;
         let uAns = userAnswers[i];
-        
-        let statusColor = (uAns == correct) ? "green" : "red";
-        
+        let borderColor = (uAns == correct) ? "green" : "red";
+
         let div = document.createElement("div");
-        div.style = `background:white; padding:10px; margin-bottom:10px; border-left:4px solid ${statusColor}; box-shadow:0 2px 5px #eee;`;
+        div.style = `background:white; padding:12px; margin-bottom:12px; border-left:5px solid ${borderColor}; box-shadow:0 2px 4px #eee; border-radius:4px;`;
+        
         div.innerHTML = `
-            <div style="font-weight:bold">Q${i+1}. ${q.question || q.q}</div>
-            <div style="font-size:14px; color:#555; margin-top:5px;">
+            <div style="font-weight:600; font-size:15px;">Q${i+1}. ${q.question || q.q}</div>
+            <div style="font-size:14px; color:#444; margin-top:8px;">
                Your Ans: <b>${uAns !== undefined ? uAns : "Skipped"}</b> | 
                Correct: <b style="color:green">${correct}</b>
             </div>
-            <div style="background:#fff9c4; font-size:13px; padding:5px; margin-top:5px;">
+            <div style="background:#f9f9f9; font-size:13px; padding:8px; margin-top:8px; border-radius:4px; color:#555;">
                💡 ${q.explanation || "No explanation available."}
             </div>
         `;
-        list.appendChild(div);
+        fragment.appendChild(div);
     });
+    list.appendChild(fragment);
+}
+
+function clearCacheAndReload() {
+    sessionStorage.removeItem(`quiz_data_${exam}_${topic}`);
+    window.location.reload();
 }
 </script>
 
