@@ -37,9 +37,9 @@
     #main-content { display: none; }
 
     /* Header */
-    .main-header { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: #1e88e5; color: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    .main-header { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: #1e88e5; color: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; }
     .header-left { display: flex; align-items: center; gap: 10px; }
-    .header-right { display: flex; align-items: center; gap: 20px; } /* Added for Notif + Menu */
+    .header-right { display: flex; align-items: center; gap: 20px; } 
     .app-logo { height: 35px; width: 35px; background: white; border-radius: 50%; padding: 2px; object-fit: contain; }
     .app-name { font-size: 20px; font-weight: bold; }
     .menu-btn-icon { font-size: 26px; cursor: pointer; }
@@ -71,8 +71,9 @@
 
     .ca-btn { background: #43a047; }
     .news-btn { background: #fb8c00; }
-    .premium-btn { background: #6a1b9a; position: relative; } /* Purple for Premium */
-    .lock-icon { font-size: 12px; margin-left: 5px; }
+    
+    /* UPDATED: Notes Button Style (was Premium) */
+    .notes-btn { background: #8e24aa; } 
 
     h3 { color: #444; margin-top: 25px; margin-bottom: 15px; }
     .exam-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
@@ -90,6 +91,32 @@
     .modal-title { font-weight: bold; font-size: 18px; margin-bottom: 10px; color: #333; }
     .modal-msg { color: #555; margin-bottom: 20px; font-size: 15px; }
     .modal-close { background: #1e88e5; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; }
+
+    /* --- NEW STYLES FOR NOTES & PAGES --- */
+    .full-page-view {
+      display: none; 
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+      background: #f4f6f8; z-index: 500; overflow-y: auto;
+    }
+    .page-header {
+      background: #1e88e5; color: white; padding: 15px; 
+      display: flex; align-items: center; gap: 15px; position: sticky; top: 0;
+    }
+    .back-btn { font-size: 20px; cursor: pointer; background: none; border: none; color: white; }
+    .page-content { padding: 20px; max-width: 800px; margin: 0 auto; }
+    
+    .subject-btn {
+      background: white; padding: 20px; margin-bottom: 15px; border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05); font-size: 18px; font-weight: 600; 
+      color: #333; cursor: pointer; display: flex; justify-content: space-between; align-items: center;
+    }
+    .subject-btn span { color: #1e88e5; font-size: 24px; }
+
+    .note-text-container {
+      background: white; padding: 25px; border-radius: 10px; 
+      line-height: 1.8; color: #333; font-size: 16px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+      white-space: pre-line; /* Keeps formatting */
+    }
   </style>
 </head>
 <body>
@@ -132,6 +159,8 @@
     <div id="menu">
       <div class="menu-item" onclick="window.location.href='profile.html'">👤 My Profile</div>
       <div class="menu-item" onclick="window.location.href='history.html'">🕒 History</div>
+      <div class="menu-item" onclick="openPage('About Us', aboutUsData)">ℹ️ About Us</div>
+      <div class="menu-item" onclick="openPage('Privacy Policy', privacyPolicyData)">🔒 Privacy Policy</div>
       <div class="menu-item" onclick="shareApp()">📤 Share App</div>
       <div class="menu-item" style="color:red;" onclick="logout()">🚪 Logout</div>
     </div>
@@ -142,7 +171,7 @@
         
         <div class="split-row">
             <button class="btn-half news-btn" onclick="window.location.href='exam-news.html'">📢 Exam News</button>
-            <button class="btn-half premium-btn" onclick="checkPremiumAndOpen()">⭐ Premium <span class="lock-icon">🔒</span></button>
+            <button class="btn-half notes-btn" onclick="openNotesMenu()">📚 Notes</button>
         </div>
       </div>
 
@@ -151,6 +180,38 @@
       <div class="exam-grid" id="exam-container">
         <div style="grid-column:span 2; text-align:center; padding:20px; color:#777;">Loading Exams...</div>
       </div>
+    </div>
+  </div>
+
+  <div id="notes-menu-view" class="full-page-view">
+    <div class="page-header">
+      <button class="back-btn" onclick="closeNotesMenu()">←</button>
+      <span>Study Notes</span>
+    </div>
+    <div class="page-content">
+      <div class="subject-btn" onclick="openNoteDetail('History', notesDB.history)">
+        History <span>➔</span>
+      </div>
+      <div class="subject-btn" onclick="openNoteDetail('Geography', notesDB.geography)">
+        Geography <span>➔</span>
+      </div>
+      <div class="subject-btn" onclick="openNoteDetail('Polity', notesDB.polity)">
+        Polity <span>➔</span>
+      </div>
+      <div class="subject-btn" onclick="openNoteDetail('Art & Culture', notesDB.art_culture)">
+        Art & Culture <span>➔</span>
+      </div>
+    </div>
+  </div>
+
+  <div id="page-viewer" class="full-page-view">
+    <div class="page-header">
+      <button class="back-btn" onclick="closePageView()">←</button>
+      <span id="viewer-title">Title</span>
+    </div>
+    <div class="page-content">
+      <div id="viewer-body" class="note-text-container">
+        </div>
     </div>
   </div>
 
@@ -167,6 +228,53 @@
   let currentUserUid = null;
   let currentNotificationMsg = "";
 
+  // --- LOCAL DATA STORE (Adsense Friendly Text) ---
+  // Aap yahan apna lamba content likh sakte hain. App slow nahi hoga kyunki ye string variable hai.
+  const notesDB = {
+    history: `
+      <h3>Ancient History Overview</h3>
+      <p>Indus Valley Civilization was one of the first major civilizations...</p>
+      <p>The Vedic period saw the composition of the Vedas...</p>
+      <h3>Medieval History</h3>
+      <p>The Mughal Empire brought significant cultural changes...</p>
+      <h3>Modern History</h3>
+      <p>The Indian independence movement began in 1857...</p>
+      <p>(Add more detailed text here for AdSense)</p>
+    `,
+    geography: `
+      <h3>Indian Geography</h3>
+      <p>India is the 7th largest country by area...</p>
+      <p>Major rivers include Ganga, Yamuna, Brahmaputra...</p>
+      <p>The climate varies from tropical in the south to temperate in the north.</p>
+    `,
+    polity: `
+      <h3>Indian Constitution</h3>
+      <p>Adopted on 26th November 1949...</p>
+      <p>Fundamental Rights are guaranteed under Part III...</p>
+      <p>The President is the head of the state...</p>
+    `,
+    art_culture: `
+      <h3>Indian Art Forms</h3>
+      <p>Bharatanatyam, Kathak, Odissi are major classical dances...</p>
+      <p>Mughal architecture introduced domes and minarets...</p>
+    `
+  };
+
+  const aboutUsData = `
+    <h3>About Career Care</h3>
+    <p>Career Care is your ultimate companion for Govt exam preparation.</p>
+    <p>We provide daily current affairs, exam updates, and high-quality study material to help you succeed.</p>
+    <p>Contact: dsjhorar@gmail.com</p>
+  `;
+
+  const privacyPolicyData = `
+    <h3>Privacy Policy</h3>
+    <p>Your privacy is important to us.</p>
+    <p>1. We collect basic user data for login purposes.</p>
+    <p>2. We do not share your personal data with third parties.</p>
+    <p>3. This app uses cookies for better user experience.</p>
+  `;
+
   // AUTH STATE
   firebase.auth().onAuthStateChanged((user) => {
     document.getElementById("page-loader").style.display = "none";
@@ -175,31 +283,56 @@
       document.getElementById("main-content").style.display = "block";
       document.getElementById("login-gate").style.display = "none";
       loadExams();
-      listenForNotifications(); // Start checking notifications
+      listenForNotifications();
     } else {
       document.getElementById("main-content").style.display = "none";
       document.getElementById("login-gate").style.display = "flex";
     }
   });
 
-  // --- 1. NOTIFICATION LOGIC ---
+  // --- NAVIGATION FUNCTIONS ---
+
+  function openNotesMenu() {
+    document.getElementById('notes-menu-view').style.display = 'block';
+    // Close main menu if open
+    document.getElementById("menu").style.display = "none";
+  }
+
+  function closeNotesMenu() {
+    document.getElementById('notes-menu-view').style.display = 'none';
+  }
+
+  function openNoteDetail(title, content) {
+    document.getElementById('viewer-title').innerText = title;
+    document.getElementById('viewer-body').innerHTML = content;
+    document.getElementById('page-viewer').style.display = 'block';
+  }
+
+  function openPage(title, content) {
+    // Used for About Us & Privacy Policy
+    document.getElementById('viewer-title').innerText = title;
+    document.getElementById('viewer-body').innerHTML = content;
+    document.getElementById('page-viewer').style.display = 'block';
+    document.getElementById("menu").style.display = "none"; // Close menu
+  }
+
+  function closePageView() {
+    document.getElementById('page-viewer').style.display = 'none';
+  }
+
+  // --- NOTIFICATION LOGIC ---
   function listenForNotifications() {
-    // Database path: notification (aap isse change kr skte h)
     const notifRef = firebase.database().ref('notification');
-    
     notifRef.on('value', (snapshot) => {
       const data = snapshot.val();
       if (data && data.message) {
         currentNotificationMsg = data.message;
         const savedMsg = localStorage.getItem('last_notification');
-
-        // Agar database wali msg purani saved msg se alag hai, to new hai
         if (savedMsg !== data.message) {
-          document.getElementById('notif-dot').style.display = 'flex'; // Show Red Dot
-          openModal(data.message); // Show Popup automatically
-          localStorage.setItem('last_notification', data.message); // Save as read
+          document.getElementById('notif-dot').style.display = 'flex';
+          openModal(data.message);
+          localStorage.setItem('last_notification', data.message);
         } else {
-           // Agar already read hai, to red dot hta do
            document.getElementById('notif-dot').style.display = 'none';
         }
       }
@@ -209,7 +342,7 @@
   function showLatestNotif() {
      if(currentNotificationMsg) {
          openModal(currentNotificationMsg);
-         document.getElementById('notif-dot').style.display = 'none'; // Click kiya to read ho gya
+         document.getElementById('notif-dot').style.display = 'none';
      } else {
          alert("No new notifications");
      }
@@ -223,41 +356,7 @@
     document.getElementById('notif-modal').style.display = 'none';
   }
 
-  // --- 2. PREMIUM CHECK LOGIC ---
-  function checkPremiumAndOpen() {
-    if(!currentUserUid) return;
-
-    // Button pr loading effect (optional)
-    const btn = document.querySelector('.premium-btn');
-    const originalText = btn.innerHTML;
-    btn.innerHTML = "Checking...";
-
-    // User ke database mein check kro 'isPremium' true hai ya nahi
-    firebase.database().ref('users/' + currentUserUid).once('value')
-      .then((snapshot) => {
-        const userData = snapshot.val();
-        
-        // Check if user exists and has isPremium = true
-        if (userData && userData.isPremium === true) {
-            // Paid User -> Go to Subject Selection Page
-            // Note: Aapko 'premium_subjects.html' page banana pdega
-            window.location.href = 'premium_subjects.html'; 
-        } else {
-            // Free User -> Show Alert
-            alert("🔒 This is a Premium Feature.\nPlease upgrade your plan to access Premium Tests.");
-            // Yahan payment page par bhi bhej sakte hain
-            // window.location.href = 'payment.html'; 
-        }
-        btn.innerHTML = originalText;
-      })
-      .catch((error) => {
-        console.error(error);
-        alert("Error checking status. Please try again.");
-        btn.innerHTML = originalText;
-      });
-  }
-
-  // LOAD EXAMS (Existing)
+  // LOAD EXAMS
   function loadExams() {
     const grid = document.getElementById("exam-container");
     firebase.database().ref('exam_categories').once('value').then(snap => {
@@ -305,4 +404,4 @@
   });
 </script>
 </body>
-  </html>
+</html>
