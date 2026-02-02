@@ -1174,8 +1174,8 @@ const privacyPolicyData = `
       <div class="policy-content">
         <p>If you want to delete your data or have questions about this policy, please contact us:</p>
         <ul class="policy-list">
-          <li><b>Email:</b> support@careercare.com (Replace with your email)</li>
-          <li><b>Address:</b> Bikaner, Rajasthan, India</li>
+          <li><b>Email:</b> dsjhorar@gmail.com</li>
+          
         </ul>
       </div>
     </details>
