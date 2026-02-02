@@ -3,7 +3,78 @@
 // Ye file index.html se alag rahegi to code clean dikhega.
 
 const notesDB = {
-  history: `<h3>🌵 राजस्थान का इतिहास (Rajasthan History)</h3>
+  history: `
+  <style>
+    /* Geography Specific Style */
+    .geo-box { font-family: 'Segoe UI', sans-serif; color: #333; line-height: 1.6; }
+    
+    /* Accordion Style */
+    details {
+      background: #fff;
+      border: 1px solid #b2dfdb;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      overflow: hidden;
+    }
+    
+    summary {
+      background: #e0f2f1; /* Teal Light */
+      padding: 15px;
+      cursor: pointer;
+      font-weight: 700;
+      color: #00695c;
+      font-size: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      list-style: none;
+    }
+    
+    summary::after { content: '+'; font-size: 20px; font-weight: bold; }
+    details[open] summary { border-bottom: 1px solid #b2dfdb; background: #b2dfdb; }
+    details[open] summary::after { content: '-'; }
+    
+    .geo-content { padding: 15px; font-size: 14px; }
+
+    /* Flowchart / Line Diagram Style */
+    .flow-chart {
+      background: #f1f8e9;
+      padding: 15px;
+      border-radius: 8px;
+      border: 1px dashed #81c784;
+      margin: 15px 0;
+      text-align: center;
+    }
+    .flow-node {
+      display: inline-block;
+      padding: 5px 10px;
+      background: #fff;
+      border: 1px solid #4caf50;
+      border-radius: 4px;
+      font-weight: bold;
+      color: #2e7d32;
+      margin: 5px;
+    }
+    .arrow { font-size: 18px; color: #555; margin: 0 5px; }
+    .tree-box { text-align: left; margin-left: 20px; border-left: 2px solid #ccc; padding-left: 10px; }
+
+    /* Tables */
+    table.geo-table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 13px; }
+    table.geo-table th { background: #00796b; color: white; padding: 8px; text-align: left; }
+    table.geo-table td { border: 1px solid #b2dfdb; padding: 8px; vertical-align: top; }
+    table.geo-table tr:nth-child(even) { background: #e0f2f1; }
+
+    /* Highlights */
+    .fact { color: #d84315; font-weight: bold; }
+    ul.dot-list { list-style-type: none; padding-left: 10px; }
+    ul.dot-list li::before { content: "🌍 "; font-size: 12px; }
+  </style>
+
+  <div class="geo-box">
+    <div style="text-align:center; padding:10px; margin-bottom:15px; border-radius:5px; background-color: #e0f2f1; color: #004d40;">
+      <b>🗺️ राजस्थान का इतिहास (Rajasthan History)</b>
+    </div>
 
     <details>
       <summary>1. राजस्थान की प्राचीन सभ्यताएँ (Ancient Civilizations)</summary>
