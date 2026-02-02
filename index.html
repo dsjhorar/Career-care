@@ -455,17 +455,477 @@ ul.bullet-list li { margin-bottom: 8px; }
   </details>
 `,
     geography: `
-      <h3>Indian Geography</h3>
-      <p>India is the 7th largest country by area...</p>
-      <p>Major rivers include Ganga, Yamuna, Brahmaputra...</p>
-      <p>The climate varies from tropical in the south to temperate in the north.</p>
+  <style>
+    /* Geography Specific Style */
+    .geo-box { font-family: 'Segoe UI', sans-serif; color: #333; line-height: 1.6; }
+    
+    /* Accordion Style */
+    details {
+      background: #fff;
+      border: 1px solid #b2dfdb;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      overflow: hidden;
+    }
+    
+    summary {
+      background: #e0f2f1; /* Teal Light */
+      padding: 15px;
+      cursor: pointer;
+      font-weight: 700;
+      color: #00695c;
+      font-size: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      list-style: none;
+    }
+    
+    summary::after { content: '+'; font-size: 20px; font-weight: bold; }
+    details[open] summary { border-bottom: 1px solid #b2dfdb; background: #b2dfdb; }
+    details[open] summary::after { content: '-'; }
+    
+    .geo-content { padding: 15px; font-size: 14px; }
+
+    /* Flowchart / Line Diagram Style */
+    .flow-chart {
+      background: #f1f8e9;
+      padding: 15px;
+      border-radius: 8px;
+      border: 1px dashed #81c784;
+      margin: 15px 0;
+      text-align: center;
+    }
+    .flow-node {
+      display: inline-block;
+      padding: 5px 10px;
+      background: #fff;
+      border: 1px solid #4caf50;
+      border-radius: 4px;
+      font-weight: bold;
+      color: #2e7d32;
+      margin: 5px;
+    }
+    .arrow { font-size: 18px; color: #555; margin: 0 5px; }
+    .tree-box { text-align: left; margin-left: 20px; border-left: 2px solid #ccc; padding-left: 10px; }
+
+    /* Tables */
+    table.geo-table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 13px; }
+    table.geo-table th { background: #00796b; color: white; padding: 8px; text-align: left; }
+    table.geo-table td { border: 1px solid #b2dfdb; padding: 8px; vertical-align: top; }
+    table.geo-table tr:nth-child(even) { background: #e0f2f1; }
+
+    /* Highlights */
+    .fact { color: #d84315; font-weight: bold; }
+    ul.dot-list { list-style-type: none; padding-left: 10px; }
+    ul.dot-list li::before { content: "🌍 "; font-size: 12px; }
+  </style>
+
+  <div class="geo-box">
+    <div style="text-align:center; padding:10px; margin-bottom:15px; border-radius:5px; background-color: #e0f2f1; color: #004d40;">
+      <b>🗺️ राजस्थान भूगोल (सम्पूर्ण नोट्स)</b>
+    </div>
+
+    <details>
+      <summary>1. राजस्थान की उत्पत्ति (Origin)</summary>
+      <div class="geo-content">
+        <p>अल्फ्रेड वेगेनर के महाद्वीपीय विस्थापन सिद्धांत के अनुसार:</p>
+        
+        <div class="flow-chart">
+          <div><span class="flow-node">पैंजिया (महाद्वीप) 29%</span></div>
+          <div class="arrow">↓ (विभाजन)</div>
+          <div>
+            <span class="flow-node">अंगारालैण्ड (उत्तरी भाग)</span> + 
+            <span class="flow-node">गोंडवानालैण्ड (दक्षिणी भाग)</span>
+          </div>
+        </div>
+
+        <div class="flow-chart">
+          <div><span class="flow-node">पैंथालासा (महासागर) 71%</span></div>
+          <div class="arrow">↓ (अवशेष)</div>
+          <div><span class="flow-node">टेथिस सागर (भूसन्नति)</span></div>
+        </div>
+
+        <p><b>राजस्थान का निर्माण (GT):</b></p>
+        <div class="tree-box">
+          <b>G (गोंडवानालैण्ड)</b> <span class="arrow">→</span> अरावली + हाड़ौती (पठारी भाग) [प्राचीनतम]<br>
+          <b>T (टेथिस सागर)</b> <span class="arrow">→</span> मरूस्थल + मैदान (मैदानी भाग) [नवीनतम]
+        </div>
+        [cite_start]<p><i>नोट: अरावली व हाड़ौती 'प्रायद्वीपीय पठार' का हिस्सा हैं, जबकि मरूस्थल व मैदान 'उत्तर विशाल मैदान' का हिस्सा हैं [cite: 2745] [cite_start][cite: 2775-2792]。</i></p>
+      </div>
+    </details>
+
+    <details>
+      <summary>2. स्थिति एवं विस्तार (Location & Extension)</summary>
+      <div class="geo-content">
+        <ul class="dot-list">
+          <li><b>स्थिति:</b> उत्तरी-पूर्वी गोलार्द्ध (विश्व में), उत्तर-पश्चिम (भारत में)।</li>
+          [cite_start]<li><b>आकृति:</b> विषमकोणीय चतुर्भुज / पतंगाकार (T.H. हैण्डले के अनुसार) [cite: 2746]。</li>
+          [cite_start]<li><b>क्षेत्रफल:</b> 3,42,239 वर्ग किमी (देश का 10.41%, प्रथम स्थान) [cite: 2840-2844]。</li>
+        </ul>
+
+        <div class="flow-chart">
+          <span class="flow-node">उत्तर: कोणा गाँव (गंगानगर)</span><br>
+          <span class="arrow">↕ 826 Km</span><br>
+          <span class="flow-node">दक्षिण: बोरकुण्ड (बांसवाड़ा)</span>
+        </div>
+        <div class="flow-chart">
+          <span class="flow-node">पश्चिम: कटरा (जैसलमेर)</span> 
+          <span class="arrow">↔ 869 Km</span> 
+          <span class="flow-node">पूर्व: सिलाना (धौलपुर)</span>
+        </div>
+
+        <p><b>सीमाएँ (कुल 5920 Km):</b></p>
+        <ul>
+          <li><b>अंतर्राष्ट्रीय (1070 Km):</b> पाकिस्तान (रेडक्लिफ रेखा)। श्रीगंगानगर (210), बीकानेर (168), जैसलमेर (464), बाड़मेर (228)।</li>
+          [cite_start]<li><b>अंतर्राज्यीय (4850 Km):</b> 5 राज्य (MP-1600, हरियाणा-1262, गुजरात-1022, UP-877, पंजाब-89) [cite: 2865-2890]。</li>
+        </ul>
+      </div>
+    </details>
+
+    <details>
+      <summary>3. भौतिक प्रदेश (Physical Divisions)</summary>
+      <div class="geo-content">
+        <table class="geo-table">
+          <tr><th>प्रदेश</th><th>क्षेत्रफल</th><th>जनसंख्या</th><th>मृदा</th></tr>
+          <tr><td>मरूस्थल</td><td>61.11%</td><td>40%</td><td>रेतीली/बलुई</td></tr>
+          <tr><td>अरावली</td><td>9%</td><td>10%</td><td>पर्वतीय</td></tr>
+          <tr><td>मैदान</td><td>23%</td><td>39%</td><td>जलोढ़</td></tr>
+          <tr><td>हाड़ौती</td><td>6.89%</td><td>11%</td><td>काली</td></tr>
+        </table>
+
+        <h4>(A) पश्चिमी मरूस्थल (Thar Desert)</h4>
+        <div class="tree-box">
+          1. <b>शुष्क मरूस्थल (0-25cm वर्षा):</b>
+          <br> &nbsp; - बालुका स्तूप मुक्त (41.5%): हमादा (पथरीला)।
+          <br> &nbsp; - बालुका स्तूप युक्त (58.5%): बरखान, सीफ, पैराबोलिक।
+          <br>2. <b>अर्द्धशुष्क (25-50cm वर्षा):</b>
+          <br> &nbsp; - लूनी बेसिन (गोडवाड़), नागौरी उच्च भूमि (कुबड़ पट्टी), शेखावाटी (जोहड़), घग्घर (नाली)।
+        </div>
+
+        <h4>(B) अरावली (Aravalli)</h4>
+        <p>विश्व की प्राचीनतम वलित पर्वतमाला। [cite_start]लम्बाई: 692 Km (राज. में 550 Km) [cite: 3122-3127]。</p>
+        <ul>
+          <li><b>उत्तरी:</b> रघुनाथगढ़ (1055 मी)।</li>
+          <li><b>मध्य:</b> टॉडगढ़ (934 मी)।</li>
+          <li><b>दक्षिणी:</b> गुरुशिखर (1722 मी), सेर (1597), देलवाड़ा (1442)।</li>
+          [cite_start]<li><b>दर्रे (नाल):</b> देसुरी, हाथी गुड़ा, केवड़ा की नाल [cite: 3182-3195]。</li>
+        </ul>
+
+        <h4>(C) हाड़ौती पठार</h4>
+        <p>लावा निर्मित (बेसाल्ट)। महान सीमांत भ्रंश (Great Boundary Fault) अरावली और हाड़ौती को अलग करता है।</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>4. जलवायु (Climate)</summary>
+      <div class="geo-content">
+        <p><b>सामान्य वर्गीकरण:</b> 5 प्रकार (शुष्क, अर्द्धशुष्क, उप-आर्द्र, आर्द्र, अति-आर्द्र)।</p>
+        
+        <h4>कोपेन का वर्गीकरण (आधार: वनस्पति)</h4>
+        <table class="geo-table">
+          <tr><th>कोड</th><th>प्रकार</th><th>क्षेत्र</th></tr>
+          <tr><td><b>Aw</b></td><td>अति आर्द्र</td><td>डूंगरपुर, बांसवाड़ा, झालावाड़ (सवाना वनस्पति)</td></tr>
+          <tr><td><b>BWhw</b></td><td>शुष्क</td><td>जैसलमेर, बीकानेर, गंगानगर (कंटीली)</td></tr>
+          <tr><td><b>BShw</b></td><td>अर्द्धशुष्क</td><td>नागौर, लूनी बेसिन, शेखावाटी (स्टेपी)</td></tr>
+          <tr><td><b>Cwg</b></td><td>उप आर्द्र</td><td>पूर्वी मैदान (मानसूनी वनस्पति)</td></tr>
+        </table>
+        
+        <div class="flow-chart">
+          <b>ऋतु वर्गीकरण:</b><br>
+          ग्रीष्म (लू/आंधी) <span class="arrow">→</span> वर्षा (मानसून) <span class="arrow">→</span> शरद (निवर्तन) <span class="arrow">→</span> शीत (मावठ)
+        </div>
+        [cite_start]<p><span class="fact">मावठ:</span> शीतकालीन वर्षा (भूमध्य सागर/पश्चिमी विक्षोभ) → 'गोल्डन ड्रॉप्स' (रबी/गेहूं के लिए) [cite: 3538-3544]。</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>5. अपवाह तंत्र (Rivers & Lakes)</summary>
+      <div class="geo-content">
+        <div class="tree-box">
+          <b>1. आंतरिक (60%):</b> घग्घर (मृत नदी), कांतली (तोरावाटी), काकनी (बुझ झील), साबी, रूपारेल।
+          <br><b>2. अरब सागर (17%):</b>
+          <br> &nbsp; - <b>लूनी:</b> नाग पहाड़ से कच्छ का रण। सहायक: जोजड़ी, सुकड़ी, जवाई। बालोतरा के बाद खारी।
+          <br> &nbsp; - <b>माही:</b> 'आदिवासियों की गंगा'। कर्क रेखा को दो बार काटती है। सुजलाम-सुफलाम परियोजना।
+          <br><b>3. बंगाल की खाड़ी (23%):</b>
+          <br> &nbsp; - <b>चम्बल:</b> 'कामधेनु'। सर्वाधिक बीहड़/अवनालिका अपरदन। बांध: गांधी सागर, राणा प्रताप, जवाहर सागर, कोटा बैराज।
+          <br> &nbsp; - <b>बनास:</b> 'वन की आशा'। पूर्णतः राजस्थान में बहने वाली सबसे लंबी।
+        </div>
+
+        <h4>प्रमुख झीलें</h4>
+        <ul>
+          <li><b>खारे पानी:</b> सांभर (सबसे बड़ी), पंचभद्रा (सर्वोत्तम नमक-98% NaCl), डीडवाना, लूणकरणसर।</li>
+          <li><b>मीठे पानी:</b> जयसमंद (ढेबर), पिछोला, फतेहसागर, राजसमंद, नक्की (सबसे ऊँची), पुष्कर।</li>
+        </ul>
+      </div>
+    </details>
+
+    <details>
+      <summary>6. खनिज सम्पदा (Minerals)</summary>
+      <div class="geo-content">
+        <p>राजस्थान को 'खनिजों का अजायबघर' कहते हैं।</p>
+        <table class="geo-table">
+          <tr><th>खनिज</th><th>क्षेत्र (खान)</th></tr>
+          <tr><td><b>सीसा-जस्ता</b></td><td>जावर (उदयपुर), रामपुरा-अगुचा (भीलवाड़ा), राजपुरा-दरीबा।</td></tr>
+          <tr><td><b>तांबा</b></td><td>खेतड़ी (झुंझुनू), खो-दरीबा (अलवर)।</td></tr>
+          <tr><td><b>टंगस्टन</b></td><td>डेगाना (नागौर)।</td></tr>
+          <tr><td><b>मैंगनीज</b></td><td>लीलावानी, कालाखूंटा (बांसवाड़ा)।</td></tr>
+          <tr><td><b>रॉक फॉस्फेट</b></td><td>झामर कोटड़ा (उदयपुर)।</td></tr>
+          <tr><td><b>जिप्सम</b></td><td>जामसर (बीकानेर), गोट मांगलोद।</td></tr>
+          <tr><td><b>पेट्रोलियम</b></td><td>बाड़मेर-सांचौर बेसिन (मंगला, ऐश्वर्या, भाग्यम)। रिफाइनरी: पचपदरा।</td></tr>
+        </table>
+      </div>
+    </details>
+
+    <details>
+      <summary>7. वन एवं वन्यजीव (Forest & Wildlife)</summary>
+      <div class="geo-content">
+        <ul>
+          <li><b>वन रिपोर्ट 2019 (16वीं):</b> कुल वन 9.57%। सर्वाधिक: उदयपुर, न्यूनतम: चूरू।</li>
+          <li><b>खेजड़ी:</b> राज्य वृक्ष (1983)। वैज्ञानिक नाम: *Prosopis cineraria*।</li>
+          <li><b>रोहिड़ा:</b> राज्य पुष्प। *Tecomella undulata*।</li>
+        </ul>
+        <div class="tree-box">
+          <b>राष्ट्रीय उद्यान (3):</b> रणथम्भौर (बाघ), केवलादेव (पक्षी), मुकुन्दरा हिल्स।
+          <br><b>बाघ परियोजनाएं:</b> रणथम्भौर, सरिस्का, मुकुन्दरा, रामगढ़ विषधारी।
+          <br><b>अभयारण्य:</b> तालछापर (काले हिरण), सीतामाता (उड़न गिलहरी), चम्बल (घड़ियाल)।
+        </div>
+      </div>
+    </details>
+  </div>
     `,
     polity: `
-      <h3>Indian Constitution</h3>
-      <p>Adopted on 26th November 1949...</p>
-      <p>Fundamental Rights are guaranteed under Part III...</p>
-      <p>The President is the head of the state...</p>
-    `,
+  <style>
+    /* Polity Theme (Blue/Official) */
+    .polity-container { font-family: 'Segoe UI', sans-serif; color: #333; line-height: 1.6; }
+
+    /* 1. Accordion Style */
+    details {
+      background: #ffffff;
+      border: 1px solid #90caf9; /* Blue border */
+      border-radius: 8px;
+      margin-bottom: 12px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+      overflow: hidden;
+    }
+    summary {
+      background: #e3f2fd; /* Light Blue */
+      padding: 15px;
+      cursor: pointer;
+      font-weight: 700;
+      color: #1565c0; /* Dark Blue Text */
+      font-size: 16px;
+      list-style: none;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    summary::-webkit-details-marker { display: none; }
+    summary::after { content: '+'; font-size: 20px; font-weight: bold; }
+    details[open] summary { border-bottom: 1px solid #90caf9; background: #bbdefb; }
+    details[open] summary::after { content: '-'; }
+    
+    .poly-content { padding: 15px; font-size: 14px; }
+
+    /* 2. Flowchart / Hierarchy Diagram */
+    .flow-wrapper {
+      background: #f5f5f5;
+      padding: 15px;
+      margin: 15px 0;
+      border-radius: 8px;
+      border: 1px dashed #bdbdbd;
+      text-align: center;
+    }
+    .flow-level {
+      display: inline-block;
+      padding: 6px 15px;
+      background: #fff;
+      border: 1px solid #1976d2;
+      border-radius: 4px;
+      font-weight: bold;
+      color: #0d47a1;
+      margin: 5px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .arrow-down { display: block; color: #555; font-size: 18px; margin: 2px 0; }
+    
+    /* 3. Articles Box */
+    .article-box {
+      background: #e8eaf6;
+      border-left: 4px solid #3f51b5;
+      padding: 10px;
+      margin: 10px 0;
+      font-size: 13px;
+    }
+    .art-num { font-weight: bold; color: #303f9f; margin-right: 5px; }
+
+    /* 4. Tables */
+    table.poly-table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 13px; }
+    table.poly-table th { background: #283593; color: white; padding: 10px; text-align: left; }
+    table.poly-table td { border: 1px solid #c5cae9; padding: 8px; vertical-align: top; }
+    table.poly-table tr:nth-child(even) { background: #e8eaf6; }
+
+    /* 5. Lists */
+    ul.star-list { list-style: none; padding-left: 5px; }
+    ul.star-list li { margin-bottom: 6px; position: relative; padding-left: 20px; }
+    ul.star-list li::before { content: "★"; font-size: 12px; color: #ff6f00; position: absolute; left: 0; top: 2px; }
+  </style>
+
+  <div class="polity-container">
+    <div style="text-align:center; padding:12px; margin-bottom:15px; border-radius:8px; background-color: #e8eaf6; color: #1a237e; border: 1px solid #c5cae9;">
+      <b>🏛️ राजस्थान राजव्यवस्था (Polity Notes)</b>
+    </div>
+
+    <details>
+      <summary>1. राज्यपाल (Governor)</summary>
+      <div class="poly-content">
+        <div class="flow-wrapper">
+          <span class="flow-level">राष्ट्रपति (नियुक्ति)</span>
+          <span class="arrow-down">↓</span>
+          <span class="flow-level">राज्यपाल (राज्य प्रमुख)</span>
+          <span class="arrow-down">↓</span>
+          <span class="flow-level">मुख्यमंत्री (शपथ दिलाता है)</span>
+        </div>
+
+        <div class="article-box">
+          <span class="art-num">अनु. 153:</span> प्रत्येक राज्य का एक राज्यपाल होगा।<br>
+          <span class="art-num">अनु. 154:</span> कार्यपालिका शक्ति राज्यपाल में निहित।<br>
+          <span class="art-num">अनु. 155:</span> नियुक्ति राष्ट्रपति द्वारा (कनाडा से प्रेरित)।<br>
+          <span class="art-num">अनु. 161:</span> क्षमादान शक्ति (मृत्युदंड माफ नहीं कर सकता)।
+        </div>
+
+        <h4>राजस्थान विशेष:</h4>
+        <ul class="star-list">
+          <li><b>प्रथम राज्यपाल:</b> गुरुमुख निहाल सिंह (1956-62)।</li>
+          <li><b>त्यागपत्र देने वाले प्रथम:</b> मदन लाल खुराना।</li>
+          <li><b>पद पर मृत्यु:</b> दरबारा सिंह, निर्मल चंद जैन, शैलेंद्र कुमार सिंह, प्रभा राव।</li>
+          <li><b>महिला राज्यपाल:</b> प्रतिभा पाटिल, प्रभा राव, मार्गरेट अल्वा।</li>
+        </ul>
+      </div>
+    </details>
+
+    <details>
+      <summary>2. मुख्यमंत्री व मंत्रिपरिषद (CM & Council)</summary>
+      <div class="poly-content">
+        <div class="article-box">
+          <span class="art-num">अनु. 163:</span> राज्यपाल को सलाह देने हेतु मंत्रिपरिषद।<br>
+          <span class="art-num">अनु. 164:</span> CM की नियुक्ति राज्यपाल करेगा।<br>
+          <span class="art-num">91वां संशोधन (2003):</span> मंत्री अधिकतम 15% हो सकते हैं। (राजस्थान में 200 का 15% = 30 मंत्री अधिकतम, न्यूनतम 12)।
+        </div>
+
+        <table class="poly-table">
+          <tr><th>मुख्यमंत्री</th><th>विशेष तथ्य</th></tr>
+          <tr><td>हीरालाल शास्त्री</td><td>प्रथम मनोनीत CM (1949)।</td></tr>
+          <tr><td>टीकाराम पालीवाल</td><td>प्रथम निर्वाचित CM (1952)।</td></tr>
+          <tr><td>मोहनलाल सुखाड़िया</td><td>आधुनिक राजस्थान के निर्माता, 4 बार, सर्वाधिक 17 वर्ष।</td></tr>
+          <tr><td>भैरोंसिंह शेखावत</td><td>प्रथम गैर-कांग्रेसी, 'बाबोसा', 3 बार राष्ट्रपति शासन लगा।</td></tr>
+          <tr><td>जगन्नाथ पहाड़िया</td><td>प्रथम दलित CM।</td></tr>
+        </table>
+      </div>
+    </details>
+
+    <details>
+      <summary>3. राज्य विधानमण्डल (Vidhan Sabha)</summary>
+      <div class="poly-content">
+        <p>राजस्थान में <b>एक सदनीय</b> (केवल विधानसभा) व्यवस्था है। विधान परिषद नहीं है।</p>
+        
+        <div class="flow-wrapper">
+          <span class="flow-level">विधानमंडल (अनु. 168)</span><br>
+          <span class="arrow-down">↙ &nbsp; ↘</span><br>
+          <span class="flow-level">राज्यपाल</span> &nbsp; &nbsp; <span class="flow-level">विधानसभा</span>
+        </div>
+
+        <ul class="star-list">
+          <li><b>सीटें:</b> वर्तमान में 200। (प्रथम चुनाव 1952 में 160 थीं)।</li>
+          <li><b>आरक्षण (SC/ST):</b> SC-34, ST-25। (अनु. 332)।</li>
+          <li><b>गणपूर्ति (Quorum):</b> 1/10 (20 सदस्य)।</li>
+          <li><b>प्रथम अध्यक्ष:</b> नरोत्तम लाल जोशी।</li>
+          <li><b>प्रथम महिला अध्यक्ष:</b> सुमित्रा सिंह (12वीं विधानसभा)।</li>
+        </ul>
+      </div>
+    </details>
+
+    <details>
+      <summary>4. उच्च न्यायालय (High Court)</summary>
+      <div class="poly-content">
+        <div class="flow-wrapper">
+          <span class="flow-level">सुप्रीम कोर्ट (दिल्ली)</span>
+          <span class="arrow-down">↓</span>
+          <span class="flow-level">हाईकोर्ट (जोधपुर)</span>
+          <span class="arrow-down">↓</span>
+          <span class="flow-level">जिला न्यायालय</span>
+        </div>
+
+        <ul class="star-list">
+          <li><b>स्थापना:</b> 29 अगस्त 1949 (जोधपुर)। (सत्यनारायण राव समिति)।</li>
+          <li><b>खंडपीठ:</b> जयपुर (1977 में पुनः स्थापित)।</li>
+          <li><b>न्यायाधीश:</b> स्वीकृत पद 50 (1 मुख्य + 49 अन्य)।</li>
+          <li><b>प्रथम मुख्य न्यायाधीश:</b> के.के. वर्मा।</li>
+          <li><b>नियुक्ति:</b> राष्ट्रपति द्वारा (कॉलेजियम की सलाह पर)।</li>
+        </ul>
+      </div>
+    </details>
+
+    <details>
+      <summary>5. पंचायती राज (Panchayati Raj)</summary>
+      <div class="poly-content">
+        <div class="article-box">
+          <b>शुभारंभ:</b> 2 अक्टूबर 1959, बगदरी (नागौर) से पं. नेहरू द्वारा। (राजस्थान प्रथम राज्य)।<br>
+          <b>73वां संशोधन (1992):</b> भाग-9, अनुसूची-11 (29 विषय)।
+        </div>
+
+        <div class="flow-wrapper">
+          <b>त्रि-स्तरीय ढांचा (बलवंत राय मेहता)</b><br><br>
+          <span class="flow-level">जिला परिषद (जिला प्रमुख)</span><br>
+          <span class="arrow-down">↓</span><br>
+          <span class="flow-level">पंचायत समिति (प्रधान)</span><br>
+          <span class="arrow-down">↓</span><br>
+          <span class="flow-level">ग्राम पंचायत (सरपंच)</span>
+        </div>
+
+        <ul class="star-list">
+          <li><b>ग्राम सभा:</b> पंचायती राज की आधारभूत इकाई। वर्ष में 4 बैठकें अनिवार्य (26 Jan, 1 May, 15 Aug, 2 Oct)।</li>
+          <li><b>आरक्षण:</b> महिलाओं को 50% (2009 से)। OBC को 21% तक।</li>
+        </ul>
+      </div>
+    </details>
+
+    <details>
+      <summary>6. प्रमुख आयोग (Commissions)</summary>
+      <div class="poly-content">
+        <table class="poly-table">
+          <tr><th>आयोग</th><th>स्थापना/अनुच्छेद</th><th>संरचना</th></tr>
+          <tr><td><b>RPSC</b></td><td>20 Aug 1949<br>(अनु. 315)</td><td>1 अध्यक्ष + 7 सदस्य<br>(मुख्यालय: अजमेर)</td></tr>
+          <tr><td><b>राज्य मानवाधिकार</b></td><td>गठन 1999<br>कार्य 2000</td><td>1 अध्यक्ष + 2 सदस्य</td></tr>
+          <tr><td><b>राज्य निर्वाचन</b></td><td>1994<br>(अनु. 243-K)</td><td>1 आयुक्त (अमर सिंह प्रथम)</td></tr>
+          <tr><td><b>लोकायुक्त</b></td><td>1973</td><td>संवैधानिक नहीं, वैधानिक है।<br>प्रथम: आई.डी. दुआ।</td></tr>
+          <tr><td><b>सूचना आयोग</b></td><td>2006</td><td>1 मुख्य + 10 अन्य (अधिकतम)</td></tr>
+        </table>
+      </div>
+    </details>
+
+    <details>
+      <summary>7. जिला प्रशासन व सचिवालय</summary>
+      <div class="poly-content">
+        <ul class="star-list">
+          <li><b>मुख्य सचिव (Chief Secretary):</b> राज्य प्रशासन का मुखिया। CM का मुख्य सलाहकार।
+            <br>- प्रथम: के. राधाकृष्णन।
+            <br>- प्रथम महिला: कुशल सिंह।
+          </li>
+          <li><b>जिला कलेक्टर:</b> पद 1772 में वारेन हेस्टिंग्स ने बनाया। 'जिले की आंख, कान और बांह'।</li>
+          <li><b>पटवारी:</b> राजस्व प्रशासन की धुरी।</li>
+          <li><b>संभागीय व्यवस्था:</b>
+            <br>- 1949 में शुरू (हीरालाल शास्त्री)।
+            <br>- 1962 में बंद (सुखाड़िया)।
+            <br>- 1987 में पुनः शुरू (हरिदेव जोशी)।
+            <br>- वर्तमान में 10 संभाग हैं।
+          </li>
+        </ul>
+      </div>
+    </details>
+  </div>
+`,
     art_culture: `
   <style>
     /* Professional Notes Style */
@@ -715,19 +1175,188 @@ ul.bullet-list li { margin-bottom: 8px; }
   };
 
   const aboutUsData = `
-    <h3>About Career Care</h3>
-    <p>Career Care is your ultimate companion for Govt exam preparation.</p>
-    <p>We provide daily current affairs, exam updates, and high-quality study material to help you succeed.</p>
-    <p>Contact: dsjhorar@gmail.com</p>
-  `;
+    
+  <div style="font-family: sans-serif; color: #333; line-height: 1.6;">
+    
+    <div style="text-align:center; padding:15px; margin-bottom:15px; border-radius:8px; background-color: #e3f2fd; color: #0d47a1; border: 1px solid #bbdefb;">
+      <h2 style="margin:0;">🚀 About Career Care</h2>
+      <p style="margin:5px 0 0 0; font-size:14px;">Your Partner in Government Exam Success</p>
+    </div>
+
+    <details style="background:#fff; border:1px solid #ddd; border-radius:8px; margin-bottom:10px; overflow:hidden;">
+      <summary style="background:#f5f5f5; padding:15px; cursor:pointer; font-weight:bold; color:#333;">🤝 Who We Are (हम कौन हैं)</summary>
+      <div style="padding:15px; font-size:14px;">
+        <p><b>'Career Care'</b> राजस्थान और भारत की प्रतियोगी परीक्षाओं (Government Exams) की तैयारी करने वाले विद्यार्थियों के लिए एक प्रमुख ई-लर्निंग प्लेटफॉर्म है।</p>
+        <p>हमारा उद्देश्य <b>RPSC, RSMSSB, SSC, Railway</b> और <b>Police</b> जैसी परीक्षाओं के लिए उच्च गुणवत्ता वाली शिक्षा और मार्गदर्शन प्रदान करना है।</p>
+      </div>
+    </details>
+
+    <details style="background:#fff; border:1px solid #ddd; border-radius:8px; margin-bottom:10px; overflow:hidden;">
+      <summary style="background:#f5f5f5; padding:15px; cursor:pointer; font-weight:bold; color:#333;">🎯 Our Mission (हमारा लक्ष्य)</summary>
+      <div style="padding:15px; font-size:14px;">
+        <p>हमारा मिशन शिक्षा को <b>सरल, सुलभ और किफायती</b> बनाना है। हम चाहते हैं कि दूर-दराज के गांवों में बैठा छात्र भी बेहतरीन संसाधनों के साथ अपनी सरकारी नौकरी का सपना पूरा कर सके।</p>
+        <ul style="padding-left:20px;">
+          <li>गुणवत्तापूर्ण अध्ययन सामग्री (Quality Content)।</li>
+          <li>सटीक मार्गदर्शन (Expert Guidance)।</li>
+          <li>नवीनतम परीक्षा पैटर्न पर आधारित तैयारी।</li>
+        </ul>
+      </div>
+    </details>
+
+    <details style="background:#fff; border:1px solid #ddd; border-radius:8px; margin-bottom:10px; overflow:hidden;">
+      <summary style="background:#f5f5f5; padding:15px; cursor:pointer; font-weight:bold; color:#333;">📚 What We Offer (सुविधाएं)</summary>
+      <div style="padding:15px; font-size:14px;">
+        <table style="width:100%; border-collapse:collapse;">
+          <tr><td style="padding:8px; border-bottom:1px solid #eee;">✅ <b>PDF Notes:</b> हस्तलिखित और प्रिंटेड नोट्स।</td></tr>
+          <tr><td style="padding:8px; border-bottom:1px solid #eee;">✅ <b>Test Series:</b> टॉपिक वाइज और फुल मॉक टेस्ट।</td></tr>
+          <tr><td style="padding:8px; border-bottom:1px solid #eee;">✅ <b>Current Affairs:</b> राजस्थान और भारत का दैनिक अपडेट।</td></tr>
+          <tr><td style="padding:8px; border-bottom:1px solid #eee;">✅ <b>Video Lectures:</b> अनुभवी शिक्षकों द्वारा।</td></tr>
+        </table>
+      </div>
+    </details>
+
+    <details style="background:#fff; border:1px solid #ddd; border-radius:8px; margin-bottom:10px; overflow:hidden;">
+      <summary style="background:#f5f5f5; padding:15px; cursor:pointer; font-weight:bold; color:#333;">🏆 Why Choose Us (हम ही क्यों?)</summary>
+      <div style="padding:15px; font-size:14px;">
+        <p>हम सिर्फ पढ़ाते नहीं हैं, हम आपको <b>सफल</b> बनाते हैं। हमारी टीम में वे शिक्षक शामिल हैं जिन्होंने स्वयं कई सरकारी परीक्षाएं पास की हैं और जिन्हें वर्षों का अनुभव है।</p>
+      </div>
+    </details>
+
+    <details style="background:#fff; border:1px solid #ddd; border-radius:8px; margin-bottom:10px; overflow:hidden;">
+      <summary style="background:#f5f5f5; padding:15px; cursor:pointer; font-weight:bold; color:#333;">📞 Contact Us (संपर्क करें)</summary>
+      <div style="padding:15px; font-size:14px;">
+        <p>किसी भी सहायता या सुझाव के लिए हमसे संपर्क करें:</p>
+        <p><b>📧 Email:</b> support@careercare.com</p>
+        <p><b>📍 Location:</b> Bikaner, Rajasthan</p>
+        <p><b>🌐 Website:</b> www.careercare.com</p>
+      </div>
+    </details>
+
+  </div>
+`,
 
   const privacyPolicyData = `
-    <h3>Privacy Policy</h3>
-    <p>Your privacy is important to us.</p>
-    <p>1. We collect basic user data for login purposes.</p>
-    <p>2. We do not share your personal data with third parties.</p>
-    <p>3. This app uses cookies for better user experience.</p>
-  `;
+  
+  <style>
+    /* Privacy Policy Theme */
+    .policy-container { font-family: 'Segoe UI', sans-serif; color: #333; line-height: 1.6; }
+    
+    details {
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      overflow: hidden;
+    }
+    
+    summary {
+      background: #f5f5f5;
+      padding: 15px;
+      cursor: pointer;
+      font-weight: 700;
+      color: #37474f;
+      font-size: 15px;
+      list-style: none;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-left: 5px solid #546e7a;
+    }
+    
+    summary::after { content: '+'; font-size: 18px; font-weight: bold; }
+    details[open] summary { background: #eceff1; border-bottom: 1px solid #cfd8dc; }
+    details[open] summary::after { content: '-'; }
+    
+    .policy-content { padding: 15px; font-size: 14px; }
+    
+    .h-tag { color: #c62828; font-weight: bold; margin-top: 10px; display: block; }
+    ul.policy-list { padding-left: 20px; margin: 5px 0; }
+    ul.policy-list li { margin-bottom: 5px; }
+  </style>
+
+  <div class="policy-container">
+    <div style="text-align:center; padding:12px; margin-bottom:15px; border-radius:8px; background-color: #eceff1; color: #263238; border: 1px solid #cfd8dc;">
+      <b>🔒 Privacy Policy (Career Care App)</b>
+    </div>
+
+    <details open>
+      <summary>1. Introduction (परिचय)</summary>
+      <div class="policy-content">
+        <p>Welcome to <b>Career Care</b>. This app is designed to help students prepare for Government Exams (like RPSC, RSMSSB, SSC, etc.). We value your privacy and are committed to protecting your personal data.</p>
+        <p>By downloading or using the app, you agree to the collection and use of information in accordance with this policy.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>2. Information We Collect (हम क्या डेटा लेते हैं)</summary>
+      <div class="policy-content">
+        <span class="h-tag">A. Personal Information</span>
+        <ul class="policy-list">
+          <li><b>Name & Email:</b> For account creation and sending exam updates.</li>
+          <li><b>Phone Number:</b> For OTP verification and login security.</li>
+          <li><b>Profile Picture:</b> Optional, to personalize your account.</li>
+        </ul>
+
+        <span class="h-tag">B. Non-Personal Information</span>
+        <ul class="policy-list">
+          <li>Device Model, OS Version, and IP Address (for analytics and crash reporting).</li>
+          <li>Exam Preferences (e.g., Police, Patwar, RAS) to show relevant content.</li>
+        </ul>
+      </div>
+    </details>
+
+    <details>
+      <summary>3. App Permissions (अनुमतियाँ)</summary>
+      <div class="policy-content">
+        <p>To provide a smooth experience, the app may request the following permissions:</p>
+        <ul class="policy-list">
+          <li><b>Internet/Network:</b> To load PDFs, Quizzes, and Videos.</li>
+          <li><b>Storage (Read/Write):</b> To download and save Study Materials/PDFs on your device.</li>
+          <li><b>Notifications:</b> To alert you about new tests, admit cards, or results.</li>
+        </ul>
+      </div>
+    </details>
+
+    <details>
+      <summary>4. Third-Party Services (अन्य सेवाएं)</summary>
+      <div class="policy-content">
+        <p>We use trusted third-party services to improve the app:</p>
+        <ul class="policy-list">
+          <li><b>Google Play Services:</b> For app functionality.</li>
+          <li><b>Firebase / Google Analytics:</b> To understand how users use the app.</li>
+          <li><b>AdMob / Audience Network:</b> To display advertisements (if applicable).</li>
+          <li><b>Payment Gateways:</b> If you purchase a premium course, payment data is processed securely by providers (like Razorpay/Paytm), not stored by us.</li>
+        </ul>
+      </div>
+    </details>
+
+    <details>
+      <summary>5. Data Security (सुरक्षा)</summary>
+      <div class="policy-content">
+        <p>We implement appropriate security measures to protect your data. However, please remember that no method of transmission over the internet is 100% secure. We do not sell your personal data to third parties.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>6. Children's Privacy</summary>
+      <div class="policy-content">
+        <p>Our services are intended for students preparing for competitive exams (usually 13+ years). We do not knowingly collect personal identifiable information from children under 13.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>7. Contact Us / Delete Account</summary>
+      <div class="policy-content">
+        <p>If you want to delete your data or have questions about this policy, please contact us:</p>
+        <ul class="policy-list">
+          <li><b>Email:</b> support@careercare.com (Replace with your email)</li>
+          <li><b>Address:</b> Bikaner, Rajasthan, India</li>
+        </ul>
+      </div>
+    </details>
+  </div>
+`,
 
   // AUTH STATE
   firebase.auth().onAuthStateChanged((user) => {
