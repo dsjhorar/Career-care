@@ -9,6 +9,8 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1044688892570297" crossorigin="anonymous"></script>
+
   <script src="data.js"></script>
 
   <style>
@@ -21,7 +23,7 @@
       justify-content: center; align-items: center; font-size: 18px; color: #1e88e5; font-weight: bold;
     }
 
-    /* LOGIN GATE */
+    /* LOGIN SCREEN */
     #login-gate {
       display: none; height: 100vh; flex-direction: column; justify-content: center; align-items: center; text-align: center;
       background: linear-gradient(135deg, #e3f2fd, #ffffff);
@@ -34,9 +36,9 @@
       font-size: 16px; border: none; border-radius: 25px; cursor: pointer; margin-top: 20px; font-weight: bold; box-shadow: 0 4px 10px rgba(30, 136, 229, 0.3);
     }
 
-    /* DASHBOARD */
+    /* MAIN APP DASHBOARD */
     #main-content { display: none; }
-    .main-header { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: #1e88e5; color: white; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    .main-header { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: #1e88e5; color: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; }
     .app-name { font-size: 20px; font-weight: bold; }
     .menu-btn-icon { font-size: 26px; cursor: pointer; }
 
@@ -58,14 +60,16 @@
     .notes-btn { background: #8e24aa; } 
 
     /* EXAM GRID */
-    .exam-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 15px; }
+    h3 { color: #444; margin-top: 25px; margin-bottom: 15px; }
+    .exam-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
     .exam-btn { 
       background: #e1f5fe; color: #0277bd; font-weight: 600; 
       border-radius: 12px; padding: 25px 10px; text-align: center; 
-      cursor: pointer; border: 1px solid #b3e5fc;
+      cursor: pointer; transition: 0.2s; border: 1px solid #b3e5fc;
     }
+    .exam-btn:active { transform: scale(0.98); background: #b3e5fc; }
 
-    /* NOTIFICATION DOT */
+    /* NOTIFICATION BADGE */
     .notif-wrapper { position: relative; cursor: pointer; }
     .notif-badge { position: absolute; top: -5px; right: -5px; background: red; color: white; font-size: 10px; width: 15px; height: 15px; border-radius: 50%; display: none; justify-content: center; align-items: center; border: 2px solid #1e88e5; }
 
@@ -86,15 +90,32 @@
       box-shadow: 0 2px 5px rgba(0,0,0,0.05); font-size: 18px; font-weight: 600; 
       color: #333; cursor: pointer; display: flex; justify-content: space-between; align-items: center;
     }
+    .subject-btn span { color: #1e88e5; font-size: 24px; }
+
     .note-text-container {
       background: white; padding: 15px; border-radius: 10px; 
       line-height: 1.8; color: #333; font-size: 16px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
     }
+
+    /* MODAL */
+    .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; justify-content: center; align-items: center; }
+    .modal-box { background: white; padding: 20px; width: 80%; max-width: 400px; border-radius: 10px; text-align: center; }
+    .modal-title { font-weight: bold; font-size: 18px; margin-bottom: 10px; color: #333; }
+    .modal-msg { color: #555; margin-bottom: 20px; font-size: 15px; }
+    .modal-close { background: #1e88e5; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; }
   </style>
 </head>
 <body>
 
   <div id="page-loader">Checking...</div>
+
+  <div id="notif-modal" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-title">🔔 New Update</div>
+      <div id="modal-msg-text" class="modal-msg">Loading...</div>
+      <button class="modal-close" onclick="closeModal()">OK</button>
+    </div>
+  </div>
 
   <div id="login-gate">
     <div class="welcome-card">
@@ -119,6 +140,9 @@
     </header>
 
     <div id="menu">
+      <div class="menu-item" onclick="window.location.href='profile.html'">👤 My Profile</div>
+      <div class="menu-item" onclick="alert('Test History Feature Coming Soon!')">🕒 Test History</div>
+      <div class="menu-item" onclick="shareApp()">📤 Share App</div>
       <div class="menu-item" onclick="openPage('About Us', aboutUsData)">ℹ️ About Us</div>
       <div class="menu-item" onclick="openPage('Privacy Policy', privacyPolicyData)">🔒 Privacy Policy</div>
       <div class="menu-item" style="color:red;" onclick="logout()">🚪 Logout</div>
@@ -164,7 +188,7 @@
   </div>
 
 <script>
-  // 1. FIREBASE CONFIG (Replace with your own if needed)
+  // --- FIREBASE CONFIG ---
   const firebaseConfig = {
     apiKey: "AIzaSyBCuefZt2WuNsNiFme8M-HUHm_BZYKJAi4", 
     authDomain: "career-care-afb64.firebaseapp.com",
@@ -174,7 +198,9 @@
   };
   if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 
-  // 2. UI FUNCTIONS
+  let currentNotificationMsg = "";
+
+  // --- UI FUNCTIONS ---
   function toggleMenu() {
     const m = document.getElementById("menu");
     m.style.display = (m.style.display === "block") ? "none" : "block";
@@ -184,6 +210,18 @@
     firebase.auth().signOut().then(() => {
       window.location.reload();
     });
+  }
+
+  function shareApp() {
+    if (navigator.share) {
+        navigator.share({
+            title: 'Career Care',
+            text: 'Download Career Care App for Govt Exam Prep!',
+            url: window.location.href
+        }).catch(console.error);
+    } else {
+        alert("Share Link: " + window.location.href);
+    }
   }
 
   function openPage(title, content) {
@@ -211,16 +249,47 @@
     document.getElementById("page-viewer").style.display = "block";
   }
 
-  function showLatestNotif() {
-    alert("No new notifications");
+  // --- NOTIFICATION LOGIC ---
+  function listenForNotifications() {
+    const notifRef = firebase.database().ref('notification');
+    notifRef.on('value', (snapshot) => {
+      const data = snapshot.val();
+      if (data && data.message) {
+        currentNotificationMsg = data.message;
+        const savedMsg = localStorage.getItem('last_notification');
+        if (savedMsg !== data.message) {
+          document.getElementById('notif-dot').style.display = 'flex';
+          openModal(data.message);
+          localStorage.setItem('last_notification', data.message);
+        } else {
+           document.getElementById('notif-dot').style.display = 'none';
+        }
+      }
+    });
   }
 
-  // --- REALTIME EXAMS (Firebase) ---
+  function showLatestNotif() {
+     if(currentNotificationMsg) {
+         openModal(currentNotificationMsg);
+         document.getElementById('notif-dot').style.display = 'none';
+     } else {
+         alert("No new notifications");
+     }
+  }
+
+  function openModal(msg) {
+    document.getElementById('modal-msg-text').innerText = msg;
+    document.getElementById('notif-modal').style.display = 'flex';
+  }
+  function closeModal() {
+    document.getElementById('notif-modal').style.display = 'none';
+  }
+
+  // --- REALTIME EXAMS ---
   function loadExams() {
     const grid = document.getElementById("exam-container");
     const dbRef = firebase.database().ref('exam_categories');
 
-    // Listener for Realtime Updates
     dbRef.on('value', (snapshot) => {
       grid.innerHTML = ""; 
       if (snapshot.exists()) {
@@ -236,8 +305,8 @@
         grid.innerHTML = "<p style='grid-column:span 2; text-align:center;'>No exams available.</p>";
       }
     }, (err) => {
-        // Fallback if DB fails or permission denied
         console.log("DB Error: " + err);
+        // Fallback
         grid.innerHTML = `
           <div class="exam-btn">RPSC</div>
           <div class="exam-btn">RSMSSB</div>
@@ -247,21 +316,23 @@
     });
   }
 
-  // 3. AUTH CHECK (Main Logic)
+  // --- MAIN AUTH LOGIC ---
   firebase.auth().onAuthStateChanged((user) => {
+    // 1. Remove Loader
     document.getElementById("page-loader").style.display = "none";
 
     if (user) {
       document.getElementById("login-gate").style.display = "none";
       document.getElementById("main-content").style.display = "block";
       loadExams();
+      listenForNotifications();
     } else {
       document.getElementById("login-gate").style.display = "flex";
       document.getElementById("main-content").style.display = "none";
     }
   });
 
-  // Close menu on outside click
+  // Close menu on click outside
   document.addEventListener("click", function(e){
     const menu = document.getElementById("menu");
     const menuBtn = document.querySelector(".menu-btn-icon");
