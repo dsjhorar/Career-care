@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1044688892570297" crossorigin="anonymous"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Career Care</title>
@@ -10,42 +9,19 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
+  <script src="data.js"></script>
+
   <style>
     body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #f4f6f8; }
-    /* Note Table Styles */
-.note-table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 14px; background: #fff; }
-.note-table th, .note-table td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-.note-table th { background-color: #1e88e5; color: white; font-weight: bold; }
-.note-table tr:nth-child(even) { background-color: #f9f9f9; }
 
-/* Accordion Styles (Coaching Style Notes) */
-details {
-  background: #ffffff; border: 1px solid #e0e0e0; border-radius: 8px; margin-bottom: 10px; overflow: hidden;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-}
-summary {
-  background: #f1f8e9; padding: 15px; cursor: pointer; font-weight: bold; color: #2e7d32; font-size: 16px;
-  list-style: none; display: flex; justify-content: space-between; align-items: center;
-}
-summary::after { content: '+'; font-size: 20px; font-weight: bold; }
-details[open] summary::after { content: '-'; }
-details[open] summary { border-bottom: 1px solid #e0e0e0; background: #e8f5e9; }
-.details-content { padding: 15px; font-size: 15px; line-height: 1.6; color: #333; }
-
-/* Highlight Tags */
-.fact-box { background: #fff3e0; padding: 10px; border-left: 4px solid #ff9800; margin: 10px 0; font-size: 14px; }
-.imp { color: #d32f2f; font-weight: bold; }
-ul.bullet-list { padding-left: 20px; margin: 0; }
-ul.bullet-list li { margin-bottom: 8px; }
-    
-    /* 1. LOADER */
+    /* LOADER */
     #page-loader { 
       position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
       background: white; z-index: 9999; display: flex; 
       justify-content: center; align-items: center; font-size: 18px; color: #1e88e5; font-weight: bold;
     }
 
-    /* 2. WELCOME SCREEN (Login Gate) */
+    /* LOGIN GATE */
     #login-gate {
       display: none; height: 100vh; flex-direction: column; justify-content: center; align-items: center; text-align: center;
       background: linear-gradient(135deg, #e3f2fd, #ffffff);
@@ -58,89 +34,61 @@ ul.bullet-list li { margin-bottom: 8px; }
       font-size: 16px; border: none; border-radius: 25px; cursor: pointer; margin-top: 20px; font-weight: bold; box-shadow: 0 4px 10px rgba(30, 136, 229, 0.3);
     }
 
-    /* 3. DASHBOARD */
+    /* DASHBOARD */
     #main-content { display: none; }
-
-    /* Header */
-    .main-header { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: #1e88e5; color: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; }
-    .header-left { display: flex; align-items: center; gap: 10px; }
-    .header-right { display: flex; align-items: center; gap: 20px; } 
-    .app-logo { height: 35px; width: 35px; background: white; border-radius: 50%; padding: 2px; object-fit: contain; }
+    .main-header { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: #1e88e5; color: white; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
     .app-name { font-size: 20px; font-weight: bold; }
     .menu-btn-icon { font-size: 26px; cursor: pointer; }
 
-    /* Notification Styles */
-    .notif-wrapper { position: relative; cursor: pointer; }
-    .notif-icon { font-size: 24px; }
-    .notif-badge { 
-      position: absolute; top: -5px; right: -5px; 
-      background: red; color: white; font-size: 10px; 
-      width: 15px; height: 15px; border-radius: 50%; 
-      display: none; justify-content: center; align-items: center; border: 2px solid #1e88e5;
-    }
-
-    /* Menu */
+    /* MENU */
     #menu { display: none; position: absolute; top: 60px; right: 10px; background: white; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); width: 200px; z-index: 1000; overflow: hidden; }
     .menu-item { padding: 14px; border-bottom: 1px solid #eee; cursor: pointer; color: #333; font-size: 15px; }
     .menu-item:hover { background: #f5f5f5; }
 
-    /* Content */
+    /* CONTAINER */
     .container { padding: 15px; max-width: 600px; margin: 0 auto; }
     
-    /* Updated Buttons Layout */
     .top-buttons { display: flex; flex-direction: column; gap: 12px; margin-bottom: 12px; }
     .btn-full { width: 100%; padding: 15px; border: none; border-radius: 10px; color: white; font-size: 16px; font-weight: 600; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-    
     .split-row { display: flex; gap: 10px; }
     .btn-half { flex: 1; padding: 15px; border: none; border-radius: 10px; color: white; font-size: 15px; font-weight: 600; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-
+    
     .ca-btn { background: #43a047; }
     .news-btn { background: #fb8c00; }
-    
-    /* UPDATED: Notes Button Style (was Premium) */
     .notes-btn { background: #8e24aa; } 
 
-    h3 { color: #444; margin-top: 25px; margin-bottom: 15px; }
-    .exam-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
-    
+    /* EXAM GRID */
+    .exam-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 15px; }
     .exam-btn { 
       background: #e1f5fe; color: #0277bd; font-weight: 600; 
       border-radius: 12px; padding: 25px 10px; text-align: center; 
-      cursor: pointer; transition: 0.2s; border: 1px solid #b3e5fc;
+      cursor: pointer; border: 1px solid #b3e5fc;
     }
-    .exam-btn:active { transform: scale(0.98); background: #b3e5fc; }
 
-    /* Modal for Notification */
-    .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; justify-content: center; align-items: center; }
-    .modal-box { background: white; padding: 20px; width: 80%; max-width: 400px; border-radius: 10px; text-align: center; }
-    .modal-title { font-weight: bold; font-size: 18px; margin-bottom: 10px; color: #333; }
-    .modal-msg { color: #555; margin-bottom: 20px; font-size: 15px; }
-    .modal-close { background: #1e88e5; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; }
+    /* NOTIFICATION DOT */
+    .notif-wrapper { position: relative; cursor: pointer; }
+    .notif-badge { position: absolute; top: -5px; right: -5px; background: red; color: white; font-size: 10px; width: 15px; height: 15px; border-radius: 50%; display: none; justify-content: center; align-items: center; border: 2px solid #1e88e5; }
 
-    /* --- NEW STYLES FOR NOTES & PAGES --- */
+    /* FULL PAGE VIEWERS */
     .full-page-view {
-      display: none; 
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
       background: #f4f6f8; z-index: 500; overflow-y: auto;
     }
     .page-header {
       background: #1e88e5; color: white; padding: 15px; 
-      display: flex; align-items: center; gap: 15px; position: sticky; top: 0;
+      display: flex; align-items: center; gap: 15px; position: sticky; top: 0; z-index: 501;
     }
     .back-btn { font-size: 20px; cursor: pointer; background: none; border: none; color: white; }
-    .page-content { padding: 20px; max-width: 800px; margin: 0 auto; }
-    
+    .page-content { padding: 20px; max-width: 800px; margin: 0 auto; padding-bottom: 50px; }
+
     .subject-btn {
       background: white; padding: 20px; margin-bottom: 15px; border-radius: 10px;
       box-shadow: 0 2px 5px rgba(0,0,0,0.05); font-size: 18px; font-weight: 600; 
       color: #333; cursor: pointer; display: flex; justify-content: space-between; align-items: center;
     }
-    .subject-btn span { color: #1e88e5; font-size: 24px; }
-
     .note-text-container {
-      background: white; padding: 25px; border-radius: 10px; 
+      background: white; padding: 15px; border-radius: 10px; 
       line-height: 1.8; color: #333; font-size: 16px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-      white-space: pre-line; /* Keeps formatting */
     }
   </style>
 </head>
@@ -148,17 +96,8 @@ ul.bullet-list li { margin-bottom: 8px; }
 
   <div id="page-loader">Checking...</div>
 
-  <div id="notif-modal" class="modal-overlay">
-    <div class="modal-box">
-      <div class="modal-title">🔔 New Update</div>
-      <div id="modal-msg-text" class="modal-msg">Loading...</div>
-      <button class="modal-close" onclick="closeModal()">OK</button>
-    </div>
-  </div>
-
   <div id="login-gate">
     <div class="welcome-card">
-      <img src="logo.png" style="width:80px; margin-bottom:15px;" onerror="this.style.display='none'">
       <h2 style="color:#333; margin:0;">Career Care</h2>
       <p style="color:#666;">Apni Taiyari Shuru Karein</p>
       <button class="login-btn-big" onclick="window.location.href='login.html'">Login Now</button>
@@ -168,42 +107,35 @@ ul.bullet-list li { margin-bottom: 8px; }
   <div id="main-content">
     <header class="main-header">
       <div class="header-left">
-        <img src="logo.png" class="app-logo" onerror="this.src='https://via.placeholder.com/40'"> 
         <span class="app-name">Career Care</span>
       </div>
-      
       <div class="header-right">
         <div class="notif-wrapper" onclick="showLatestNotif()">
-            <span class="notif-icon">🔔</span>
-            <span id="notif-dot" class="notif-badge">!</span>
+           <span style="font-size:24px;">🔔</span>
+           <span id="notif-dot" class="notif-badge">!</span>
         </div>
-        <span class="menu-btn-icon" onclick="toggleMenu()">⋮</span>
+        <span class="menu-btn-icon" onclick="toggleMenu()" style="margin-left:15px;">⋮</span>
       </div>
     </header>
 
     <div id="menu">
-      <div class="menu-item" onclick="window.location.href='profile.html'">👤 My Profile</div>
-      <div class="menu-item" onclick="window.location.href='history.html'">🕒 History</div>
       <div class="menu-item" onclick="openPage('About Us', aboutUsData)">ℹ️ About Us</div>
       <div class="menu-item" onclick="openPage('Privacy Policy', privacyPolicyData)">🔒 Privacy Policy</div>
-      <div class="menu-item" onclick="shareApp()">📤 Share App</div>
       <div class="menu-item" style="color:red;" onclick="logout()">🚪 Logout</div>
     </div>
 
     <div class="container">
       <div class="top-buttons">
-        <button class="btn-full ca-btn" onclick="window.location.href='current_affairs.html'">📰 Daily Current Affairs</button>
-        
+        <button class="btn-full ca-btn" onclick="alert('Current Affairs Loading...')">📰 Daily Current Affairs</button>
         <div class="split-row">
-            <button class="btn-half news-btn" onclick="window.location.href='exam-news.html'">📢 Exam News</button>
+            <button class="btn-half news-btn">📢 Exam News</button>
             <button class="btn-half notes-btn" onclick="openNotesMenu()">📚 Notes</button>
         </div>
       </div>
 
-      <h3>Select Exam Category</h3>
-      
+      <h3 style="color:#444; margin:20px 0 10px;">Select Exam Category</h3>
       <div class="exam-grid" id="exam-container">
-        <div style="grid-column:span 2; text-align:center; padding:20px; color:#777;">Loading Exams...</div>
+        <div style="grid-column:span 2; text-align:center; color:#777;">Loading Exams...</div>
       </div>
     </div>
   </div>
@@ -214,18 +146,10 @@ ul.bullet-list li { margin-bottom: 8px; }
       <span>Study Notes</span>
     </div>
     <div class="page-content">
-      <div class="subject-btn" onclick="openNoteDetail('History', notesDB.history)">
-        History <span>➔</span>
-      </div>
-      <div class="subject-btn" onclick="openNoteDetail('Geography', notesDB.geography)">
-        Geography <span>➔</span>
-      </div>
-      <div class="subject-btn" onclick="openNoteDetail('Polity', notesDB.polity)">
-        Polity <span>➔</span>
-      </div>
-      <div class="subject-btn" onclick="openNoteDetail('Art & Culture', notesDB.art_culture)">
-        Art & Culture <span>➔</span>
-      </div>
+      <div class="subject-btn" onclick="openNoteDetail('History', notesDB.history)">History <span>➔</span></div>
+      <div class="subject-btn" onclick="openNoteDetail('Geography', notesDB.geography)">Geography <span>➔</span></div>
+      <div class="subject-btn" onclick="openNoteDetail('Polity', notesDB.polity)">Polity <span>➔</span></div>
+      <div class="subject-btn" onclick="openNoteDetail('Art & Culture', notesDB.art_culture)">Art & Culture <span>➔</span></div>
     </div>
   </div>
 
@@ -235,14 +159,14 @@ ul.bullet-list li { margin-bottom: 8px; }
       <span id="viewer-title">Title</span>
     </div>
     <div class="page-content">
-      <div id="viewer-body" class="note-text-container">
-        </div>
+      <div id="viewer-body" class="note-text-container"></div>
     </div>
   </div>
 
 <script>
+  // 1. FIREBASE CONFIG (Replace with your own if needed)
   const firebaseConfig = {
-    apiKey: "AIzaSyBCuefZt2WuNsNiFme8M-HUHm_BZYKJAi4",
+    apiKey: "AIzaSyBCuefZt2WuNsNiFme8M-HUHm_BZYKJAi4", 
     authDomain: "career-care-afb64.firebaseapp.com",
     databaseURL: "https://career-care-afb64-default-rtdb.firebaseio.com",
     projectId: "career-care-afb64",
@@ -250,150 +174,94 @@ ul.bullet-list li { margin-bottom: 8px; }
   };
   if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 
-  let currentUserUid = null;
-  let currentNotificationMsg = "";
-
-  // --- LOCAL DATA STORE (Adsense Friendly Text) ---
-  // Aap yahan apna lamba content likh sakte hain. App slow nahi hoga kyunki ye string variable hai.
-  const notesDB = {
-    history: `
-  
-
-    geography: `
-  
-  
-
-    art_culture: `
-  
-};
-  const aboutUsData = `
-    
-  
-  const privacyPolicyData = 
-  
-  <div class="policy-container">
-  
-
-  // AUTH STATE
-  firebase.auth().onAuthStateChanged((user) => {
-    document.getElementById("page-loader").style.display = "none";
-    if (user) {
-      currentUserUid = user.uid;
-      document.getElementById("main-content").style.display = "block";
-      document.getElementById("login-gate").style.display = "none";
-      loadExams();
-      listenForNotifications();
-    } else {
-      document.getElementById("main-content").style.display = "none";
-      document.getElementById("login-gate").style.display = "flex";
-    }
-  });
-
-  // --- NAVIGATION FUNCTIONS ---
-
-  function openNotesMenu() {
-    document.getElementById('notes-menu-view').style.display = 'block';
-    // Close main menu if open
-    document.getElementById("menu").style.display = "none";
+  // 2. UI FUNCTIONS
+  function toggleMenu() {
+    const m = document.getElementById("menu");
+    m.style.display = (m.style.display === "block") ? "none" : "block";
   }
 
-  function closeNotesMenu() {
-    document.getElementById('notes-menu-view').style.display = 'none';
-  }
-
-  function openNoteDetail(title, content) {
-    document.getElementById('viewer-title').innerText = title;
-    document.getElementById('viewer-body').innerHTML = content;
-    document.getElementById('page-viewer').style.display = 'block';
-  }
-
-  function openPage(title, content) {
-    // Used for About Us & Privacy Policy
-    document.getElementById('viewer-title').innerText = title;
-    document.getElementById('viewer-body').innerHTML = content;
-    document.getElementById('page-viewer').style.display = 'block';
-    document.getElementById("menu").style.display = "none"; // Close menu
-  }
-
-  function closePageView() {
-    document.getElementById('page-viewer').style.display = 'none';
-  }
-
-  // --- NOTIFICATION LOGIC ---
-  function listenForNotifications() {
-    const notifRef = firebase.database().ref('notification');
-    notifRef.on('value', (snapshot) => {
-      const data = snapshot.val();
-      if (data && data.message) {
-        currentNotificationMsg = data.message;
-        const savedMsg = localStorage.getItem('last_notification');
-        if (savedMsg !== data.message) {
-          document.getElementById('notif-dot').style.display = 'flex';
-          openModal(data.message);
-          localStorage.setItem('last_notification', data.message);
-        } else {
-           document.getElementById('notif-dot').style.display = 'none';
-        }
-      }
+  function logout() {
+    firebase.auth().signOut().then(() => {
+      window.location.reload();
     });
   }
 
+  function openPage(title, content) {
+    document.getElementById("menu").style.display = "none";
+    document.getElementById("viewer-title").innerText = title;
+    document.getElementById("viewer-body").innerHTML = content;
+    document.getElementById("page-viewer").style.display = "block";
+  }
+
+  function closePageView() {
+    document.getElementById("page-viewer").style.display = "none";
+  }
+
+  function openNotesMenu() {
+    document.getElementById("notes-menu-view").style.display = "block";
+  }
+
+  function closeNotesMenu() {
+    document.getElementById("notes-menu-view").style.display = "none";
+  }
+
+  function openNoteDetail(subject, content) {
+    document.getElementById("viewer-title").innerText = subject;
+    document.getElementById("viewer-body").innerHTML = content;
+    document.getElementById("page-viewer").style.display = "block";
+  }
+
   function showLatestNotif() {
-     if(currentNotificationMsg) {
-         openModal(currentNotificationMsg);
-         document.getElementById('notif-dot').style.display = 'none';
-     } else {
-         alert("No new notifications");
-     }
+    alert("No new notifications");
   }
 
-  function openModal(msg) {
-    document.getElementById('modal-msg-text').innerText = msg;
-    document.getElementById('notif-modal').style.display = 'flex';
-  }
-  function closeModal() {
-    document.getElementById('notif-modal').style.display = 'none';
-  }
-
-  // LOAD EXAMS
+  // --- REALTIME EXAMS (Firebase) ---
   function loadExams() {
     const grid = document.getElementById("exam-container");
-    firebase.database().ref('exam_categories').once('value').then(snap => {
-      if(snap.exists()){
-        grid.innerHTML = "";
-        const data = snap.val();
+    const dbRef = firebase.database().ref('exam_categories');
+
+    // Listener for Realtime Updates
+    dbRef.on('value', (snapshot) => {
+      grid.innerHTML = ""; 
+      if (snapshot.exists()) {
+        const data = snapshot.val();
         Object.keys(data).forEach(key => {
           const btn = document.createElement("div");
           btn.className = "exam-btn";
           btn.innerText = data[key];
-          btn.onclick = () => { window.location.href = "exam.html?exam=" + key; };
+          btn.onclick = function() { alert("Selected: " + data[key]); };
           grid.appendChild(btn);
         });
       } else {
-        grid.innerHTML = "<p style='text-align:center; width:100%'>No exams found.</p>";
+        grid.innerHTML = "<p style='grid-column:span 2; text-align:center;'>No exams available.</p>";
       }
+    }, (err) => {
+        // Fallback if DB fails or permission denied
+        console.log("DB Error: " + err);
+        grid.innerHTML = `
+          <div class="exam-btn">RPSC</div>
+          <div class="exam-btn">RSMSSB</div>
+          <div class="exam-btn">SSC</div>
+          <div class="exam-btn">Railway</div>
+        `;
     });
   }
 
-  function logout() {
-    if (confirm("Logout karna chahte hain?")) {
-        localStorage.clear();
-        firebase.auth().signOut().then(() => {
-            window.location.href = "login.html";
-        });
+  // 3. AUTH CHECK (Main Logic)
+  firebase.auth().onAuthStateChanged((user) => {
+    document.getElementById("page-loader").style.display = "none";
+
+    if (user) {
+      document.getElementById("login-gate").style.display = "none";
+      document.getElementById("main-content").style.display = "block";
+      loadExams();
+    } else {
+      document.getElementById("login-gate").style.display = "flex";
+      document.getElementById("main-content").style.display = "none";
     }
-  }
+  });
 
-  function shareApp(){
-    if(navigator.share){ navigator.share({ title: 'Career Care', url: window.location.href }); } 
-    else { prompt("Copy Link:", window.location.href); }
-  }
-
-  function toggleMenu(){
-    const menu = document.getElementById("menu");
-    menu.style.display = menu.style.display === "block" ? "none" : "block";
-  }
-  
+  // Close menu on outside click
   document.addEventListener("click", function(e){
     const menu = document.getElementById("menu");
     const menuBtn = document.querySelector(".menu-btn-icon");
