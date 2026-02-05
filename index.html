@@ -59,7 +59,7 @@ ul.bullet-list li { margin-bottom: 8px; }
     }
 
     /* 3. DASHBOARD */
-    #main-content { display: none; }
+    #main-content { display: block; }
 
     /* Header */
     .main-header { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: #1e88e5; color: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; }
@@ -160,15 +160,6 @@ ul.bullet-list li { margin-bottom: 8px; }
     </div>
   </div>
 
-  <div id="login-gate">
-    <div class="welcome-card">
-      <img src="logo.png" style="width:80px; margin-bottom:15px;" onerror="this.style.display='none'">
-      <h2 style="color:#333; margin:0;">Career Care</h2>
-      <p style="color:#666;">Apni Taiyari Shuru Karein</p>
-      <button class="login-btn-big" onclick="window.location.href='login.html'">Login Now</button>
-    </div>
-  </div>
-
   <div id="main-content">
     <header class="main-header">
       <div class="header-left">
@@ -193,7 +184,6 @@ ul.bullet-list li { margin-bottom: 8px; }
       <div class="menu-item" onclick="window.location.href='contact.html'">📞 Contact Us</div>
       <div class="menu-item" onclick="window.location.href='disclaimer.html'">📞 Disclaimer </div>
       <div class="menu-item" onclick="shareApp()">📤 Share App</div>
-      <div class="menu-item" style="color:red;" onclick="logout()">🚪 Logout</div>
     </div>
 
     <div class="container">
@@ -275,23 +265,16 @@ ul.bullet-list li { margin-bottom: 8px; }
 
   // --- LOCAL DATA STORE (Adsense Friendly Text) ---
   // Aap yahan apna lamba content likh sakte hain. App slow nahi hoga kyunki ye string variable hai.
-  
-  
-
-  // AUTH STATE
-  firebase.auth().onAuthStateChanged((user) => {
+  // --- NEW CODE (PASTE THIS) ---
+// Login check hata diya hai, ab sidha app khulega
+document.addEventListener("DOMContentLoaded", function() {
     document.getElementById("page-loader").style.display = "none";
-    if (user) {
-      currentUserUid = user.uid;
-      document.getElementById("main-content").style.display = "block";
-      document.getElementById("login-gate").style.display = "none";
-      loadExams();
-      listenForNotifications();
-    } else {
-      document.getElementById("main-content").style.display = "none";
-      document.getElementById("login-gate").style.display = "flex";
-    }
-  });
+    document.getElementById("main-content").style.display = "block"; // Content dikhao
+    
+    // Data load karo
+    loadExams();
+    listenForNotifications();
+});
 
   // --- NAVIGATION FUNCTIONS ---
 
@@ -377,15 +360,6 @@ ul.bullet-list li { margin-bottom: 8px; }
         grid.innerHTML = "<p style='text-align:center; width:100%'>No exams found.</p>";
       }
     });
-  }
-
-  function logout() {
-    if (confirm("Logout karna chahte hain?")) {
-        localStorage.clear();
-        firebase.auth().signOut().then(() => {
-            window.location.href = "login.html";
-        });
-    }
   }
 
   function shareApp(){
