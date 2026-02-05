@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Geography Notes - Career Care</title>
+  
+  <style>
+    body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #f4f6f8; }
+    
+    /* Header Style */
+    .page-header {
+      background: #1e88e5; color: white; padding: 15px; 
+      display: flex; align-items: center; gap: 15px; position: sticky; top: 0; z-index: 100;
+    }
+    .back-btn { font-size: 20px; cursor: pointer; background: none; border: none; color: white; text-decoration: none; }
+    .page-content { padding: 20px; max-width: 800px; margin: 0 auto; }
+
+    /* Note Styles */
+    details {
+      background: #ffffff; border: 1px solid #e0e0e0; border-radius: 8px; margin-bottom: 10px; 
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    summary {
+      background: #f1f8e9; padding: 15px; cursor: pointer; font-weight: bold; color: #2e7d32; font-size: 16px;
+      list-style: none; display: flex; justify-content: space-between; align-items: center;
+      outline: none; -webkit-tap-highlight-color: transparent;
+    }
+    summary::after { content: '+'; font-size: 20px; font-weight: bold; }
+    details[open] summary::after { content: '-'; }
+    details[open] summary { border-bottom: 1px solid #e0e0e0; background: #e8f5e9; }
+    .details-content { padding: 15px; font-size: 15px; line-height: 1.6; color: #333; }
+
+    /* Highlight Tags */
+    .fact-box { background: #fff3e0; padding: 10px; border-left: 4px solid #ff9800; margin: 10px 0; font-size: 14px; }
+    .imp { color: #d32f2f; font-weight: bold; }
+    ul.bullet-list { padding-left: 20px; margin: 0; }
+    ul.bullet-list li { margin-bottom: 8px; }
+    .note-table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 14px; background: #fff; }
+    .note-table th, .note-table td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+    .note-table th { background-color: #1e88e5; color: white; font-weight: bold; }
+  </style>
+</head>
+<body>
+
+  <div class="page-header">
+    <a href="index.html" class="back-btn">← Back</a>
+    <span>Geography Notes</span>
+  </div>
+
+  <div class="page-content">
+    
+    <h3>🌵 राजस्थान का इतिहास</h3>
+
+    <details>
+      <summary>1. राजस्थान की प्राचीन सभ्यताएँ</summary>
+      <div class="details-content">
+        <div class="fact-box"><span class="imp">महत्वपूर्ण:</span> सभ्यताएँ नदियों के किनारे विकसित हुईं।</div>
+        <h4>कालीबंगा (हनुमानगढ़)</h4>
+        <ul class="bullet-list">
+          <li><strong>खोज:</strong> 1952 में अमलानंद घोष द्वारा।</li>
+          <li><strong>नदी:</strong> घग्घर (प्राचीन सरस्वती)।</li>
+          <li>'कालीबंगा' का अर्थ: <strong>काले रंग की चूड़ियाँ</strong>।</li>
+        </ul>
+      </div>
+    </details>
+
+    <details>
+      <summary>2. मेवाड़ का इतिहास</summary>
+      <div class="details-content">
+        <p>मेवाड़ राजवंश विश्व का सबसे प्राचीन जीवित राजवंश माना जाता है।</p>
+        <table class="note-table">
+          <tr><th>शासक</th><th>महत्वपूर्ण तथ्य</th></tr>
+          <tr><td>बप्पा रावल</td><td>मेवाड़ के वास्तविक संस्थापक।</td></tr>
+          <tr><td>राणा कुंभा</td><td>स्थापत्य कला का जनक।</td></tr>
+        </table>
+      </div>
+    </details>
+    
+    </div>
+
+</body>
+  </html>
