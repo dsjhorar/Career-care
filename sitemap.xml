@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+
+  <url>
+    <loc>https://careercare.org.in/</loc>
+    <lastmod>2024-02-05</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.00</priority>
+  </url>
+  <url>
+    <loc>https://careercare.org.in/index.html</loc>
+    <lastmod>2024-02-05</lastmod>
+    <priority>0.80</priority>
+  </url>
+
+  <url>
+    <loc>https://careercare.org.in/history_notes.html</loc>
+    <lastmod>2024-02-05</lastmod>
+    <priority>0.80</priority>
+  </url>
+  <url>
+    <loc>https://careercare.org.in/geography.html</loc>
+    <lastmod>2024-02-05</lastmod>
+    <priority>0.80</priority>
+  </url>
+  <url>
+    <loc>https://careercare.org.in/polity.html</loc>
+    <lastmod>2024-02-05</lastmod>
+    <priority>0.80</priority>
+  </url>
+  <url>
+    <loc>https://careercare.org.in/art_culture.html</loc>
+    <lastmod>2024-02-05</lastmod>
+    <priority>0.80</priority>
+  </url>
+
+  <url>
+    <loc>https://careercare.org.in/privacy.html</loc>
+    <lastmod>2024-02-05</lastmod>
+    <priority>0.50</priority>
+  </url>
+  <url>
+    <loc>https://careercare.org.in/about.html</loc>
+    <lastmod>2024-02-05</lastmod>
+    <priority>0.50</priority>
+  </url>
+  <url>
+    <loc>https://careercare.org.in/contact.html</loc>
+    <lastmod>2024-02-05</lastmod>
+    <priority>0.50</priority>
+  </url>
+  <url>
+    <loc>https://careercare.org.in/disclaimer.html</loc>
+    <lastmod>2024-02-05</lastmod>
+    <priority>0.50</priority>
+  </url>
+
+</urlset>
