@@ -140,26 +140,37 @@ function initApp() {
 
 function loadData() {
     // Caching Logic
-    const cacheKey = `quiz_data_${exam}_${topic}`;
-    const cachedData = sessionStorage.getItem(cacheKey);
+    function loadData() {
+    // URL se banne wala database path
+    let dbPath = (exam === 'current_affairs') ? `daily_quiz/${topic}/questions` : `tests/${exam}/${topic}/questions`;
+    
+    // DEBUG: Screen par path dikhayein taaki hume pata chale background mein kya ho raha hai
+    document.getElementById("loader").innerHTML = `🔄 Initializing...<br><br><span style="color:blue; font-size:14px;">🔎 Checking Database at path:<br><b>${dbPath}</b></span>`;
 
-    if (cachedData) {
-        processData(JSON.parse(cachedData));
-    } else {
-        let dbPath = (exam === 'current_affairs') ? `daily_quiz/${topic}/questions` : `tests/${exam}/${topic}/questions`;
+    // Cache clear kar rahe hain taaki purani error na aaye
+    sessionStorage.removeItem(`quiz_data_${exam}_${topic}`);
+
+    firebase.database().ref(dbPath).once('value').then(snap => {
+        if(!snap.exists()){
+            // Agar data nahi mila, toh screen par error dikhaye ga na ki "Initializing" par atakega
+            showError("❌ Error: Is path par koi data nahi mila -> " + dbPath);
+            return;
+        }
         
-        firebase.database().ref(dbPath).once('value').then(snap => {
-            if(!snap.exists()){
-                showError("No questions found.");
-                return;
-            }
-            let data = snap.val();
-            sessionStorage.setItem(cacheKey, JSON.stringify(data));
-            processData(data);
-        }).catch(err => {
-            showError("Network Error.");
-        });
-    }
+        let data = snap.val();
+        
+        // Agar folder mila par andar questions khali hain
+        if(!data || (Array.isArray(data) && data.length === 0)) {
+           showError("❌ Error: Folder mil gaya, lekin andar questions khali hain.");
+           return;
+        }
+
+        // Sab theek hai toh test start karo
+        processData(data);
+    }).catch(err => {
+        showError("❌ Firebase Error: " + err.message);
+    });
+  }
 }
 
 function processData(data) {
