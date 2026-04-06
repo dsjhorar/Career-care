@@ -165,7 +165,7 @@ function fetchFromDB(path, pageName) {
                     // Naya Logic for test.html URL:
                     // Hum path parameters bhejenge
                     let cleanPath = path.replace('tests/', ''); // Remove 'tests/' prefix
-                    window.location.href = `test.html?exam=${cleanPath}&topic=${key}`;
+                    window.location.href = `test.html?exam=${encodeURIComponent(cleanPath)}&topic=${encodeURIComponent(key)}`;
                 } else {
                     // Go Deeper (Example: Select Subject)
                     if(typeID === 'topic_wise') {
