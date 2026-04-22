@@ -7,49 +7,43 @@
 
 <style>
   body{margin:0;font-family:'Segoe UI', sans-serif;background:#f4f6f8; padding-bottom: 60px;}
-  
   header{background:#1e88e5;color:#fff;padding:15px;text-align:center;font-weight:bold;font-size:18px; position: relative;}
   .progress-bar { height: 5px; background: #90caf9; width: 100%; position: absolute; bottom: 0; left: 0; }
   .progress-fill { height: 100%; background: #ffeb3b; width: 0%; transition: width 0.3s ease-out; }
-
   .container{padding:15px; max-width: 800px; margin: 0 auto;}
-  
   .info-bar { display: flex; justify-content: space-between; margin-bottom: 15px; font-weight: bold; color: #444; }
   .timer-box { background: #fff3e0; color: #e65100; padding: 5px 10px; border-radius: 4px; border: 1px solid #ffb74d; }
-  
   .question-card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); contain: content; }
   .q-text { font-size: 18px; margin-bottom: 20px; color: #222; font-weight: 500; line-height: 1.5; }
-  
   .option{background:#f8f9fa;border:2px solid #e9ecef;padding:15px;margin-bottom:10px;border-radius:8px;cursor:pointer; transition: transform 0.1s, background 0.2s;}
   .option:active { transform: scale(0.98); }
   .option.selected{background:#e3f2fd;border-color:#1e88e5; font-weight: bold; color: #1565c0;}
-  
   .footer-btns { display: flex; gap: 10px; margin-top: 20px; }
   .btn{flex:1; padding:12px; border:none; border-radius:6px; font-size:16px; cursor:pointer; font-weight: bold; color: white; transition: opacity 0.2s;}
   .btn:active { opacity: 0.8; }
   .prev{background:#78909c}
   .next{background:#1e88e5}
   .submit{background:#43a047; display: none;}
-
   .ad-banner { width: 100%; background: #eee; text-align: center; padding: 10px; color: #999; font-size: 12px; margin: 10px 0; border: 1px dashed #ccc; }
   .ad-bottom-fixed { position: fixed; bottom: 0; left: 0; width: 100%; height: 50px; background: #fff; border-top: 1px solid #ccc; z-index: 100; display: flex; justify-content: center; align-items: center;}
-
   #result-screen { display: none; text-align: center; }
   .rank-badge { background: #673ab7; color: white; padding: 5px 15px; border-radius: 20px; display: inline-block; margin-bottom: 10px; font-size: 14px;}
   .score-circle { width: 200px; height: 120px; background: #1e88e5; color: white; font-size: 32px; line-height: 120px; border-radius: 50%; margin: 10px auto; font-weight: bold; }
-  
-  /* --- NEW CSS FOR STATS --- */
   .stats-grid { display: flex; justify-content: center; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
   .stat-box { padding: 10px 15px; border-radius: 8px; font-weight: bold; color: white; font-size: 14px; min-width: 80px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-  .stat-box.right { background: #43a047; } /* Green */
-  .stat-box.wrong { background: #e53935; } /* Red */
-  .stat-box.skip { background: #fb8c00; }  /* Orange */
-  
+  .stat-box.right { background: #43a047; } 
+  .stat-box.wrong { background: #e53935; } 
+  .stat-box.skip { background: #fb8c00; }  
   #loader { text-align: center; margin-top: 50px; font-size: 18px; color: #555; }
 </style>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
 </head>
 <body>
 
+<div class="ad-banner">📢 Space for Top Banner Ad</div>
 
 <header>
   <span id="exam-title">Test Loading...</span>
@@ -58,7 +52,7 @@
 
 <div class="container">
   <div id="loader">🔄 Initializing...</div>
-  <div id="error-box" style="display:none; color:red; text-align:center;"></div>
+  <div id="error-box" style="display:none; color:red; text-align:center; padding: 20px; background: #ffebee; border-radius: 8px; font-weight: bold; margin-top: 20px;"></div>
 
   <div id="quiz-interface" style="display:none;">
     <div class="info-bar">
@@ -71,7 +65,7 @@
       <div id="options-container"></div>
     </div>
 
-    
+    <div class="ad-banner" style="margin-top:20px;">📢 Space for Middle Ad</div>
 
     <div class="footer-btns">
       <button class="btn prev" onclick="prevQ()">⬅ Prev</button>
@@ -101,6 +95,7 @@
   </div>
 </div>
 
+<div class="ad-bottom-fixed">📢 Space for Sticky Footer Ad</div>
 
 <script>
 /* ================= CONFIG ================= */
@@ -114,13 +109,16 @@ const firebaseConfig = {
 
 /* ================= LOGIC ================= */
 document.addEventListener("DOMContentLoaded", () => {
-    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
     initApp();
 });
 
 const params = new URLSearchParams(window.location.search);
-const exam = params.get("exam");
-const topic = params.get("topic");
+// decodeURIComponent safe strings ke liye use kar rahe hain
+const exam = params.get("exam") ? decodeURIComponent(params.get("exam")) : null;
+const topic = params.get("topic") ? decodeURIComponent(params.get("topic")) : null;
 
 let questions = [];
 let current = 0;
@@ -132,47 +130,43 @@ function initApp() {
     if(exam && topic) {
         loadData();
     } else {
-        document.getElementById("loader").innerText = "⚠️ Invalid URL parameters.";
+        document.getElementById("loader").innerHTML = "⚠️ Invalid URL parameters.";
     }
 }
 
 function loadData() {
-    // Caching Logic
-    function loadData() {
-    // URL se banne wala database path
+    // Path Create karna
     let dbPath = (exam === 'current_affairs') ? `daily_quiz/${topic}/questions` : `tests/${exam}/${topic}/questions`;
     
-    // DEBUG: Screen par path dikhayein taaki hume pata chale background mein kya ho raha hai
-    document.getElementById("loader").innerHTML = `🔄 Initializing...<br><br><span style="color:blue; font-size:14px;">🔎 Checking Database at path:<br><b>${dbPath}</b></span>`;
+    // UI Update for debugging
+    document.getElementById("loader").innerHTML = `🔄 Initializing...<br><br><span style="color:blue; font-size:14px; display:block; margin-top:15px; background:#e3f2fd; padding:10px; border-radius:5px;">🔎 Debugging Mode: Checking Database at path:<br><b>${dbPath}</b></span>`;
 
-    // Cache clear kar rahe hain taaki purani error na aaye
+    // Purana cache uda dena
     sessionStorage.removeItem(`quiz_data_${exam}_${topic}`);
 
     firebase.database().ref(dbPath).once('value').then(snap => {
         if(!snap.exists()){
-            // Agar data nahi mila, toh screen par error dikhaye ga na ki "Initializing" par atakega
-            showError("❌ Error: Is path par koi data nahi mila -> " + dbPath);
+            showError(`❌ Error: Is path par koi data nahi mila -> <br>${dbPath}`);
             return;
         }
         
         let data = snap.val();
         
-        // Agar folder mila par andar questions khali hain
         if(!data || (Array.isArray(data) && data.length === 0)) {
-           showError("❌ Error: Folder mil gaya, lekin andar questions mein kuch nahi hain.");
+           showError("❌ Error: Folder mil gaya, lekin andar questions nahi hain.");
            return;
         }
 
-        // Sab theek hai toh test start karo
         processData(data);
     }).catch(err => {
         showError("❌ Firebase Error: " + err.message);
     });
-  }
 }
 
 function processData(data) {
     document.getElementById("loader").style.display = "none";
+    document.getElementById("error-box").style.display = "none";
+
     questions = Array.isArray(data) ? data.filter(x=>x) : Object.values(data);
     
     document.getElementById("quiz-interface").style.display = "block";
@@ -186,7 +180,7 @@ function processData(data) {
 
 function showError(msg) {
     document.getElementById("loader").style.display = "none";
-    document.getElementById("error-box").innerText = msg;
+    document.getElementById("error-box").innerHTML = msg;
     document.getElementById("error-box").style.display="block";
 }
 
@@ -242,15 +236,12 @@ function startTimer() {
     }, 1000);
 }
 
-// === MAIN CHANGE: Updated submitTest Logic ===
 function submitTest() {
     clearInterval(timerInterval);
     document.getElementById("quiz-interface").style.display = "none";
     document.getElementById("result-screen").style.display = "block";
 
     let score = 0;
-    
-    // NEW: Counters for Stats
     let rightCount = 0;
     let wrongCount = 0;
     let skipCount = 0;
@@ -260,18 +251,17 @@ function submitTest() {
         
         if(userAnswers[i] == correct) {
             score++;
-            rightCount++; // Increase Right Count
+            rightCount++;
         } 
         else if(userAnswers[i] !== undefined) {
             score -= 0.33; 
-            wrongCount++; // Increase Wrong Count
+            wrongCount++;
         } 
         else {
-            skipCount++;  // Increase Skip Count
+            skipCount++;  
         }
     });
 
-    // Update UI with Stats
     let displayScore = score < 0 ? 0 : score;
     document.getElementById("final-score").innerText = `${displayScore.toFixed(2)}/${questions.length}`;
     
@@ -341,4 +331,4 @@ function clearCacheAndReload() {
 </script>
 
 </body>
-</html>
+                                                                   </html>
